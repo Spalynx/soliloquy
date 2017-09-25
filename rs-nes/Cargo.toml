@@ -1,6 +1,0 @@
-[package]
-name = "rs-nes"
-version = "0.1.0"
-authors = ["Spalynx <Spalynx@gmail.com>"]
-
-[dependencies]
