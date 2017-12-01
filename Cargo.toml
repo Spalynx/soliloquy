@@ -1,10 +1,10 @@
 [package]
-name = "rs_nes"
+name = "soliloquy"
 version = "0.1.0"
 authors = ["Spalynx <Spalynx@gmail.com>"]
 
 readme = "README.md"
-keywords = ["nes", "Nintendo", "Entertainment", "System", "Emulator"]
+keywords = ["soliloquy", "nes", "Nintendo", "Entertainment", "System", "Emulator"]
 license = "WTFPL"
 
 publish = false
