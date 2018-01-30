@@ -1,0 +1,1 @@
+c:\Users\JurbLynx\dev\soliloquy\target\debug\soliloquy.exe: C:\Users\JurbLynx\dev\soliloquy\src\main.rs C:\Users\JurbLynx\dev\soliloquy\src\core\cpu.rs C:\Users\JurbLynx\dev\soliloquy\src\core\mod.rs C:\Users\JurbLynx\dev\soliloquy\src\lib.rs

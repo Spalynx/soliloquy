@@ -1,4 +1,4 @@
-[root]
-name = "rs-nes"
+[[package]]
+name = "soliloquy"
 version = "0.1.0"
 

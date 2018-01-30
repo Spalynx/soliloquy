@@ -3,6 +3,42 @@
  *  Date: 12/8/17
  */
 
+//CPU=DEFINITION====================================================================================
+
+/** Emulate a CPU STEP */
+#[allow(dead_code)]
+pub struct CpuStep {
+	  address:    u16,
+	  pc:         u16, 
+	  mode:       u8, 
+}
+//type CpuOp = fn(CpuStep) -> i8;
+
+
+/** CPU struct definition.
+ *
+ *  This struct emulates the NES cpu.
+ *  CPU holds within it: a set of registers, a connection to memory,
+ *  it's instruction set, and it commands to parse instructinos.
+ */
+pub struct CPU {
+    pub memory:         i32,
+    pub cycles:         u64,    //Number of cycles
+    pub pc:             u16,    //Program Counter
+    pub sp:             u8,     //Stack Pointer
+
+    pub x:              u8,     // x register
+    pub y:              u8,     // y register
+
+    pub flags:          u8,     //CPU Flags See [1] for reference
+
+    pub interrupt:      u8,     // interrupt type to perform
+    pub stall:          i32,    // number of cycles to stall
+
+    //instructions:        &[&[&str]],
+}
+
+/* Initializes an empty CPU struct. */
 pub fn new() -> CPU{
     CPU{
         memory:         0,
@@ -17,46 +53,44 @@ pub fn new() -> CPU{
 
         interrupt :     0,     // interrupt type to perform
         stall:          0,    // number of cycles to stall
-        opcodes:        &[&[&str]],
+        //instructions:        &[&[&str]],
     }
 }
 
+
+//CPU=IMPLEMENTATION=================================================================================
+
+/** There will be two main function types here:
+ *  CPU Instructions
+ *  CPU Meta Functions - Like parsing opcodes, etc.
+ */
 #[allow(dead_code)]
-pub struct CpuStep {
-	address:    u16,
-	pc:         u16, 
-	mode:       u8, 
-}
-
-type CpuOp = fn(CpuStep) -> i8;
-
-pub struct CPU {
-    pub memory:         i32,
-    pub cycles:         u64,    //Number of cycles
-    pub pc:             u16,    //Program Counter
-    pub sp:             u8,     //Stack Pointer
-
-    pub x:              u8,     // x register
-    pub y:              u8,     // y register
-
-    //CPU Flags
-    //  See [1] for reference:
-    pub flags           u8,        
-
-	pub interrupt :     u8,     // interrupt type to perform
-	pub stall:          i32,    // number of cycles to stall
-
-    opcodes:        &[&[&str]],
-}
-
 impl CPU {
-    fn step() -> i32{
 
+    //Meta~Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /** Runs a CPU cycle with each call
+     *
+     */
+    fn step() -> i32{
+        1
     }
+
+    fn parse_opcodes() {
+        
+    }
+
+    //CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     pub fn add(&self) -> u64 {
         self.memory as u64 + self.cycles
     }
 
+    //DEBUG~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!
+    pub fn print_flags(&self) {
+        println!("N V - - D I Z C");
+
+        println!("{} ", &self.flags & 0b000001);
+        
+    }
 }
 
 // pub &[&[f64]]
