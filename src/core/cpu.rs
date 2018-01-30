@@ -3,6 +3,8 @@
  *  Date: 12/8/17
  */
 
+//I'm pretty sure I have no clue whats going on!
+
 //CPU=DEFINITION====================================================================================
 
 /** Emulate a CPU STEP */
@@ -39,7 +41,7 @@ pub struct CPU {
 }
 
 /* Initializes an empty CPU struct. */
-pub fn new() -> CPU{
+pub fn new_cpu() -> CPU {
     CPU{
         memory:         0,
         cycles:         0,    //Number of cycles
@@ -95,26 +97,6 @@ impl CPU {
 
 // pub &[&[f64]]
 
-
-
-
-
-
-
-
-
-
-
-//https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
-
-
-/* Creates a function array of CPU operations.
- * <p>
- * I was originally planning on making a global table, that could be used
- * as the CPU pleases, but this allowed easy hi-jacking by really anyone.
- *
- */
-
 //[1] https://wiki.nesdev.com/w/index.php/CPU_status_flag_behavior
     //  0: carry flag
     //  1: zero flag
@@ -124,38 +106,47 @@ impl CPU {
     //  5: unused flag
     //  6: overflow flag
     //  7: negative flag
-//
+//[2] https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
 
-/*
-pub fn cpu_function_arr(&self){
-    let self.OPCODES: &[ &[&str] ] = 
-            [["BRK", "ORA", "STP", "SLO", "NOP", "ORA", "ASL", "SLO", "PHP", "ORA", "ASL", "ANC", "NOP", "ORA", 
-                    "ASL", "SLO", "BPL", "ORA", "STP", "SLO", "NOP", "ORA", "ASL", "SLO", "CLC", "ORA", "NOP",
-                    "SLO", "NOP", "ORA", "ASL", "SLO"],
-            ["JSR", "AND", "STP", "RLA", "BIT", "AND", "ROL", "RLA", "PLP", "AND", "ROL", "ANC", "BIT", "AND", 
-                    "ROL", "RLA", "BMI", "AND", "STP", "RLA", "NOP", "AND", "ROL", "RLA", "SEC", "AND", "NOP",
-                    "RLA", "NOP", "AND", "ROL", "RLA"],
-            ["RTI", "EOR", "STP", "SRE", "NOP", "EOR", "LSR", "SRE", "PHA", "EOR", "LSR", "ALR", "JMP", "EOR", 
-                    "LSR", "SRE", "BVC", "EOR", "STP", "SRE", "NOP", "EOR", "LSR", "SRE", "CLI", "EOR", "NOP",
-                    "SRE", "NOP", "EOR", "LSR", "SRE"],
-            ["RTS", "ADC", "STP", "RRA", "NOP", "ADC", "ROR", "RRA", "PLA", "ADC", "ROR", "ARR", "JMP", "ADC", 
-                    "ROR", "RRA", "BVS", "ADC", "STP", "RRA", "NOP", "ADC", "ROR", "RRA", "SEI", "ADC", "NOP",
-                    "RRA", "NOP", "ADC", "ROR", "RRA"],
-            ["NOP", "STA", "NOP", "SAX", "STY", "STA", "STX", "SAX", "DEY", "NOP", "TXA", "XAA", "STY", "STA", 
-                    "STX", "SAX", "BCC", "STA", "STP", "AHX", "STY", "STA", "STX", "SAX", "TYA", "STA", "TXS",
-                    "TAS", "SHY", "STA", "SHX", "AHX"],
-            ["LDY", "LDA", "LDX", "LAX", "LDY", "LDA", "LDX", "LAX", "TAY", "LDA", "TAX", "LAX", "LDY", "LDA", 
-                    "LDX", "LAX", "BCS", "LDA", "STP", "LAX", "LDY", "LDA", "LDX", "LAX", "CLV", "LDA", "TSX",
-                    "LAS", "LDY", "LDA", "LDX", "LAX"],
-            ["CPY", "CMP", "NOP", "DCP", "CPY", "CMP", "DEC", "DCP", "INY", "CMP", "DEX", "AXS", "CPY", "CMP", 
-                    "DEC", "DCP", "BNE", "CMP", "STP", "DCP", "NOP", "CMP", "DEC", "DCP", "CLD", "CMP", "NOP",
-                    "DCP", "NOP", "CMP", "DEC", "DCP"],
-            ["CPX", "SBC", "NOP", "ISC", "CPX", "SBC", "INC", "ISC", "INX", "SBC", "NOP", "SBC", "CPX", "SBC", 
-                    "INC", "ISC", "BEQ", "SBC", "STP", "ISC", "NOP", "SBC", "INC", "ISC", "SED", "SBC", "NOP",
-                    "ISC", "NOP", "SBC", "INC", "ISC"]];
+
+pub struct Instructions {
+    pub names:     &[str],
+    pub sizes:     &[i8],
+}
+pub fn new_instruction() -> Instructions {
+    let names: &[str] = 
+        ["BRK", "ORA", "STP", "SLO", "NOP", "ORA", "ASL", "SLO", "PHP", "ORA",
+        "ASL", "ANC", "NOP", "ORA", "ASL", "SLO", "BPL", "ORA", "STP", "SLO",
+        "NOP", "ORA", "ASL", "SLO", "CLC", "ORA", "NOP", "SLO", "NOP", "ORA",
+        "ASL", "SLO", "JSR", "AND", "STP", "RLA", "BIT", "AND", "ROL", "RLA",
+        "PLP", "AND", "ROL", "ANC", "BIT", "AND", "ROL", "RLA", "BMI", "AND",
+        "STP", "RLA", "NOP", "AND", "ROL", "RLA", "SEC", "AND", "NOP", "RLA",
+        "NOP", "AND", "ROL", "RLA", "RTI", "EOR", "STP", "SRE", "NOP", "EOR",
+        "LSR", "SRE", "PHA", "EOR", "LSR", "ALR", "JMP", "EOR", "LSR", "SRE",
+        "BVC", "EOR", "STP", "SRE", "NOP", "EOR", "LSR", "SRE", "CLI", "EOR",
+        "NOP", "SRE", "NOP", "EOR", "LSR", "SRE", "RTS", "ADC", "STP", "RRA",
+        "NOP", "ADC", "ROR", "RRA", "PLA", "ADC", "ROR", "ARR", "JMP", "ADC",
+        "ROR", "RRA", "BVS", "ADC", "STP", "RRA", "NOP", "ADC", "ROR", "RRA",
+        "SEI", "ADC", "NOP", "RRA", "NOP", "ADC", "ROR", "RRA", "NOP", "STA",
+        "NOP", "SAX", "STY", "STA", "STX", "SAX", "DEY", "NOP", "TXA", "XAA",
+        "STY", "STA", "STX", "SAX", "BCC", "STA", "STP", "AHX", "STY", "STA",
+        "STX", "SAX", "TYA", "STA", "TXS", "TAS", "SHY", "STA", "SHX", "AHX",
+        "LDY", "LDA", "LDX", "LAX", "LDY", "LDA", "LDX", "LAX", "TAY", "LDA",
+        "TAX", "LAX", "LDY", "LDA", "LDX", "LAX", "BCS", "LDA", "STP", "LAX",
+        "LDY", "LDA", "LDX", "LAX", "CLV", "LDA", "TSX", "LAS", "LDY", "LDA",
+        "LDX", "LAX", "CPY", "CMP", "NOP", "DCP", "CPY", "CMP", "DEC", "DCP",
+        "INY", "CMP", "DEX", "AXS", "CPY", "CMP", "DEC", "DCP", "BNE", "CMP",
+        "STP", "DCP", "NOP", "CMP", "DEC", "DCP", "CLD", "CMP", "NOP", "DCP",
+        "NOP", "CMP", "DEC", "DCP", "CPX", "SBC", "NOP", "ISC", "CPX", "SBC",
+        "INC", "ISC", "INX", "SBC", "NOP", "SBC", "CPX", "SBC", "INC", "ISC",
+        "BEQ", "SBC", "STP", "ISC", "NOP", "SBC", "INC", "ISC", "SED", "SBC",
+        "NOP", "ISC", "NOP", "SBC", "INC", "ISC"];
+    let sizes: &[i8] =
+        [1;255];
 }
 
 
+/*
         ["BRK7", "ORAizx6",  "KIL",  "SLOizx8",  "NOPzp3",  "ORAzp3",  "ASLzp5",  "SLOzp5", "PHP3", "ORAimm2", "ASL2", "ANCimm2", "NOPabs4", "ORAabs4", "ASLabs6", "SLOabs6"];
 BPLrel 2* 	ORAizy 5* 	KIL 	SLOizy 8 	NOPzpx 4 	ORAzpx 4 	ASLzpx 6 	SLOzpx 6 	CLC2 	ORAaby 4* 	NOP2 	SLOaby 7 	NOPabx 4* 	ORAabx 4* 	ASLabx 7 	SLOabx 7
 -
