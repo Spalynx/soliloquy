@@ -58,7 +58,21 @@ pub fn new_cpu() -> CPU {
         //instructions:        &[&[&str]],
     }
 }
-
+enum {
+    AMImplied,//0
+    AMAccumulator,//1
+    AMImmediate,//2
+    AMZeroPage,//3
+    AMZeroPageX,//4
+    AMZeroPageY,//5
+    AMAbsolute,//6
+    AMAbsoluteX,//7
+    AMAbsoluteY,//8
+    AMRelative,//9
+    AMIndirect,//10
+    AMIndirectIndexed,//11
+    AMIndexedIndirect,//12
+}
 
 //CPU=IMPLEMENTATION=================================================================================
 
@@ -168,12 +182,17 @@ impl CPU {
     }
 }
 
-/*
 
+/* Constructs a table of CPU instructions based upon what addressing mode they are run with.
+ *
+ */
 pub struct Instructions {
-    pub names:     &[str],
-    pub sizes:     &[i8],
+    pub names:		&[str],
+    pub sizes:		&[u8],
+    pub modes:		&[u8],
+    pub speeds:		&[u8],
 }
+/*
 pub fn new_instruction() -> Instructions {
     let names: &[str] = 
         ["BRK", "ORA", "STP", "SLO", "NOP", "ORA", "ASL", "SLO", "PHP", "ORA",
@@ -202,50 +221,40 @@ pub fn new_instruction() -> Instructions {
         "INC", "ISC", "INX", "SBC", "NOP", "SBC", "CPX", "SBC", "INC", "ISC",
         "BEQ", "SBC", "STP", "ISC", "NOP", "SBC", "INC", "ISC", "SED", "SBC",
         "NOP", "ISC", "NOP", "SBC", "INC", "ISC"];
-    let sizes: &[i8] =
-        [1;255];
+
+    //TODO: Fill instruction tables.
+    let sizes: &[i8:256] =
+        [1; 256];
+    let modes: &[i8:256] =
+        [0, 12, 0, 12, 3, 3, 3, 3, 3, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4,
+        4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 6, 12, 0, 12, 3, 3, 3, 3, 4, 2, 2, 2, 6,
+        6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 6, 12, 0, 12,
+        3, 3, 3, 3, 3, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2,
+        8, 7, 7, 7, 7, 6, 12, 0, 12, 3, 3, 3, 3, 4, 2, 2, 2, 10, 6, 6, 6, 9, 11,
+        0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 2, 12, 2, 12, 3, 3, 3, 3, 2,
+        2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 5, 5, 2, 8, 2, 8, 7, 7, 8, 8,
+        2, 12, 2, 12, 3, 3, 3, 3, 2, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 5,
+        5, 2, 8, 2, 8, 7, 7, 8, 8, 2, 12, 2, 12, 3, 3, 3, 3, 2, 2, 2, 2, 6, 6,
+        6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 2, 12, 2, 12, 3,
+        3, 3, 3, 2, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8,
+        7, 7, 7, 7];
+
+    let speeds: &[i8:255] =
+        [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2*, 5*, 0, 8, 4, 4, 6,
+        6, 0, 4*, 0, 7, 4*, 4*, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
+        6, 6, 2*, 5*, 0, 8, 4, 4, 6, 6, 0, 4*, 0, 7, 4*, 4*, 7, 7, 0, 6, 0, 8,
+        3, 3, 5, 5, 0, 2, 0, 2, 3, 4, 6, 6, 2*, 5*, 0, 8, 4, 4, 6, 6, 0, 4*, 0,
+        7, 4*, 4*, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 5, 4, 6, 6, 2*, 5*,
+        0, 8, 4, 4, 6, 6, 0, 4*, 0, 7, 4*, 4*, 7, 7, 2, 6, 2, 6, 3, 3, 3, 3, 0,
+        2, 0, 2, 4, 4, 4, 4, 2*, 6, 0, 6, 4, 4, 4, 4, 0, 5, 0, 5, 5, 5, 5, 5, 2,
+        6, 2, 6, 3, 3, 3, 3, 0, 2, 0, 2, 4, 4, 4, 4, 2*, 5*, 0, 5*, 4, 4, 4, 4,
+        0, 4*, 0, 4*, 4*, 4*, 4*, 4*, 2, 6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
+        6, 6, 2*, 5*, 0, 8, 4, 4, 6, 6, 0, 4*, 0, 7, 4*, 4*, 7, 7, 2, 6, 2, 8,
+        3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2*, 5*, 0, 8, 4, 4, 6, 6, 0, 4*, 0,
+        7, 4*, 4*, 7, 7];
 }
 */
 
-/*
-"BRK7", "ORAizx6",  "KIL",  "SLOizx8",  "NOPzp3",  "ORAzp3",  "ASLzp5",  "SLOzp5", "PHP3", "ORAimm2", "ASL2", "ANCimm2", "NOPabs4", "ORAabs4", "ASLabs6", "SLOabs6"
--
-BPLrel 2* 	ORAizy 5* 	KIL 	SLOizy 8 	NOPzpx 4 	ORAzpx 4 	ASLzpx 6 	SLOzpx 6 	CLC2 	ORAaby 4* 	NOP2 	SLOaby 7 	NOPabx 4* 	ORAabx 4* 	ASLabx 7 	SLOabx 7
--
- JSRabs 6 ANDizx 6 KIL RLAizx 8 BITzp 3 ANDzp 3 ROLzp 5 RLAzp 5 PLP4 ANDimm 2 ROL2 ANCimm 2 BITabs 4 ANDabs 4 ROLabs 6 RLAabs 6
--
-
- BMIrel 2* ANDizy 5* KIL RLAizy 8 NOPzpx 4 ANDzpx 4 ROLzpx 6 RLAzpx 6 SEC2 ANDaby 4* NOP2 RLAaby 7 NOPabx 4* ANDabx 4* ROLabx 7 RLAabx 7
--
-RTI6 EORizx 6 KIL SREizx 8 NOPzp 3 EORzp 3 LSRzp 5 SREzp 5 PHA3 EORimm 2 LSR2 ALRimm 2 JMPabs 3 EORabs 4 LSRabs 6 SREabs 6
--
-BVCrel 2* EORizy 5* KIL SREizy 8 NOPzpx 4 EORzpx 4 LSRzpx 6 SREzpx 6 CLI2 EORaby 4* NOP2 SREaby 7 NOPabx 4* EORabx 4* LSRabx 7 SREabx 7
--
-RTS6 ADCizx 6 KIL RRAizx 8 NOPzp 3 ADCzp 3 RORzp 5 RRAzp 5 PLA4 ADCimm 2 ROR2 ARRimm 2 JMPind 5 ADCabs 4 RORabs 6 RRAabs 6
--
-BVSrel 2* ADCizy 5* KIL RRAizy 8 NOPzpx 4 ADCzpx 4 RORzpx 6 RRAzpx 6 SEI2 ADCaby 4* NOP2 RRAaby 7 NOPabx 4* ADCabx 4* RORabx 7 RRAabx 7
--
-NOPimm 2 STAizx 6 NOPimm 2 SAXizx 6 STYzp 3 STAzp 3 STXzp 3 SAXzp 3 DEY2 NOPimm 2 TXA2 XAAimm 2 STYabs 4 STAabs 4 STXabs 4 SAXabs 4
-
--
- BCCrel 2* STAizy 6 KIL AHXizy 6 STYzpx 4 STAzpx 4 STXzpy 4 SAXzpy 4 TYA2 STAaby 5 TXS2 TASaby 5 SHYabx 5 STAabx 5 SHXaby 5 AHXaby 5
--
-LDYimm 2 LDAizx 6 LDXimm 2 LAXizx 6 LDYzp 3 LDAzp 3 LDXzp 3 LAXzp 3 TAY2 LDAimm 2 TAX2 LAXimm 2 LDYabs 4 LDAabs 4 LDXabs 4 LAXabs 4
-
--
-BCSrel 2* LDAizy 5* KIL LAXizy 5* LDYzpx 4 LDAzpx 4 LDXzpy 4 LAXzpy 4 CLV2 LDAaby 4* TSX2 LASaby 4* LDYabx 4* LDAabx 4* LDXaby 4* LAXaby 4*
--
- CPYimm 2 CMPizx 6 NOPimm 2 DCPizx 8 CPYzp 3 CMPzp 3 DECzp 5 DCPzp 5 INY2 CMPimm 2 DEX2 AXSimm 2 CPYabs 4 CMPabs 4 DECabs 6 DCPabs 6
-
--
-BNErel 2* CMPizy 5* KIL DCPizy 8 NOPzpx 4 CMPzpx 4 DECzpx 6 DCPzpx 6 CLD2 CMPaby 4* NOP2 DCPaby 7 NOPabx 4* CMPabx 4* DECabx 7 DCPabx 7
--
-CPXimm 2 SBCizx 6 NOPimm 2 ISCizx 8 CPXzp 3 SBCzp 3 INCzp 5 ISCzp 5 INX2 SBCimm 2 NOP2 SBCimm 2 CPXabs 4 SBCabs 4 INCabs 6 ISCabs 6
-
--
-BEQrel 2* SBCizy 5* KIL ISCizy 8 NOPzpx 4 SBCzpx 4 INCzpx 6 ISCzpx 6 SED2 SBCaby 4* NOP2 ISCaby 7 NOPabx 4* SBCabx 4* INCabx 7 ISCabx 7
--
-*/
 
 // pub &[&[f64]]
 
@@ -260,3 +269,14 @@ BEQrel 2* SBCizy 5* KIL ISCizy 8 NOPzpx 4 SBCzpx 4 INCzpx 6 ISCzpx 6 SED2 SBCaby
 //  7: negative flag
 //[2] https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
 //[3] http://obelisk.me.uk/6502/reference.html
+//    izx = indexed indirect =  12
+//    izy = indirect indexed = 11
+//    ind = indirect = 10
+//    zp = zero page = 3
+//    zpx = zero page x = 4
+//    zpy = zero page y = 5
+//    abs = absolute val = 6
+//    abx = absolute val x = 7 
+//    aby = absolute val y = 8
+//    imm = immediate = 2
+//    rel = relative = 9
