@@ -82,32 +82,93 @@ impl CPU {
     }
 
     //CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //Refer to [3] for all cpu explanations.
+    //This doesn't exist in CPU, this is just messing with impl.
     pub fn add(&self) -> u64 {
         self.memory as u64 + self.cycles
     }
 
+    pub fn ADC(&self) {}
+    pub fn AND(&self) {}
+    pub fn ASL(&self) {}
+    pub fn BCC(&self) {}
+    pub fn BCS(&self) {}
+    pub fn BEQ(&self) {}
+    pub fn BIT(&self) {}
+    pub fn BMI(&self) {}
+    pub fn BNE(&self) {}
+    pub fn BPL(&self) {}
+    pub fn BRK(&self) {}
+    pub fn BVC(&self) {}
+    pub fn BVS(&self) {}
+    pub fn CLC(&self) {}
+    pub fn CLD(&self) {}
+    pub fn CLI(&self) {}
+    pub fn CLV(&self) {}
+    pub fn CMP(&self) {}
+    pub fn CPX(&self) {}
+    pub fn CPY(&self) {}
+    pub fn DEC(&self) {}
+    pub fn DEX(&self) {}
+    pub fn DEY(&self) {}
+    pub fn EOR(&self) {}
+    pub fn INC(&self) {}
+    pub fn INX(&self) {}
+    pub fn INY(&self) {}
+    pub fn JMP(&self) {}
+    pub fn JSR(&self) {}
+    pub fn LDA(&self) {}
+    pub fn LDX(&self) {}
+    pub fn LDY(&self) {}
+    pub fn LSR(&self) {}
+    pub fn NOP(&self) {}
+    pub fn ORA(&self) {}
+    pub fn PHA(&self) {}
+    pub fn PHP(&self) {}
+    pub fn PLA(&self) {}
+    pub fn PLP(&self) {}
+    pub fn ROL(&self) {}
+    pub fn ROR(&self) {}
+    pub fn RTI(&self) {}
+    pub fn RTS(&self) {}
+    pub fn SBC(&self) {}
+    pub fn SEC(&self) {}
+    pub fn SED(&self) {}
+    pub fn SEI(&self) {}
+    pub fn STA(&self) {}
+    pub fn STX(&self) {}
+    pub fn STY(&self) {}
+    pub fn TAX(&self) {}
+    pub fn TAY(&self) {}
+    pub fn TSX(&self) {}
+    pub fn TXA(&self) {}
+    pub fn TXS(&self) {}
+    pub fn TYA(&self) {}
+
     //DEBUG~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!
+    pub fn set_flags(&mut self, a: u8){
+        self.flags = a;
+
+    }
     pub fn print_flags(&self) {
         println!("N V - - D I Z C");
 
-        println!("{} ", &self.flags & 0b000001);
+        let mut y = 128;
+
+        while y > 0 {
+            match &self.flags & y {
+                0 => print!("0 "),
+                _ => print!("1 "),
+            }
+            y = y / 2;
+        }
+
+        println!();
         
     }
 }
 
-// pub &[&[f64]]
-
-//[1] https://wiki.nesdev.com/w/index.php/CPU_status_flag_behavior
-    //  0: carry flag
-    //  1: zero flag
-    //  2: interrupt disable flag
-    //  3: decimal mode flag
-    //  4: break command flag
-    //  5: unused flag
-    //  6: overflow flag
-    //  7: negative flag
-//[2] https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
-
+/*
 
 pub struct Instructions {
     pub names:     &[str],
@@ -144,10 +205,11 @@ pub fn new_instruction() -> Instructions {
     let sizes: &[i8] =
         [1;255];
 }
-
+*/
 
 /*
-        ["BRK7", "ORAizx6",  "KIL",  "SLOizx8",  "NOPzp3",  "ORAzp3",  "ASLzp5",  "SLOzp5", "PHP3", "ORAimm2", "ASL2", "ANCimm2", "NOPabs4", "ORAabs4", "ASLabs6", "SLOabs6"];
+"BRK7", "ORAizx6",  "KIL",  "SLOizx8",  "NOPzp3",  "ORAzp3",  "ASLzp5",  "SLOzp5", "PHP3", "ORAimm2", "ASL2", "ANCimm2", "NOPabs4", "ORAabs4", "ASLabs6", "SLOabs6"
+-
 BPLrel 2* 	ORAizy 5* 	KIL 	SLOizy 8 	NOPzpx 4 	ORAzpx 4 	ASLzpx 6 	SLOzpx 6 	CLC2 	ORAaby 4* 	NOP2 	SLOaby 7 	NOPabx 4* 	ORAabx 4* 	ASLabx 7 	SLOabx 7
 -
  JSRabs 6 ANDizx 6 KIL RLAizx 8 BITzp 3 ANDzp 3 ROLzp 5 RLAzp 5 PLP4 ANDimm 2 ROL2 ANCimm 2 BITabs 4 ANDabs 4 ROLabs 6 RLAabs 6
@@ -184,3 +246,17 @@ CPXimm 2 SBCizx 6 NOPimm 2 ISCizx 8 CPXzp 3 SBCzp 3 INCzp 5 ISCzp 5 INX2 SBCimm 
 BEQrel 2* SBCizy 5* KIL ISCizy 8 NOPzpx 4 SBCzpx 4 INCzpx 6 ISCzpx 6 SED2 SBCaby 4* NOP2 ISCaby 7 NOPabx 4* SBCabx 4* INCabx 7 ISCabx 7
 -
 */
+
+// pub &[&[f64]]
+
+//[1] https://wiki.nesdev.com/w/index.php/CPU_status_flag_behavior
+//  0: carry flag
+//  1: zero flag
+//  2: interrupt disable flag
+//  3: decimal mode flag
+//  4: break command flag
+//  5: unused flag
+//  6: overflow flag
+//  7: negative flag
+//[2] https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
+//[3] http://obelisk.me.uk/6502/reference.html
