@@ -1,1 +1,1 @@
-c:\Users\JurbLynx\dev\soliloquy\target\debug\libsoliloquy.rlib: C:\Users\JurbLynx\dev\soliloquy\src\lib.rs
+/home/spal/dev/soliloquy/target/debug/libsoliloquy.rlib: /home/spal/dev/soliloquy/src/lib.rs
