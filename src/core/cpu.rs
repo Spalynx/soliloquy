@@ -47,22 +47,6 @@ pub struct CPU {
 ///
 /// All values initialized as empty.
 /// 
-pub fn new_cpu() -> CPU {
-    CPU{
-        memory:         0,
-        cycles:         0,    //Number of cycles
-        pc:             0,    //Program Counter
-        sp:             0,     //Stack Pointer
-
-        x:              0,     // x register
-        y:              0,     // y register
-
-        flags:          0,      //cpu flags
-
-        interrupt :     0,     // interrupt type to perform
-        stall:          0,    // number of cycles to stall
-    }
-}
 
 
 
@@ -82,7 +66,7 @@ pub struct CpuStep {
 type cpuop = fn(cpustep) -> u8;
 
 
-/// the cpu addressing modes enum, contains all possible cpu modes.
+/// The cpu addressing modes enum, contains all possible cpu modes.
 ///
 ///
 enum am {
@@ -110,7 +94,7 @@ enum am {
 ///
 /// 6 tables exist: instruction names, instruction sizes, instruction modes,
 /// instruction speeds, and instruction speeds when a page boundary is crossed.
-pub struct instructions {
+pub struct Instructions {
     pub names:		[&'static str;256],
     pub sizes:		[u8;256],
     pub modes:		[u8;256],
@@ -125,80 +109,81 @@ pub struct instructions {
 ///
 /// see [6502 unofficial opcodes](https://wiki.nesdev.com/w/index.php/cpu_unofficial_opcodes)
 /// for the full table and info.
-pub fn new_instruction() -> instructions {
-    instructions {
-        names:  
-            ["brk", "ora", "stp", "slo", "nop", "ora", "asl", "slo", "php", "ora",
-            "asl", "anc", "nop", "ora", "asl", "slo", "bpl", "ora", "stp", "slo",
-            "nop", "ora", "asl", "slo", "clc", "ora", "nop", "slo", "nop", "ora",
-            "asl", "slo", "jsr", "and", "stp", "rla", "bit", "and", "rol", "rla",
-            "plp", "and", "rol", "anc", "bit", "and", "rol", "rla", "bmi", "and",
-            "stp", "rla", "nop", "and", "rol", "rla", "sec", "and", "nop", "rla",
-            "nop", "and", "rol", "rla", "rti", "eor", "stp", "sre", "nop", "eor",
-            "lsr", "sre", "pha", "eor", "lsr", "alr", "jmp", "eor", "lsr", "sre",
-            "bvc", "eor", "stp", "sre", "nop", "eor", "lsr", "sre", "cli", "eor",
-            "nop", "sre", "nop", "eor", "lsr", "sre", "rts", "adc", "stp", "rra",
-            "nop", "adc", "ror", "rra", "pla", "adc", "ror", "arr", "jmp", "adc",
-            "ror", "rra", "bvs", "adc", "stp", "rra", "nop", "adc", "ror", "rra",
-            "sei", "adc", "nop", "rra", "nop", "adc", "ror", "rra", "nop", "sta",
-            "nop", "sax", "sty", "sta", "stx", "sax", "dey", "nop", "txa", "xaa",
-            "sty", "sta", "stx", "sax", "bcc", "sta", "stp", "ahx", "sty", "sta",
-            "stx", "sax", "tya", "sta", "txs", "tas", "shy", "sta", "shx", "ahx",
-            "ldy", "lda", "ldx", "lax", "ldy", "lda", "ldx", "lax", "tay", "lda",
-            "tax", "lax", "ldy", "lda", "ldx", "lax", "bcs", "lda", "stp", "lax",
-            "ldy", "lda", "ldx", "lax", "clv", "lda", "tsx", "las", "ldy", "lda",
-            "ldx", "lax", "cpy", "cmp", "nop", "dcp", "cpy", "cmp", "dec", "dcp",
-            "iny", "cmp", "dex", "axs", "cpy", "cmp", "dec", "dcp", "bne", "cmp",
-            "stp", "dcp", "nop", "cmp", "dec", "dcp", "cld", "cmp", "nop", "dcp",
-            "nop", "cmp", "dec", "dcp", "cpx", "sbc", "nop", "isc", "cpx", "sbc",
-            "inc", "isc", "inx", "sbc", "nop", "sbc", "cpx", "sbc", "inc", "isc",
-            "beq", "sbc", "stp", "isc", "nop", "sbc", "inc", "isc", "sed", "sbc",
-            "nop", "isc", "nop", "sbc", "inc", "isc"],
-        sizes: //todo: fill sizes.
-            [1; 256],
+impl Instructions {
+    pub fn new() -> Instructions {
+        Instructions {
+            names:  
+                ["brk", "ora", "stp", "slo", "nop", "ora", "asl", "slo", "php", "ora",
+                "asl", "anc", "nop", "ora", "asl", "slo", "bpl", "ora", "stp", "slo",
+                "nop", "ora", "asl", "slo", "clc", "ora", "nop", "slo", "nop", "ora",
+                "asl", "slo", "jsr", "and", "stp", "rla", "bit", "and", "rol", "rla",
+                "plp", "and", "rol", "anc", "bit", "and", "rol", "rla", "bmi", "and",
+                "stp", "rla", "nop", "and", "rol", "rla", "sec", "and", "nop", "rla",
+                "nop", "and", "rol", "rla", "rti", "eor", "stp", "sre", "nop", "eor",
+                "lsr", "sre", "pha", "eor", "lsr", "alr", "jmp", "eor", "lsr", "sre",
+                "bvc", "eor", "stp", "sre", "nop", "eor", "lsr", "sre", "cli", "eor",
+                "nop", "sre", "nop", "eor", "lsr", "sre", "rts", "adc", "stp", "rra",
+                "nop", "adc", "ror", "rra", "pla", "adc", "ror", "arr", "jmp", "adc",
+                "ror", "rra", "bvs", "adc", "stp", "rra", "nop", "adc", "ror", "rra",
+                "sei", "adc", "nop", "rra", "nop", "adc", "ror", "rra", "nop", "sta",
+                "nop", "sax", "sty", "sta", "stx", "sax", "dey", "nop", "txa", "xaa",
+                "sty", "sta", "stx", "sax", "bcc", "sta", "stp", "ahx", "sty", "sta",
+                "stx", "sax", "tya", "sta", "txs", "tas", "shy", "sta", "shx", "ahx",
+                "ldy", "lda", "ldx", "lax", "ldy", "lda", "ldx", "lax", "tay", "lda",
+                "tax", "lax", "ldy", "lda", "ldx", "lax", "bcs", "lda", "stp", "lax",
+                "ldy", "lda", "ldx", "lax", "clv", "lda", "tsx", "las", "ldy", "lda",
+                "ldx", "lax", "cpy", "cmp", "nop", "dcp", "cpy", "cmp", "dec", "dcp",
+                "iny", "cmp", "dex", "axs", "cpy", "cmp", "dec", "dcp", "bne", "cmp",
+                "stp", "dcp", "nop", "cmp", "dec", "dcp", "cld", "cmp", "nop", "dcp",
+                "nop", "cmp", "dec", "dcp", "cpx", "sbc", "nop", "isc", "cpx", "sbc",
+                "inc", "isc", "inx", "sbc", "nop", "sbc", "cpx", "sbc", "inc", "isc",
+                "beq", "sbc", "stp", "isc", "nop", "sbc", "inc", "isc", "sed", "sbc",
+                "nop", "isc", "nop", "sbc", "inc", "isc"],
+            sizes: //todo: fill sizes.
+                [1; 256],
 
-        modes: 
-            [0, 12, 0, 12, 3, 3, 3, 3, 3, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4,
-            4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 6, 12, 0, 12, 3, 3, 3, 3, 4, 2, 2, 2, 6,
-            6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 6, 12, 0, 12,
-            3, 3, 3, 3, 3, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2,
-            8, 7, 7, 7, 7, 6, 12, 0, 12, 3, 3, 3, 3, 4, 2, 2, 2, 10, 6, 6, 6, 9, 11,
-            0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 2, 12, 2, 12, 3, 3, 3, 3, 2,
-            2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 5, 5, 2, 8, 2, 8, 7, 7, 8, 8,
-            2, 12, 2, 12, 3, 3, 3, 3, 2, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 5,
-            5, 2, 8, 2, 8, 7, 7, 8, 8, 2, 12, 2, 12, 3, 3, 3, 3, 2, 2, 2, 2, 6, 6,
-            6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 2, 12, 2, 12, 3,
-            3, 3, 3, 2, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8,
-            7, 7, 7, 7],
+            modes: 
+                [0, 12, 0, 12, 3, 3, 3, 3, 3, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4,
+                4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 6, 12, 0, 12, 3, 3, 3, 3, 4, 2, 2, 2, 6,
+                6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 6, 12, 0, 12,
+                3, 3, 3, 3, 3, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2,
+                8, 7, 7, 7, 7, 6, 12, 0, 12, 3, 3, 3, 3, 4, 2, 2, 2, 10, 6, 6, 6, 9, 11,
+                0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 2, 12, 2, 12, 3, 3, 3, 3, 2,
+                2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 5, 5, 2, 8, 2, 8, 7, 7, 8, 8,
+                2, 12, 2, 12, 3, 3, 3, 3, 2, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 5,
+                5, 2, 8, 2, 8, 7, 7, 8, 8, 2, 12, 2, 12, 3, 3, 3, 3, 2, 2, 2, 2, 6, 6,
+                6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8, 7, 7, 7, 7, 2, 12, 2, 12, 3,
+                3, 3, 3, 2, 2, 2, 2, 6, 6, 6, 6, 9, 11, 0, 11, 4, 4, 4, 4, 2, 8, 2, 8,
+                7, 7, 7, 7],
 
-        speeds: 
-            [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6,
-            6, 0, 4, 0, 7, 4, 4, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
-            6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 0, 6, 0, 8,
-            3, 3, 5, 5, 0, 2, 0, 2, 3, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0,
-            7, 4, 4, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 5, 4, 6, 6, 2, 5,
-            0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 2, 6, 2, 6, 3, 3, 3, 3, 0,
-            2, 0, 2, 4, 4, 4, 4, 2, 6, 0, 6, 4, 4, 4, 4, 0, 5, 0, 5, 5, 5, 5, 5, 2,
-            6, 2, 6, 3, 3, 3, 3, 0, 2, 0, 2, 4, 4, 4, 4, 2, 5, 0, 5, 4, 4, 4, 4,
-            0, 4, 0, 4, 4, 4, 4, 4, 2, 6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
-            6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 2, 6, 2, 8,
-            3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0,
-            7, 4, 4, 7, 7],
+            speeds: 
+                [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6,
+                6, 0, 4, 0, 7, 4, 4, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
+                6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 0, 6, 0, 8,
+                3, 3, 5, 5, 0, 2, 0, 2, 3, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0,
+                7, 4, 4, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 5, 4, 6, 6, 2, 5,
+                0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 2, 6, 2, 6, 3, 3, 3, 3, 0,
+                2, 0, 2, 4, 4, 4, 4, 2, 6, 0, 6, 4, 4, 4, 4, 0, 5, 0, 5, 5, 5, 5, 5, 2,
+                6, 2, 6, 3, 3, 3, 3, 0, 2, 0, 2, 4, 4, 4, 4, 2, 5, 0, 5, 4, 4, 4, 4,
+                0, 4, 0, 4, 4, 4, 4, 4, 2, 6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
+                6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 2, 6, 2, 8,
+                3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4, 0,
+                7, 4, 4, 7, 7],
 
-        paging: 
-            [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6,
-            6, 0, 5, 0, 7, 5, 5, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
-            6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 0, 6, 0, 8,
-            3, 3, 5, 5, 0, 2, 0, 2, 3, 4, 6, 6, 4, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0,
-            7, 5, 5, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 5, 4, 6, 6, 3, 6,
-            0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 2, 6, 2, 6, 3, 3, 3, 3, 0,
-            2, 0, 2, 4, 4, 4, 4, 3, 6, 0, 6, 4, 4, 4, 4, 0, 5, 0, 5, 5, 5, 5, 5, 2,
-            6, 2, 6, 3, 3, 3, 3, 0, 2, 0, 2, 4, 4, 4, 4, 3, 6, 0, 6, 4, 4, 4, 4,
-            0, 5, 0, 5, 5, 5, 5, 5, 2, 6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
-            6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 2, 6, 2, 8,
-            3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0,
-            7, 5, 5, 7, 7],
-    }
+            paging: 
+                [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6,
+                6, 0, 5, 0, 7, 5, 5, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
+                6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 0, 6, 0, 8,
+                3, 3, 5, 5, 0, 2, 0, 2, 3, 4, 6, 6, 4, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0,
+                7, 5, 5, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 5, 4, 6, 6, 3, 6,
+                0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 2, 6, 2, 6, 3, 3, 3, 3, 0,
+                2, 0, 2, 4, 4, 4, 4, 3, 6, 0, 6, 4, 4, 4, 4, 0, 5, 0, 5, 5, 5, 5, 5, 2,
+                6, 2, 6, 3, 3, 3, 3, 0, 2, 0, 2, 4, 4, 4, 4, 3, 6, 0, 6, 4, 4, 4, 4,
+                0, 5, 0, 5, 5, 5, 5, 5, 2, 6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4,
+                6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 2, 6, 2, 8,
+                3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0,
+                7, 5, 5, 7, 7],
+        }
 }
 
 
@@ -212,6 +197,23 @@ pub fn new_instruction() -> instructions {
 ///
 #[allow(dead_code)]
 impl cpu {
+
+    pub fn new() -> CPU {
+        CPU{
+            memory:         0,
+            cycles:         0,    //Number of cycles
+            pc:             0,    //Program Counter
+            sp:             0,     //Stack Pointer
+
+            x:              0,     // x register
+            y:              0,     // y register
+
+            flags:          0,      //cpu flags
+
+            interrupt:     0,     // interrupt type to perform
+            stall:          0,    // number of cycles to stall
+        }
+    }
 
     //meta~functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// runs a cpu cycle with each call
@@ -315,6 +317,39 @@ impl cpu {
 
 
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cpu_init(){
+        let test_cpu = super::CPU::new();
+        
+        assert_eq!(test_cpu.memory,			0);
+        assert_eq!(test_cpu.cycles,			0);
+        assert_eq!(test_cpu.pc,					0);
+        assert_eq!(test_cpu.sp,					0);
+        assert_eq!(test_cpu.x,					0);
+        assert_eq!(test_cpu.y,					0);
+        assert_eq!(test_cpu.flags,			0);
+        assert_eq!(test_cpu.interrupt,	0);
+        assert_eq!(test_cpu.stall, 			0);
+    }
+
+    #[test]
+    fn test_instruction_init(){
+        let test_instr = super::Instruction::new();
+
+        //I'm pretty sure that these fields are arrays, and therefore have len().
+        //If this fails, DELET THIS!
+        assert_eq!(test_instr.names.len()		,256);
+        assert_eq!(test_instr.sizes.len()		,256);
+        assert_eq!(test_instr.modes.len()		,256);
+        assert_eq!(test_instr.speeds.len()	,256);
+        assert_eq!(test_instr.paging.len()	,256);
+    }
+
+}
 
 
 //[1] https://wiki.nesdev.com/w/index.php/CPU_status_flag_behavior
