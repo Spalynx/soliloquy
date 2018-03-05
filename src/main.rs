@@ -5,7 +5,7 @@
 mod core;
 use core::cpu::*;
 fn main() {
-    let mut c = new_cpu();
+    let mut c = CPU::new();
     c.memory = 10000;
     c.cycles = 200000;
     println!("{}", c.add());
