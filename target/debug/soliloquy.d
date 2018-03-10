@@ -1,1 +1,1 @@
-C:\Users\mreikel1s\Desktop\soliloquy\target\debug\soliloquy.exe: C:\Users\mreikel1s\Desktop\soliloquy\src\main.rs C:\Users\mreikel1s\Desktop\soliloquy\src\lib.rs C:\Users\mreikel1s\Desktop\soliloquy\src\core\cpu.rs C:\Users\mreikel1s\Desktop\soliloquy\src\core\mod.rs
+/home/spal/dev/soliloquy/target/debug/soliloquy: /home/spal/dev/soliloquy/src/core/cpu.rs /home/spal/dev/soliloquy/src/main.rs /home/spal/dev/soliloquy/src/core/mod.rs /home/spal/dev/soliloquy/src/lib.rs

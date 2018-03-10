@@ -11,11 +11,13 @@ fn main() {
     println!("{}", c.add());
 
     //Messing with CPU flags
-    let new_flags = 85;
     println!("Printing CPU flags:");
     c.print_flags();
-    println!("Setting CPU flags to: {}", new_flags);
-    c.set_flags(new_flags);
+    println!("Setting CPU flags to: 10001010 ");
+    c.set_flag("N", true);
+    c.set_flag("Z", true);
+    c.set_flag("D", true);
+    
     println!("Printing CPU flags:");
     c.print_flags();
 

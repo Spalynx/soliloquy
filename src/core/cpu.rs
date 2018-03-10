@@ -28,10 +28,11 @@
 /// it's instruction set, and it commands to parse instructinos.
 pub struct CPU {
     pub memory:         i32,
-    pub cycles:         u64,    //Number of cycles
+    pub cycles:         u64,    //Clock cycle counter. Other hardware relies on this. [5]
     pub pc:             u16,    //Program Counter
     pub sp:             u8,     //Stack Pointer
 
+    pub a:              u8,     //Accumulator
     pub x:              u8,     // x register
     pub y:              u8,     // y register
 
@@ -63,6 +64,7 @@ impl CPU {
             pc:             0,    //Program Counter
             sp:             0,     //Stack Pointer
 
+            a:              0,     //Accumulator
             x:              0,     // x register
             y:              0,     // y register
 
@@ -78,6 +80,12 @@ impl CPU {
     /// 
     ///
     fn step() -> i32{
+        let step = CpuStep {
+	          address:    0,
+	          pc:         0, 
+	          mode:       0, 
+        };
+
         1
     }
 
@@ -92,7 +100,53 @@ impl CPU {
         self.memory as u64 + self.cycles
     }
 
-    pub fn ADC(&self) {}
+    ///A sort of primitive function for every opcode:
+    /// pub fn OPCODE (&self) {
+    ///    Perform OPCODE specific functions {
+    ///       Per -> Addressing mode,
+    ///    };
+    ///
+    ///    GET op_time = Instruction.size(opcode);
+    ///    ADD op_time + CPU.pc; //Keeps track of how long this took.
+    ///
+    ///    //Considering return bool for testing, but I think my unit tests will check struct values.
+    ///    // That seems more thorough...
+    /// }
+
+    //Most definitely taking pointers from fogelman, and it's still hard to conceptualize!
+    //TODO: UNTESTED
+    pub fn ADC(&mut self, step: CpuStep) {
+        let a: u16 = self.a as u16;
+        let b: u16 = step.address;
+        let c: u16 = self.get_flag("C") as u16;
+
+        //Intentionally cutting off anything over 256.
+        self.a = (a + b + c) as u8;
+
+        //
+        self.set_flag("Z", self.a > 0);
+        self.set_flag("N", self.a > 0);
+
+
+        //Standard stuff, filling carry if we go over 256.
+        if a + b + c > 0xFF {
+		        self.set_flag("C", true);
+	      }
+        else {
+		        self.set_flag("C", false);
+	      }
+
+        //Now I'm legit copying Fogelman...
+        //So, 0x80 = 128 and I think 1 << 8.
+        // TODO understand this.
+	      if (( a^b ) & 0x80) == 0 		&&	 (( a^self.a) & 0x80) != 0 {
+		        self.set_flag("V", true);
+	      }
+        else {
+		        self.set_flag("V", false);
+        }
+
+    }
     pub fn AND(&self) {}
     pub fn ASL(&self) {}
     pub fn BCC(&self) {}
@@ -152,8 +206,33 @@ impl CPU {
     //DEBUG~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!
     /// Sets flags based upon a given byte.
     /// TODO: Change to set register and print register.
-    pub fn set_flags(&mut self, a: u8){
-        self.flags = a;
+    /// TODO: UNTESTED
+    pub fn set_flag(&mut self, flag: &'static str, val: bool){
+
+        self.flags = match flag.as_ref() {
+            "N" | "n" => self.flags | (1 << 8),
+            "V" | "v" => self.flags | (1 << 7),
+            "s"       => self.flags | (1 << 6),
+            "B" | "b" => self.flags | (1 << 5),
+            "D" | "d" => self.flags | (1 << 4),
+            "I" | "i" => self.flags | (1 << 3),
+            "Z" | "z" => self.flags | (1 << 2),
+            "C" | "c" => self.flags | (1 << 1),
+        };
+    }
+    /// TODO: UNTESTED
+    pub fn get_flag(&mut self, flag: &'static str) -> bool{
+
+        return match flag.as_ref() {
+            "N" | "n" => self.flags & (1 << 8) == 128,
+            "V" | "v" => self.flags & (1 << 7) == 64,
+            "s"       => self.flags & (1 << 6) == 32,
+            "B" | "b" => self.flags & (1 << 5) == 16,
+            "D" | "d" => self.flags & (1 << 4) == 8,
+            "I" | "i" => self.flags & (1 << 3) == 4,
+            "Z" | "z" => self.flags & (1 << 2) == 2,
+            "C" | "c" => self.flags & (1 << 1) == 1,
+        }
     }
     pub fn print_flags(&self) {
         println!("N V - - D I Z C");
@@ -169,7 +248,6 @@ impl CPU {
         }
 
         println!();
-        
     }
 }
 
@@ -181,7 +259,7 @@ impl CPU {
 ///
 /// #Examples
 /// ```
-///
+//
 /// ```
 /// Contains fields for an address, programcounter, and cpu mode.
 pub struct CpuStep {
@@ -189,7 +267,7 @@ pub struct CpuStep {
 	  pc:         u16, 
 	  mode:       u8, 
 }
-type cpuop = fn(CpuStep) -> u8;
+//type cpuop = fn(CpuStep) -> u8;
 
 
 /// The cpu addressing modes enum, contains all possible cpu modes.

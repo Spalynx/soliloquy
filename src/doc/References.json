@@ -4,7 +4,8 @@
 		{"id": "2", "Description": "CPU Unofficial opcodes (includes official)", "Link": "https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes"},
 		{"id": "3", "Description": "MOS 6502 Reference", "Link": "http://obelisk.me.uk/6502/reference.html"},
 		{"id": "4", "Description": "MOS 6502 Assembly Easy", "Link": "https://www.dwheeler.com/6502/oneelkruns/asm1step.html"},
-		{"id": "5", "Description": "", "Link": ""}
+    {"id": "5", "Description": "NES emulator development guide", "Link": "http://nesdev.com/NES%20emulator%20development%20guide.txt"},
+		{"id": "6", "Description": "", "Link": ""}
 	]
 }}
 
