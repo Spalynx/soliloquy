@@ -4,6 +4,7 @@
  */
 
 //I'm pretty sure I have no clue whats going on!
+//It's getting better.
 
 //CPU=DEFINITION====================================================================================
 //==================================================================================================
@@ -147,8 +148,22 @@ impl CPU {
         }
 
     }
-    pub fn AND(&self) {}
-    pub fn ASL(&self) {}
+    /// CPU OPCODE -> AND
+    /// Bitwise AND with accumulator, takes memory address as parameter, and comp/replaces cpu.a.
+    pub fn AND(&mut self, mem: u8) {
+        /// For now, We're gonna act like the ROM interpreting program will supply
+        /// the memory to the function. If this doesn't happen to be true, maybe we
+        /// can read directly from file. (Seems messy).
+
+        self.a = self.a & self.mem;
+
+        self.set_flag("Z", self.a > 0);
+        self.set_flag("N", self.a > 0);
+    }
+    
+    pub fn ASL(&self) {
+        
+    }
     pub fn BCC(&self) {}
     pub fn BCS(&self) {}
     pub fn BEQ(&self) {}
@@ -179,8 +194,18 @@ impl CPU {
     pub fn LDX(&self) {}
     pub fn LDY(&self) {}
     pub fn LSR(&self) {}
-    pub fn NOP(&self) {}
-    pub fn ORA(&self) {}
+    pub fn NOP(&self) {
+        //AFAIK, IT DOES NOTHING, PRODUCTIVITY.
+    }
+
+    /// CPU OPCODE -> ORA
+    /// Bitwise OR with accumulator, param of memory val to bitwise OR cpu.a.
+    pub fn ORA(&mut self, mem: u8) {
+        self.a = self.a | self.mem;
+
+        self.set_flag("Z", self.a > 0);
+        self.set_flag("N", self.a > 0);
+    }
     pub fn PHA(&self) {}
     pub fn PHP(&self) {}
     pub fn PLA(&self) {}
@@ -387,7 +412,7 @@ impl Instructions {
                 6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 2, 6, 2, 8,
                 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5, 0,
                 7, 5, 5, 7, 7],
-	}
+        }
 	}
 }
 
