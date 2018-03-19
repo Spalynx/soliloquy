@@ -77,15 +77,13 @@ impl CPU {
     }
 
     //meta~functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /// runs a cpu cycle with each call
-    /// 
-    ///
+    /// Runs a cpu cycle with each call
+    /// TODO: At the moment, I'm not sure if I want to impl with a param of the incoming opcode, or if there should be some buffer?
     fn step() -> i32{
         let step = CpuStep {
 	          address:    0,
 	          pc:         0, 
 	          mode:       0, 
-        };
 
         1
     }
@@ -94,6 +92,12 @@ impl CPU {
         
     }
 
+    /// throw_interrupt
+    /// Receives a string as a param, and throws one of the 3 (?) cpu interrupts.
+    /// NOTE: This is me pushing off interrupts until I actually understand what they do.
+    fn throw_interrupt($mut self, int: &'static str){
+
+    }
     //CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// Refer to [3] for all cpu explanations.
     /// This doesn't exist in CPU, this is just messing with impl.
@@ -161,9 +165,17 @@ impl CPU {
         self.set_flag("N", self.a > 0);
     }
     
-    pub fn ASL(&self) {
-        
+    /// CPU OPCODE -> ASL
+    /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
+    pub fn ASL(&mut self) {
+        if self.a & 0x1000000 == 0x1000000 {
+            self.set_flag("C", true);
+        } 
+        else { self.set_flag("C", false); }
+
+        self.a = self.a << 1;
     }
+
     pub fn BCC(&self) {}
     pub fn BCS(&self) {}
     pub fn BEQ(&self) {}
@@ -171,7 +183,17 @@ impl CPU {
     pub fn BMI(&self) {}
     pub fn BNE(&self) {}
     pub fn BPL(&self) {}
-    pub fn BRK(&self) {}
+    
+    /// CPU OPCODE -> BRK
+    /// Break. Throws a NMI, and increments the program counter by one.
+    /// If the value of the accumulator is equal or greater than the compared value, the Carry will be set.
+    /// The equal (Z) and sign (S) flags will be set based on equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
+    pub fn BRK(&mut self) {
+        self.throw_interrupt("NMI");
+        self.pc -= 1;
+
+        //NONCOMPLETE
+    }
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
     pub fn CLC(&self) {}
@@ -194,8 +216,11 @@ impl CPU {
     pub fn LDX(&self) {}
     pub fn LDY(&self) {}
     pub fn LSR(&self) {}
+
+    /// CPU OPCODE -> NOP
+    /// AFAIK, IT DOES NOTHING. PRODUCTIVITY.
+    /// Arguably, it looks like this opcode is meant to be a way to manually step.
     pub fn NOP(&self) {
-        //AFAIK, IT DOES NOTHING, PRODUCTIVITY.
     }
 
     /// CPU OPCODE -> ORA
