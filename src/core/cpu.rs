@@ -30,8 +30,8 @@
 pub struct CPU {
     pub memory:         i32,
     pub cycles:         u64,    //Clock cycle counter. Other hardware relies on this. [5]
-    pub pc:             u16,    //Program Counter
-    pub sp:             u8,     //Stack Pointer
+    pub pc:             u16,    //Program Counter - Supports 65536 direct memory locations.
+    pub sp:             u8,     //Stack Pointer - Accessed using interrupts, pulls, pushes, and transfers.
 
     pub a:              u8,     //Accumulator
     pub x:              u8,     // x register
@@ -186,22 +186,67 @@ impl CPU {
     
     /// CPU OPCODE -> BRK
     /// Break. Throws a NMI, and increments the program counter by one.
-    /// If the value of the accumulator is equal or greater than the compared value, the Carry will be set.
-    /// The equal (Z) and sign (S) flags will be set based on equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
+    // BRK is a 2 byte opcode. The first is #$00 and the second is a padding byte.
+    //Since the PC increment/decrement is handled in the step function, we skip that part.
     pub fn BRK(&mut self) {
         self.throw_interrupt("NMI");
-        self.pc -= 1;
 
-        //NONCOMPLETE
+        self.set_flag("B", true);
+        self.set_flag("U", true);
     }
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
-    pub fn CLC(&self) {}
-    pub fn CLD(&self) {}
-    pub fn CLI(&self) {}
-    pub fn CLV(&self) {}
+
+    /// CPU OPCODE -> CLC
+    /// Clear Carry. Sets carry to false.
+    pub fn CLC(&self) {
+        self.set_flag("C", false);
+    }
+
+    /// CPU OPCODE -> CLD
+    /// Clear Decimal. Sets decimal to false.
+    pub fn CLD(&self) {
+        self.set_flag("D", false);
+    }
+
+    /// CPU OPCODE -> CLI
+    /// Clear Interrupt. Sets interrupt to false.
+    pub fn CLI(&self) {
+        self.set_flag("I", false);
+    }
+
+    /// CPU OPCODE -> CLV
+    /// Clear O*V*ERFLOW. Sets overflow to false.
+    pub fn CLV(&self) {
+        self.set_flag("V", false);
+    }
+
+    ///CMP (CoMPare accumulator) 
+    ///Affects Flags: S Z C 
+    ///MODE           SYNTAX       HEX LEN TIM
+    ///Immediate     CMP #$44      $C9  2   2
+    ///Zero Page     CMP $44       $C5  2   3
+    ///Zero Page,X   CMP $44,X     $D5  2   4
+    ///Absolute      CMP $4400     $CD  3   4
+    ///Absolute,X    CMP $4400,X   $DD  3   4+
+    ///Absolute,Y    CMP $4400,Y   $D9  3   4+
+    ///Indirect,X    CMP ($44,X)   $C1  2   6
+    ///Indirect,Y    CMP ($44),Y   $D1  2   5+
+    ///+ add 1 cycle if page boundary crossed
+    ///Compare sets flags as if a subtraction had been carried out. If the value in the
+    ///accumulator is equal or greater than the compared value, the Carry will be
+    ///set. The equal (Z) and sign (S) flags will be set based on equality or lack
+    ///thereof and the sign (i.e. A>=$80) of the accumulator. 
     pub fn CMP(&self) {}
+
+    ///CPX (ComPare X register) 
+    ///Operation and flag results are identical to equivalent mode accumulator CMP
+    ///ops. 
     pub fn CPX(&self) {}
+
+    ///CPY (ComPare Y register) 
+    ///Operation and flag results are identical to equivalent mode accumulator CMP
+    ///ops. 
     pub fn CPY(&self) {}
     pub fn DEC(&self) {}
     pub fn DEX(&self) {}
@@ -240,9 +285,25 @@ impl CPU {
     pub fn RTI(&self) {}
     pub fn RTS(&self) {}
     pub fn SBC(&self) {}
-    pub fn SEC(&self) {}
-    pub fn SED(&self) {}
-    pub fn SEI(&self) {}
+
+    /// CPU OPCODE -> SEC 
+    /// SEt Carry. Sets carry to true.
+    pub fn SEC(&self) {
+        self.set_flag("C", true);
+    }
+
+    /// CPU OPCODE -> SED 
+    /// SEt Decimal. Sets decimal to true.
+    pub fn SED(&self) {
+        self.set_flag("D", true);
+    }
+
+    /// CPU OPCODE -> SEI 
+    /// SEt Interrupt. Sets interrupt to true.
+    pub fn SED(&self) {
+        self.set_flag("I", true);
+    }
+
     pub fn STA(&self) {}
     pub fn STX(&self) {}
     pub fn STY(&self) {}
