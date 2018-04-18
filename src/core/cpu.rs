@@ -1,10 +1,7 @@
 /*  Emulates the MOS Technology 6052 CPU of the NES.
  *  Author: Spalynx
- *  Date: 12/8/17
+ *  Init: 12/8/17
  */
-
-//I'm pretty sure I have no clue whats going on!
-//It's getting better.
 
 //CPU=DEFINITION====================================================================================
 //==================================================================================================
@@ -19,10 +16,6 @@
 /// c.cycles = 200000;
 /// println!("{}", c.add());
 /// ```
-///
-/// Currently, I don't have a thorough enough understanding of rust types
-/// to effectively make the CPU safe (private fields). I think that I might
-/// for now just treat the struct as a OOP class, and implement getters/setters.
 ///
 /// This struct emulates the NES cpu.
 /// CPU holds within it: a set of registers, a connection to memory,
@@ -55,9 +48,7 @@ pub struct CPU {
 #[allow(dead_code)]
 impl CPU {
     /// Initializes an empty CPU struct
-    ///
     /// All values initialized as empty.
-    /// 
     pub fn new() -> CPU {
         CPU{
             memory:         0,
@@ -105,21 +96,11 @@ impl CPU {
         self.memory as u64 + self.cycles
     }
 
-    ///A sort of primitive function for every opcode:
-    /// pub fn OPCODE (&self) {
-    ///    Perform OPCODE specific functions {
-    ///       Per -> Addressing mode,
-    ///    };
-    ///
-    ///    GET op_time = Instruction.size(opcode);
-    ///    ADD op_time + CPU.pc; //Keeps track of how long this took.
-    ///
-    ///    //Considering return bool for testing, but I think my unit tests will check struct values.
-    ///    // That seems more thorough...
-    /// }
-
-    //Most definitely taking pointers from fogelman, and it's still hard to conceptualize!
-    //TODO: UNTESTED
+    
+        /// CPU OPCODE -> ADC
+        /// ADd with Carry. ADC results are based on the decimal flag. In
+        /// decimal mode, addition is carried out as if the values are in Binary
+        /// Coded Decimal.
     pub fn ADC(&mut self, step: CpuStep) {
         let a: u16 = self.a as u16;
         let b: u16 = step.address;
@@ -152,6 +133,7 @@ impl CPU {
         }
 
     }
+
     /// CPU OPCODE -> AND
     /// Bitwise AND with accumulator, takes memory address as parameter, and comp/replaces cpu.a.
     pub fn AND(&mut self, mem: u8) {
@@ -316,8 +298,6 @@ impl CPU {
 
     //DEBUG~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!
     /// Sets flags based upon a given byte.
-    /// TODO: Change to set register and print register.
-    /// TODO: UNTESTED
     pub fn set_flag(&mut self, flag: &'static str, val: bool){
 
         self.flags = match flag.as_ref() {
@@ -331,7 +311,7 @@ impl CPU {
             "C" | "c" => self.flags | (1 << 1),
         };
     }
-    /// TODO: UNTESTED
+        
     pub fn get_flag(&mut self, flag: &'static str) -> bool{
 
         return match flag.as_ref() {
@@ -538,6 +518,33 @@ pub mod tests {
         assert_eq!(test_instr.paging.len()	,256);
     }
 
+    #[test]
+    fn test_flags(){
+        let test_cpu = super::CPU::new();
+        let flags = {"N", "n", "V", "v", "s", "B", "b", "D", "d", "I", "i", "Z",
+        "z", "C", "c"};
+
+        //Should cycle through each flag setting it true, and testing to see if
+        // it actually happened.
+        for f in flags {
+            test_cpu.set_flag(f, 1);
+            assert_eq!(test_cpu.get_flag(f), 1);
+
+            //Reset flag.
+            test_cpu.set_flag(f, 0);
+        }
+    }
+
+    #[test]
+    fn test_adc_instruction(){
+        let test_cpu = super::CPU::new();
+    }
+
+    /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
+    #[test]
+    fn test_flagsetclear_instructions(){
+        let test_cpu = super::CPU::new();
+    }
 }
 
 
