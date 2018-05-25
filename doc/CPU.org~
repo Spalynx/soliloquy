@@ -1,0 +1,205 @@
+
+#+Title: CPU TODO LIST
+#+subtitle: And quick notes for faster reuptake.
+
+* TODO Understand internals of CPU Steps.
+* TODO TESTS FOR EACH OPCODE
+* Opcodes
+  A little list for my pleasure.
+** DONE ADC
+   CLOSED: [2018-03-28 Wed 14:40]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:40]
+*** TODO Tested
+** DONE AND
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** DONE ASL
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** TODO BCC
+*** TODO Implemented
+*** TODO Tested
+** TODO BCS
+*** TODO Implemented
+*** TODO Tested
+** TODO BEQ
+*** TODO Implemented
+*** TODO Tested
+** TODO BIT
+*** TODO Implemented
+*** TODO Tested
+** TODO BMI
+*** TODO Implemented
+*** TODO Tested
+** TODO BNE
+*** TODO Implemented
+*** TODO Tested
+** TODO BPL
+*** TODO Implemented
+*** TODO Tested
+** DONE BRK
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+**** TODO BRK_EXCEPTION - Brk can be PC+3 instead of intended PC+1.
+*** TODO Tested
+** TODO BVC
+*** TODO Implemented
+*** TODO Tested
+** DONE BVS
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** DONE CLC
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** DONE CLD
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** DONE CLI
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** DONE CLV
+   CLOSED: [2018-03-28 Wed 14:41]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:41]
+*** TODO Tested
+** TODO CMP
+*** TODO Implemented
+*** TODO Tested
+** TODO CPX
+*** TODO Implemented
+*** TODO Tested
+** TODO CPY
+*** TODO Implemented
+*** TODO Tested
+** TODO DEC
+*** TODO Implemented
+*** TODO Tested
+** DEX
+*** TODO Implemented
+*** TODO Tested
+** DEY
+*** TODO Implemented
+*** TODO Tested
+** EOR
+*** TODO Implemented
+*** TODO Tested
+** INC
+*** TODO Implemented
+*** TODO Tested
+** INX
+*** TODO Implemented
+*** TODO Tested
+** INY
+*** TODO Implemented
+*** TODO Tested
+** JMP
+*** TODO Implemented
+*** TODO Tested
+** JSR
+*** TODO Implemented
+*** TODO Tested
+** LDA
+*** TODO Implemented
+*** TODO Tested
+** LDX
+*** TODO Implemented
+*** TODO Tested
+** LDY
+*** TODO Implemented
+*** TODO Tested
+** LSR
+*** TODO Implemented
+*** TODO Tested
+** DONE NOP
+   CLOSED: [2018-03-28 Wed 14:42]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:42]
+*** TODO Tested
+** DONE ORA
+   CLOSED: [2018-03-28 Wed 14:42]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:42]
+*** TODO Tested
+** PHA
+*** TODO Implemented
+*** TODO Tested
+** PHP
+*** TODO Implemented
+*** TODO Tested
+** PLA
+*** TODO Implemented
+*** TODO Tested
+** PLP
+*** TODO Implemented
+*** TODO Tested
+** ROL
+*** TODO Implemented
+*** TODO Tested
+** ROR
+*** TODO Implemented
+*** TODO Tested
+** RTI
+*** TODO Implemented
+*** TODO Tested
+** RTS
+*** TODO Implemented
+*** TODO Tested
+** SBC
+*** TODO Implemented
+*** TODO Tested
+** DONE SEC
+   CLOSED: [2018-03-28 Wed 14:42]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:42]
+*** TODO Tested
+** DONE SED
+   CLOSED: [2018-03-28 Wed 14:42]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:42]
+*** TODO Tested
+** DONE SED
+   CLOSED: [2018-03-28 Wed 14:42]
+*** DONE Implemented
+    CLOSED: [2018-03-28 Wed 14:42]
+*** TODO Tested
+** STA
+*** TODO Implemented
+*** TODO Tested
+** STX
+*** TODO Implemented
+*** TODO Tested
+** STY
+*** TODO Implemented
+*** TODO Tested
+** TAX
+*** TODO Implemented
+*** TODO Tested
+** TAY
+*** TODO Implemented
+*** TODO Tested
+** TODO TSX
+*** TODO Implemented
+*** TODO Tested
+** TODO TXA
+*** TODO Implemented
+*** TODO Tested
+** TODO TXS
+*** TODO Implemented
+*** TODO Tested
+** TODO TYA
+*** TODO Implemented
+*** TODO Tested

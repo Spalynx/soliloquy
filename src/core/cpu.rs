@@ -2,6 +2,7 @@
  *  Author: Spalynx
  *  Init: 12/8/17
  */
+//TODO: For now, all opcodes receive simple value for the operand, this /might/ be changed to a more complex type.
 
 //CPU=DEFINITION====================================================================================
 //==================================================================================================
@@ -32,13 +33,12 @@ pub struct CPU {
 
     pub flags:          u8,     //CPU Flags See [1] for reference
 
-    pub interrupt:      u8,     // interrupt type to perform
-    pub stall:          i32,    // number of cycles to stall
-
+    pub interrupt:      u8,     // interrupt type to perform pub stall:          i32,    // number of cycles to stall 
     //instructions:        &[&[&str]],
 }
 
 //cpu=implementation=================================================================================
+
 //===================================================================================================
 
 /// there will be two main function types here:
@@ -91,16 +91,11 @@ impl CPU {
     }
     //CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// Refer to [3] for all cpu explanations.
-    /// This doesn't exist in CPU, this is just messing with impl.
-    pub fn add(&self) -> u64 {
-        self.memory as u64 + self.cycles
-    }
 
-    
-        /// CPU OPCODE -> ADC
-        /// ADd with Carry. ADC results are based on the decimal flag. In
-        /// decimal mode, addition is carried out as if the values are in Binary
-        /// Coded Decimal.
+    /// ADC
+    /// ADd with Carry. ADC results are based on the decimal flag. In
+    /// decimal mode, addition is carried out as if the values are in Binary
+    /// Coded Decimal.
     pub fn ADC(&mut self, step: CpuStep) {
         let a: u16 = self.a as u16;
         let b: u16 = step.address;
@@ -134,7 +129,7 @@ impl CPU {
 
     }
 
-    /// CPU OPCODE -> AND
+    /// AND
     /// Bitwise AND with accumulator, takes memory address as parameter, and comp/replaces cpu.a.
     pub fn AND(&mut self, mem: u8) {
         /// For now, We're gonna act like the ROM interpreting program will supply
@@ -147,7 +142,7 @@ impl CPU {
         self.set_flag("N", self.a > 0);
     }
     
-    /// CPU OPCODE -> ASL
+    /// ASL
     /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
     pub fn ASL(&mut self) {
         if self.a & 0x1000000 == 0x1000000 {
@@ -166,7 +161,7 @@ impl CPU {
     pub fn BNE(&self) {}
     pub fn BPL(&self) {}
     
-    /// CPU OPCODE -> BRK
+    /// BRK
     /// Break. Throws a NMI, and increments the program counter by one.
     // BRK is a 2 byte opcode. The first is #$00 and the second is a padding byte.
     //Since the PC increment/decrement is handled in the step function, we skip that part.
@@ -179,25 +174,25 @@ impl CPU {
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
 
-    /// CPU OPCODE -> CLC
+    /// CLC
     /// Clear Carry. Sets carry to false.
     pub fn CLC(&self) {
         self.set_flag("C", false);
     }
 
-    /// CPU OPCODE -> CLD
+    /// CLD
     /// Clear Decimal. Sets decimal to false.
     pub fn CLD(&self) {
         self.set_flag("D", false);
     }
 
-    /// CPU OPCODE -> CLI
+    /// CLI
     /// Clear Interrupt. Sets interrupt to false.
     pub fn CLI(&self) {
         self.set_flag("I", false);
     }
 
-    /// CPU OPCODE -> CLV
+    /// CLV
     /// Clear O*V*ERFLOW. Sets overflow to false.
     pub fn CLV(&self) {
         self.set_flag("V", false);
@@ -239,18 +234,44 @@ impl CPU {
     pub fn INY(&self) {}
     pub fn JMP(&self) {}
     pub fn JSR(&self) {}
-    pub fn LDA(&self) {}
-    pub fn LDX(&self) {}
+    /// LDA (LoaD Accumulator with memory)
+    /// One of the most used opcodes, loads the A register.
+    pub fn LDA(&self, operand: i8) {
+        if (operand >= 0x00){
+            self.set_flag("Z", true);
+            self.set_flag("N", false);
+        }
+        else if ( operand >= 0x00 || operand <= 0x7f){
+            self.set_flag("N", false);
+            self.set_flag("Z", false);
+        }
+        else {
+            self.set_flag("N", true);
+            self.set_flag("Z", false);
+        }
+
+        this.a = operand;
+    }
+    ///LDX (LoaD X with memory) 
+    pub fn LDX(&self, operand: i8) {
+        if (operand > 0){
+            self.set_flag("N", false);
+        }
+        //sets negative flag equal to 7th bit
+        //sets the zero flag if the operand is $#00
+        this.x = operand;
+    }
+
     pub fn LDY(&self) {}
     pub fn LSR(&self) {}
 
-    /// CPU OPCODE -> NOP
+    /// NOP
     /// AFAIK, IT DOES NOTHING. PRODUCTIVITY.
     /// Arguably, it looks like this opcode is meant to be a way to manually step.
     pub fn NOP(&self) {
     }
 
-    /// CPU OPCODE -> ORA
+    /// ORA
     /// Bitwise OR with accumulator, param of memory val to bitwise OR cpu.a.
     pub fn ORA(&mut self, mem: u8) {
         self.a = self.a | self.mem;
@@ -268,19 +289,19 @@ impl CPU {
     pub fn RTS(&self) {}
     pub fn SBC(&self) {}
 
-    /// CPU OPCODE -> SEC 
+    /// SEC 
     /// SEt Carry. Sets carry to true.
     pub fn SEC(&self) {
         self.set_flag("C", true);
     }
 
-    /// CPU OPCODE -> SED 
+    /// SED 
     /// SEt Decimal. Sets decimal to true.
     pub fn SED(&self) {
         self.set_flag("D", true);
     }
 
-    /// CPU OPCODE -> SEI 
+    /// SEI 
     /// SEt Interrupt. Sets interrupt to true.
     pub fn SED(&self) {
         self.set_flag("I", true);
@@ -379,6 +400,25 @@ enum Am {
     IndirectIndexed,//11
     IndexedIndirect,//12
 }
+    impl Am {
+        fn call (&self, &cpu: CPU) -> u16 {
+            return match self {
+                Am::Implied => ,
+                Am::Accumulator => ,
+                Am::Immediate => ,
+                Am::Zeropage => ,
+                Am::Zeropagex => ,
+                Am::Zeropagey => ,
+                Am::Absolute => ,
+                Am::Absolutex => ,
+                Am::Absolutey => ,
+                Am::Relative => ,
+                Am::Indirect => ,
+                Am::IndirectIndexed => ,
+                Am::IndexedIndirect => 
+            };
+        }
+    }
 
 
 
@@ -488,6 +528,8 @@ impl Instructions {
 
 #[cfg(test)]
 pub mod tests {
+    //Tests could be greatly improved with
+    // [before_each]/[assemblyintialize]... Maybe one day!
     use super::*;
 
     #[test]
@@ -496,12 +538,12 @@ pub mod tests {
         
         assert_eq!(test_cpu.memory,			0);
         assert_eq!(test_cpu.cycles,			0);
-        assert_eq!(test_cpu.pc,					0);
-        assert_eq!(test_cpu.sp,					0);
-        assert_eq!(test_cpu.x,					0);
-        assert_eq!(test_cpu.y,					0);
+        assert_eq!(test_cpu.pc,				0);
+        assert_eq!(test_cpu.sp,				0);
+        assert_eq!(test_cpu.x,				0);
+        assert_eq!(test_cpu.y,				0);
         assert_eq!(test_cpu.flags,			0);
-        assert_eq!(test_cpu.interrupt,	0);
+        assert_eq!(test_cpu.interrupt,			0);
         assert_eq!(test_cpu.stall, 			0);
     }
 
@@ -536,9 +578,35 @@ pub mod tests {
     }
 
     #[test]
-    fn test_adc_instruction(){
+    fn testOP_adc(){
+        //Testing for basic ADd with Carry.
         let test_cpu = super::CPU::new();
+
+        test_cpu.LDA(254);
+        test_cpu.ADC(6);
+        assert_eq!(test_cpu.A, 5);
+        assert_eq!(test_cpu.get_flag("C"), 1);
     }
+    #[test]
+    fn testOP_adc_signed (){
+        //Testing signed arithmetic.
+        let test_cpu = super::CPU::new();
+
+        test_cpu.LDA(0b01111111u8); //+127
+        test_cpu.ADC(0b00000010u8); //+2
+        assert_eq!(test_cpu.A, 0b10000001u8); // = -127
+        //Overflow should be set because bit 7 is '1'.
+        assert_eq!(test_cpu.get_flag("O"), 1);
+    }
+    #[test]
+    fn testOP_adc_decimal(){
+        //TODO: Test adc with a decimal.
+        let test_cpu = super::CPU::new();
+
+        test_cpu.SED();
+        assert!();
+    }
+
 
     /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
     #[test]

@@ -7,6 +7,7 @@ Project Goals:
   - Sufficiently emulate most NES Cartridges, on a somewhat useable level.
   - Allow the use of ROB, and the default controller (maybe zap gun and power glove?)
   - Asynchronous GUI, to allow for multi-language implementation (cross platform).
+  - Provide a knowledge base for a possible future emulation project.
   
   
 Personal Goals:
