@@ -22,7 +22,7 @@
 /// CPU holds within it: a set of registers, a connection to memory,
 /// it's instruction set, and it commands to parse instructinos.
 pub struct CPU {
-    pub memory:         i32,
+    pub memory:         &MEM,
     pub cycles:         u64,    //Clock cycle counter. Other hardware relies on this. [5]
     pub pc:             u16,    //Program Counter - Supports 65536 direct memory locations.
     pub sp:             u8,     //Stack Pointer - Accessed using interrupts, pulls, pushes, and transfers.
@@ -37,6 +37,12 @@ pub struct CPU {
     //instructions:        &[&[&str]],
 }
 
+trait AddressingMode {
+    fn load (&self) -> u8;
+    fn save (&self) -> u8;
+}
+impl AddressingMode for CPU {}
+
 //cpu=implementation=================================================================================
 
 //===================================================================================================
@@ -49,9 +55,9 @@ pub struct CPU {
 impl CPU {
     /// Initializes an empty CPU struct
     /// All values initialized as empty.
+    /// To initialize memory, call new_memory().
     pub fn new() -> CPU {
         CPU{
-            memory:         0,
             cycles:         0,    //Number of cycles
             pc:             0,    //Program Counter
             sp:             0,     //Stack Pointer
@@ -180,6 +186,7 @@ impl CPU {
         self.set_flag("C", false);
     }
 
+
     /// CLD
     /// Clear Decimal. Sets decimal to false.
     pub fn CLD(&self) {
@@ -234,23 +241,10 @@ impl CPU {
     pub fn INY(&self) {}
     pub fn JMP(&self) {}
     pub fn JSR(&self) {}
+
     /// LDA (LoaD Accumulator with memory)
     /// One of the most used opcodes, loads the A register.
-    pub fn LDA(&self, operand: i8) {
-        if (operand >= 0x00){
-            self.set_flag("Z", true);
-            self.set_flag("N", false);
-        }
-        else if ( operand >= 0x00 || operand <= 0x7f){
-            self.set_flag("N", false);
-            self.set_flag("Z", false);
-        }
-        else {
-            self.set_flag("N", true);
-            self.set_flag("Z", false);
-        }
-
-        this.a = operand;
+    pub fn LDA(&self) {
     }
     ///LDX (LoaD X with memory) 
     pub fn LDX(&self, operand: i8) {
@@ -361,6 +355,10 @@ impl CPU {
 
         println!();
     }
+
+        pub fn new_MEM(&mut self, &MEM memory){
+	    self.memory = &memory;
+        }
 }
 
 
@@ -382,43 +380,6 @@ pub struct CpuStep {
 //type cpuop = fn(CpuStep) -> u8;
 
 
-/// The cpu addressing modes enum, contains all possible cpu modes.
-///
-///
-enum Am {
-    Implied,//0
-    Accumulator,//1
-    Immediate,//2
-    Zeropage,//3
-    Zeropagex,//4
-    Zeropagey,//5
-    Absolute,//6
-    Absolutex,//7
-    Absolutey,//8
-    Relative,//9
-    Indirect,//10
-    IndirectIndexed,//11
-    IndexedIndirect,//12
-}
-    impl Am {
-        fn call (&self, &cpu: CPU) -> u16 {
-            return match self {
-                Am::Implied => ,
-                Am::Accumulator => ,
-                Am::Immediate => ,
-                Am::Zeropage => ,
-                Am::Zeropagex => ,
-                Am::Zeropagey => ,
-                Am::Absolute => ,
-                Am::Absolutex => ,
-                Am::Absolutey => ,
-                Am::Relative => ,
-                Am::Indirect => ,
-                Am::IndirectIndexed => ,
-                Am::IndexedIndirect => 
-            };
-        }
-    }
 
 
 

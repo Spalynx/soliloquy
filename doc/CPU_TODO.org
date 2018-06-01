@@ -111,7 +111,7 @@
 ** JSR
 *** TODO Implemented
 *** TODO Tested
-** LDA
+** TODO LDA
 *** TODO Implemented
 *** TODO Tested
 ** LDX

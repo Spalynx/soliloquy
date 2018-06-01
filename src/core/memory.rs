@@ -5,7 +5,7 @@ pub struct MEM {
 }
 
 #[allow(dead_code)]
-impl memory {
+impl MEM {
 //Initializes an empty memory struct.
     pub fn new() -> MEM {
         MEM {
@@ -60,4 +60,6 @@ $e: Light blue
 $f: Light grey
 
 I think this might be easy 6502 specific...
-*/
+ */
+//JESUS CHRIST, why did they have to make it all confusing and call the High Order Bytes pages?
+//Now Zero Paging seems really fukken obvious!
