@@ -12,8 +12,11 @@ Project Goals:
   
 Personal Goals:
   - Actually learn how to write clean readable code.
-  - Actually understand what test driven code looks like.
+  - Learning proper unit/integration testing practices.
+
 
 
 This project is gonna borrow heavily from fogleman/nes, but hopefully it's not just a copy paste job!
 Also, pcwalton/sprocketnes has been great for helping me understand how to implement a project like this in rust.
+
+![WTFPL2](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-3.png)

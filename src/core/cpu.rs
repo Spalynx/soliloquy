@@ -21,8 +21,8 @@
 /// This struct emulates the NES cpu.
 /// CPU holds within it: a set of registers, a connection to memory,
 /// it's instruction set, and it commands to parse instructinos.
-pub struct CPU {
-    pub memory:         &MEM,
+pub struct CPU <mem: MEM> {
+    pub memory:         mem,
     pub cycles:         u64,    //Clock cycle counter. Other hardware relies on this. [5]
     pub pc:             u16,    //Program Counter - Supports 65536 direct memory locations.
     pub sp:             u8,     //Stack Pointer - Accessed using interrupts, pulls, pushes, and transfers.
@@ -33,15 +33,92 @@ pub struct CPU {
 
     pub flags:          u8,     //CPU Flags See [1] for reference
 
-    pub interrupt:      u8,     // interrupt type to perform pub stall:          i32,    // number of cycles to stall 
-    //instructions:        &[&[&str]],
+    pub interrupt:      u8,     // interrupt type to perform
 }
 
-trait AddressingMode {
-    fn load (&self) -> u8;
-    fn save (&self) -> u8;
+
+/*
+impl AddressingMode for CPU {
+    //UGH, not sure if I fully understand traits yet...
+    when CPU has trait AddressingMode<AM>
+        AM also = Immediate
+            Implement Immediate load/save
+        AM also = Absolute
+            Implement Absolute load/save
+        etc.
+    For now, I could try something horrendous like a struct and match clause, in only one load/save...
 }
-impl AddressingMode for CPU {}
+*/
+
+/// AddressingMode trait for opcodes within the CPU.
+///
+/// I think that the hardest part in the conceptualization of AM
+/// is that they are not a trait of the CPU. Moreso, they are sort
+/// of like a function trait.
+///
+/// #Example
+/// ```
+/// fn lda<AM: AddressingMode<M>>(&mut self, ami: AM){
+///     //ami = addressing mode interface
+///     //	This is how you interact with load/save.
+/// 
+///     ami.load(self);
+///     ami.save(self);
+/// }
+///
+/// self.lda(ZeroPageAM{0x2B});
+/// ```
+///
+/// This struct emulates the NES cpu.
+/// CPU holds within it: a set of registers, a connection to memory,
+/// it's instruction set, and it commands to parse instructinos.
+trait AddressingMode<M: MEM> {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+
+
+struct ImmediateAM {pub address: u16};
+impl<M:MEM> AddressingMode<M> for ImmediateAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+
+struct AbsoluteAM {pub address: u16};
+impl<M:MEM> AddressingMode<M> for AbsoluteAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+struct AbsoluteXAM {pub address: u16};
+impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+struct AbsoluteYAM {pub address: u16};
+impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+struct ZeroPageAM{pub address: u16};
+impl<M:MEM> AddressingMode<M> for ZeroPageAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+struct ZPXindexAM{pub address: u16};
+impl<M:MEM> AddressingMode<M> for ZPXindexAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+struct ZPXindirAM{pub address: u16};
+impl<M:MEM> AddressingMode<M> for ZPXindirAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+struct ZPYindirAM{pub address: u16};
+impl<M:MEM> AddressingMode<M> for ZPYindirAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
 
 //cpu=implementation=================================================================================
 
