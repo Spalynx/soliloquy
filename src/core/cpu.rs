@@ -2,7 +2,10 @@
  *  Author: Spalynx
  *  Init: 12/8/17
  */
-//TODO: For now, all opcodes receive simple value for the operand, this /might/ be changed to a more complex type.
+
+macro_rules! bytes_to_word {
+    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
+}
 
 //CPU=DEFINITION====================================================================================
 //==================================================================================================
@@ -25,13 +28,14 @@ pub struct CPU <mem: MEM> {
     pub memory:         mem,
     pub cycles:         u64,    //Clock cycle counter. Other hardware relies on this. [5]
     pub pc:             u16,    //Program Counter - Supports 65536 direct memory locations.
-    pub sp:             u8,     //Stack Pointer - Accessed using interrupts, pulls, pushes, and transfers.
+    pub sp:             u8,     //Stack Pointer - Accessed using interrupts, pulls, pushes,
+    				// and transfers.
 
     pub a:              u8,     //Accumulator
     pub x:              u8,     // x register
     pub y:              u8,     // y register
 
-    pub flags:          u8,     //CPU Flags See [1] for reference
+    pub status:          u8,     //CPU Flags See [1] for reference
 
     pub interrupt:      u8,     // interrupt type to perform
 }
@@ -72,56 +76,86 @@ impl AddressingMode for CPU {
 /// This struct emulates the NES cpu.
 /// CPU holds within it: a set of registers, a connection to memory,
 /// it's instruction set, and it commands to parse instructinos.
+/// TODO: UNTESTED
 trait AddressingMode<M: MEM> {
     fn load (&self, cpu: &mut CPU<M>) -> u8;
     fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
 }
 
+struct AccumulatorAM	{};
+struct ImmediateAM	{pub address: u8};
+struct AbsoluteAM	{pub address: u16};
+struct AbsoluteXAM	{pub address: u16};
+struct AbsoluteYAM	{pub address: u16};
+struct ZeroPageAM	{pub address: u8};
+struct ZPXindexAM	{pub address: u8};
+struct ZPXindirectAM	{pub address: u8};
+struct ZPYindirectAM	{pub address: u8};
 
-struct ImmediateAM {pub address: u16};
+impl<M:MEM> AddressingMode<M> for AccumulatorAM{
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.a; }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.a = storeval; }
+}
 impl<M:MEM> AddressingMode<M> for ImmediateAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	self.address }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	panic!("No way to store in ImmediateAM!"); }
 }
-
-struct AbsoluteAM {pub address: u16};
 impl<M:MEM> AddressingMode<M> for AbsoluteAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getw( self.address ) }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16){
+    }
 }
-struct AbsoluteXAM {pub address: u16};
 impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getw( self.address + cpu.memory.x ) }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16){
+    }
 }
-struct AbsoluteYAM {pub address: u16};
 impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getw( self.address + cpu.memory.y ) }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16){
+    }
 }
-struct ZeroPageAM{pub address: u16};
 impl<M:MEM> AddressingMode<M> for ZeroPageAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getb( self.address ); }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+    }
 }
-struct ZPXindexAM{pub address: u16};
 impl<M:MEM> AddressingMode<M> for ZPXindexAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getb( self.address + x ); }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+    }
 }
-struct ZPXindirAM{pub address: u16};
-impl<M:MEM> AddressingMode<M> for ZPXindirAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+impl<M:MEM> AddressingMode<M> for ZPXindirectAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8 {
+	let high = cpu.memory.getb( self.address + x );
+        let low = cpu.memory.getb( self.address + x + 1);
+
+        cpu.memory.getw( bytes_to_word!(high,low) )
+    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+    }
 }
-struct ZPYindirAM{pub address: u16};
-impl<M:MEM> AddressingMode<M> for ZPYindirAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+impl<M:MEM> AddressingMode<M> for ZPYindirectAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8 {
+	let high = cpu.memory.getb( self.address );
+        let low = cpu.memory.getb( self.address + 1);
+
+        cpu.memory.getw( bytes_to_word!(high,low) + cpu.y as u16 )
+    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+    }
 }
 
-//cpu=implementation=================================================================================
-
+//~CPU-IMPLEMENTATION================================================================================
 //===================================================================================================
 
 /// there will be two main function types here:
@@ -143,7 +177,7 @@ impl CPU {
             x:              0,     // x register
             y:              0,     // y register
 
-            flags:          0,      //cpu flags
+            status:          0,      //cpu flags
 
             interrupt:      0,     // interrupt type to perform
             stall:          0,    // number of cycles to stall
@@ -392,38 +426,38 @@ impl CPU {
     /// Sets flags based upon a given byte.
     pub fn set_flag(&mut self, flag: &'static str, val: bool){
 
-        self.flags = match flag.as_ref() {
-            "N" | "n" => self.flags | (1 << 8),
-            "V" | "v" => self.flags | (1 << 7),
-            "s"       => self.flags | (1 << 6),
-            "B" | "b" => self.flags | (1 << 5),
-            "D" | "d" => self.flags | (1 << 4),
-            "I" | "i" => self.flags | (1 << 3),
-            "Z" | "z" => self.flags | (1 << 2),
-            "C" | "c" => self.flags | (1 << 1),
+        self.status = match flag.as_ref() {
+            "N" | "n" => self.status | (1 << 8),
+            "V" | "v" => self.status | (1 << 7),
+            "s"       => self.status | (1 << 6),
+            "B" | "b" => self.status | (1 << 5),
+            "D" | "d" => self.status | (1 << 4),
+            "I" | "i" => self.status | (1 << 3),
+            "Z" | "z" => self.status | (1 << 2),
+            "C" | "c" => self.status | (1 << 1),
         };
     }
         
     pub fn get_flag(&mut self, flag: &'static str) -> bool{
 
         return match flag.as_ref() {
-            "N" | "n" => self.flags & (1 << 8) == 128,
-            "V" | "v" => self.flags & (1 << 7) == 64,
-            "s"       => self.flags & (1 << 6) == 32,
-            "B" | "b" => self.flags & (1 << 5) == 16,
-            "D" | "d" => self.flags & (1 << 4) == 8,
-            "I" | "i" => self.flags & (1 << 3) == 4,
-            "Z" | "z" => self.flags & (1 << 2) == 2,
-            "C" | "c" => self.flags & (1 << 1) == 1,
+            "N" | "n" => self.status & (1 << 8) == 128,
+            "V" | "v" => self.status & (1 << 7) == 64,
+            "s"       => self.status & (1 << 6) == 32,
+            "B" | "b" => self.status & (1 << 5) == 16,
+            "D" | "d" => self.status & (1 << 4) == 8,
+            "I" | "i" => self.status & (1 << 3) == 4,
+            "Z" | "z" => self.status & (1 << 2) == 2,
+            "C" | "c" => self.status & (1 << 1) == 1,
         }
     }
-    pub fn print_flags(&self) {
+    pub fn print_status(&self) {
         println!("N V - - D I Z C");
 
         let mut y = 128;
 
         while y > 0 {
-            match &self.flags & y {
+            match &self.status & y {
                 0 => print!("0 "),
                 _ => print!("1 "),
             }
@@ -580,7 +614,7 @@ pub mod tests {
         assert_eq!(test_cpu.sp,				0);
         assert_eq!(test_cpu.x,				0);
         assert_eq!(test_cpu.y,				0);
-        assert_eq!(test_cpu.flags,			0);
+        assert_eq!(test_cpu.status,			0);
         assert_eq!(test_cpu.interrupt,			0);
         assert_eq!(test_cpu.stall, 			0);
     }
@@ -599,14 +633,14 @@ pub mod tests {
     }
 
     #[test]
-    fn test_flags(){
+    fn test_status(){
         let test_cpu = super::CPU::new();
-        let flags = {"N", "n", "V", "v", "s", "B", "b", "D", "d", "I", "i", "Z",
+        let status = {"N", "n", "V", "v", "s", "B", "b", "D", "d", "I", "i", "Z",
         "z", "C", "c"};
 
         //Should cycle through each flag setting it true, and testing to see if
         // it actually happened.
-        for f in flags {
+        for f in status {
             test_cpu.set_flag(f, 1);
             assert_eq!(test_cpu.get_flag(f), 1);
 
@@ -648,7 +682,7 @@ pub mod tests {
 
     /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
     #[test]
-    fn test_flagsetclear_instructions(){
+    fn test_status_setclear_instructions(){
         let test_cpu = super::CPU::new();
     }
 }

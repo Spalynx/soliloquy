@@ -15,7 +15,7 @@ impl MEM {
     }
 
     //Obtains values from full memory map.
-    pub fn get(&self, address: u16) -> u8 {
+    pub fn getw(&self, address: u16) -> u8 {
         if(address >= 0x00 && address <= 0x800){
             //2kb internal ram
             self.values[address]
@@ -25,7 +25,15 @@ impl MEM {
         }
     }
 
-    //Stores a value into memory. The conditional statements should
+    //Much faster, only has to access the first page of memory.
+    pub fn getb(&self, address: u8) -> u8 {
+        if (address > 255){
+            panic!("Went over!");
+        }
+
+        self.values[address]
+    }
+
     // block any illegal storing.
     pub fn set(&mut self, address: u16, val: u8){
         if(address >= 0x00 && address <= 0x800){
