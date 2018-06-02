@@ -3,9 +3,6 @@
  *  Init: 12/8/17
  */
 
-macro_rules! bytes_to_word {
-    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
-}
 
 //CPU=DEFINITION====================================================================================
 //==================================================================================================
@@ -107,32 +104,32 @@ impl<M:MEM> AddressingMode<M> for ImmediateAM {
 impl<M:MEM> AddressingMode<M> for AbsoluteAM {
     fn load (&self, cpu: &mut CPU<M>) -> u8
     {	cpu.memory.getw( self.address ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16){
-    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    {	cpu.memory.set( self.address, storeval ) }
 }
 impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
     fn load (&self, cpu: &mut CPU<M>) -> u8
     {	cpu.memory.getw( self.address + cpu.memory.x ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16){
-    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    {	cpu.memory.set( self.address + cpu.memory.x, storeval ) }
 }
 impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
     fn load (&self, cpu: &mut CPU<M>) -> u8
     {	cpu.memory.getw( self.address + cpu.memory.y ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16){
-    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    {	cpu.memory.set( self.address + cpu.memory.y, storeval ) }
 }
 impl<M:MEM> AddressingMode<M> for ZeroPageAM {
     fn load (&self, cpu: &mut CPU<M>) -> u8
     {	cpu.memory.getb( self.address ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
-    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.memory.set( self.address ); }
 }
 impl<M:MEM> AddressingMode<M> for ZPXindexAM {
     fn load (&self, cpu: &mut CPU<M>) -> u8
     {	cpu.memory.getb( self.address + x ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
-    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.memory.set( self.address + x , storeval); }
 }
 impl<M:MEM> AddressingMode<M> for ZPXindirectAM {
     fn load (&self, cpu: &mut CPU<M>) -> u8 {
@@ -142,6 +139,10 @@ impl<M:MEM> AddressingMode<M> for ZPXindirectAM {
         cpu.memory.getw( bytes_to_word!(high,low) )
     }
     fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+	let high = cpu.memory.getb( self.address + x );
+        let low = cpu.memory.getb( self.address + x + 1);
+
+        cpu.memory.set( bytes_to_word!(high,low), storeval );
     }
 }
 impl<M:MEM> AddressingMode<M> for ZPYindirectAM {
@@ -152,6 +153,10 @@ impl<M:MEM> AddressingMode<M> for ZPYindirectAM {
         cpu.memory.getw( bytes_to_word!(high,low) + cpu.y as u16 )
     }
     fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+	let high = cpu.memory.getb( self.address );
+        let low = cpu.memory.getb( self.address + 1);
+
+        cpu.memory.set( bytes_to_word!(high,low) + cpu.y as u16, storeval );
     }
 }
 
@@ -473,6 +478,9 @@ impl CPU {
 }
 
 
+macro_rules! bytes_to_word {
+    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
+}
 
 
 #[allow(dead_code)]
