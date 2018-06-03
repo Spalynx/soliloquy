@@ -38,135 +38,12 @@ pub struct CPU <mem: MEM> {
 }
 
 
-/*
-impl AddressingMode for CPU {
-    //UGH, not sure if I fully understand traits yet...
-    when CPU has trait AddressingMode<AM>
-        AM also = Immediate
-            Implement Immediate load/save
-        AM also = Absolute
-            Implement Absolute load/save
-        etc.
-    For now, I could try something horrendous like a struct and match clause, in only one load/save...
-}
-*/
-
-/// AddressingMode trait for opcodes within the CPU.
-///
-/// I think that the hardest part in the conceptualization of AM
-/// is that they are not a trait of the CPU. Moreso, they are sort
-/// of like a function trait.
-///
-/// #Example
-/// ```
-/// fn lda<AM: AddressingMode<M>>(&mut self, ami: AM){
-///     //ami = addressing mode interface
-///     //	This is how you interact with load/save.
-/// 
-///     ami.load(self);
-///     ami.save(self);
-/// }
-///
-/// self.lda(ZeroPageAM{0x2B});
-/// ```
-///
-/// This struct emulates the NES cpu.
-/// CPU holds within it: a set of registers, a connection to memory,
-/// it's instruction set, and it commands to parse instructinos.
-/// TODO: UNTESTED
-trait AddressingMode<M: MEM> {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
-}
-
-struct AccumulatorAM	{};
-struct ImmediateAM	{pub address: u8};
-struct AbsoluteAM	{pub address: u16};
-struct AbsoluteXAM	{pub address: u16};
-struct AbsoluteYAM	{pub address: u16};
-struct ZeroPageAM	{pub address: u8};
-struct ZPXindexAM	{pub address: u8};
-struct ZPXindirectAM	{pub address: u8};
-struct ZPYindirectAM	{pub address: u8};
-
-impl<M:MEM> AddressingMode<M> for AccumulatorAM{
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.a; }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	cpu.a = storeval; }
-}
-impl<M:MEM> AddressingMode<M> for ImmediateAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	self.address }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	panic!("No way to store in ImmediateAM!"); }
-}
-impl<M:MEM> AddressingMode<M> for AbsoluteAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getw( self.address ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
-    {	cpu.memory.set( self.address, storeval ) }
-}
-impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getw( self.address + cpu.memory.x ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
-    {	cpu.memory.set( self.address + cpu.memory.x, storeval ) }
-}
-impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getw( self.address + cpu.memory.y ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
-    {	cpu.memory.set( self.address + cpu.memory.y, storeval ) }
-}
-impl<M:MEM> AddressingMode<M> for ZeroPageAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getb( self.address ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	cpu.memory.set( self.address ); }
-}
-impl<M:MEM> AddressingMode<M> for ZPXindexAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getb( self.address + x ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	cpu.memory.set( self.address + x , storeval); }
-}
-impl<M:MEM> AddressingMode<M> for ZPXindirectAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8 {
-	let high = cpu.memory.getb( self.address + x );
-        let low = cpu.memory.getb( self.address + x + 1);
-
-        cpu.memory.getw( bytes_to_word!(high,low) )
-    }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
-	let high = cpu.memory.getb( self.address + x );
-        let low = cpu.memory.getb( self.address + x + 1);
-
-        cpu.memory.set( bytes_to_word!(high,low), storeval );
-    }
-}
-impl<M:MEM> AddressingMode<M> for ZPYindirectAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8 {
-	let high = cpu.memory.getb( self.address );
-        let low = cpu.memory.getb( self.address + 1);
-
-        cpu.memory.getw( bytes_to_word!(high,low) + cpu.y as u16 )
-    }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
-	let high = cpu.memory.getb( self.address );
-        let low = cpu.memory.getb( self.address + 1);
-
-        cpu.memory.set( bytes_to_word!(high,low) + cpu.y as u16, storeval );
-    }
-}
-
 //~CPU-IMPLEMENTATION================================================================================
 //===================================================================================================
 
-/// there will be two main function types here:
-/// cpu instructions
-/// cpu meta functions - like parsing opcodes, etc.
-///
+/// There will be two main function types here:
+///      CPU instructions     - OPCODES
+///      CPU meta functions   - get_status, parse_opcodes.
 #[allow(dead_code)]
 impl CPU {
     /// Initializes an empty CPU struct
@@ -182,16 +59,20 @@ impl CPU {
             x:              0,     // x register
             y:              0,     // y register
 
-            status:          0,      //cpu flags
+            status:         0,      //cpu flags
 
             interrupt:      0,     // interrupt type to perform
             stall:          0,    // number of cycles to stall
         }
     }
 
-    //meta~functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ///Meta-Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ///--------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     /// Runs a cpu cycle with each call
-    /// TODO: At the moment, I'm not sure if I want to impl with a param of the incoming opcode, or if there should be some buffer?
+    /// TODO: At the moment, I'm not
+    /// sure if I want to impl with a param of the incoming opcode, or
+    /// if there should be some buffer?
     fn step() -> i32{
         let step = CpuStep {
 	          address:    0,
@@ -211,7 +92,50 @@ impl CPU {
     fn throw_interrupt($mut self, int: &'static str){
 
     }
-    //CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /// Sets flags based upon a given byte.
+    pub fn set_flag(&mut self, flag: &'static str, val: bool){
+        /// Yes, I know that this is a really slow way to access
+        /// flags, but I plan on refactoring with actual opcodes.
+        self.status = match flag.as_ref() {
+            "N" | "n" => self.status | (1 << 8),
+            "V" | "v" => self.status | (1 << 7),
+            "S" | "s" => self.status | (1 << 6),
+            "B" | "b" => self.status | (1 << 5),
+            "D" | "d" => self.status | (1 << 4),
+            "I" | "i" => self.status | (1 << 3),
+            "Z" | "z" => self.status | (1 << 2),
+            "C" | "c" => self.status | (1 << 1),
+        };
+    }
+    pub fn get_flag(&mut self, flag: &'static str) -> bool{
+        return match flag.as_ref() {
+            "N" | "n" => self.status & (1 << 8) == 128,
+            "V" | "v" => self.status & (1 << 7) == 64,
+            "S" | "s" => self.status & (1 << 6) == 32,
+            "B" | "b" => self.status & (1 << 5) == 16,
+            "D" | "d" => self.status & (1 << 4) == 8,
+            "I" | "i" => self.status & (1 << 3) == 4,
+            "Z" | "z" => self.status & (1 << 2) == 2,
+            "C" | "c" => self.status & (1 << 1) == 1,
+        }
+    }
+    pub fn print_status(&self) {
+        println!("N V - - D I Z C");
+        let mut y = 128;
+
+        while y > 0 {
+            match &self.status & y {
+                0 => print!("0 "),
+                _ => print!("1 "),
+            }
+            y = y / 2;
+        }
+        println!();
+    }
+
+    ///CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ///---------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// Refer to [3] for all cpu explanations.
 
     /// ADC
@@ -323,15 +247,6 @@ impl CPU {
 
     ///CMP (CoMPare accumulator) 
     ///Affects Flags: S Z C 
-    ///MODE           SYNTAX       HEX LEN TIM
-    ///Immediate     CMP #$44      $C9  2   2
-    ///Zero Page     CMP $44       $C5  2   3
-    ///Zero Page,X   CMP $44,X     $D5  2   4
-    ///Absolute      CMP $4400     $CD  3   4
-    ///Absolute,X    CMP $4400,X   $DD  3   4+
-    ///Absolute,Y    CMP $4400,Y   $D9  3   4+
-    ///Indirect,X    CMP ($44,X)   $C1  2   6
-    ///Indirect,Y    CMP ($44),Y   $D1  2   5+
     ///+ add 1 cycle if page boundary crossed
     ///Compare sets flags as if a subtraction had been carried out. If the value in the
     ///accumulator is equal or greater than the compared value, the Carry will be
@@ -427,84 +342,140 @@ impl CPU {
     pub fn TXS(&self) {}
     pub fn TYA(&self) {}
 
-    //DEBUG~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!
-    /// Sets flags based upon a given byte.
-    pub fn set_flag(&mut self, flag: &'static str, val: bool){
-
-        self.status = match flag.as_ref() {
-            "N" | "n" => self.status | (1 << 8),
-            "V" | "v" => self.status | (1 << 7),
-            "s"       => self.status | (1 << 6),
-            "B" | "b" => self.status | (1 << 5),
-            "D" | "d" => self.status | (1 << 4),
-            "I" | "i" => self.status | (1 << 3),
-            "Z" | "z" => self.status | (1 << 2),
-            "C" | "c" => self.status | (1 << 1),
-        };
-    }
-        
-    pub fn get_flag(&mut self, flag: &'static str) -> bool{
-
-        return match flag.as_ref() {
-            "N" | "n" => self.status & (1 << 8) == 128,
-            "V" | "v" => self.status & (1 << 7) == 64,
-            "s"       => self.status & (1 << 6) == 32,
-            "B" | "b" => self.status & (1 << 5) == 16,
-            "D" | "d" => self.status & (1 << 4) == 8,
-            "I" | "i" => self.status & (1 << 3) == 4,
-            "Z" | "z" => self.status & (1 << 2) == 2,
-            "C" | "c" => self.status & (1 << 1) == 1,
-        }
-    }
-    pub fn print_status(&self) {
-        println!("N V - - D I Z C");
-
-        let mut y = 128;
-
-        while y > 0 {
-            match &self.status & y {
-                0 => print!("0 "),
-                _ => print!("1 "),
-            }
-            y = y / 2;
-        }
-
-        println!();
-    }
-
-        pub fn new_MEM(&mut self, &MEM memory){
-	    self.memory = &memory;
-        }
 }
 
-
-macro_rules! bytes_to_word {
-    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
-}
-
-
-#[allow(dead_code)]
-/// Emulates a CPU step.
+//=ADDRESSING-MODES=================================================================================
+//==================================================================================================
+/// AddressingMode trait for opcodes within the CPU.
 ///
-/// #Examples
-/// ```
-//
-/// ```
-/// Contains fields for an address, programcounter, and cpu mode.
-pub struct CpuStep {
-	  address:    u16,
-	  pc:         u16, 
-	  mode:       u8, 
-}
-//type cpuop = fn(CpuStep) -> u8;
-
-
-
-
-
-/// contructs tables for all cpu instructions on all addressing modes.
+/// I think that the hardest part in the conceptualization of AM
+/// is that they are not a trait of the CPU. Moreso, they are sort
+/// of like a function trait.
 ///
-/// when tables are initialized with fn new_instructions(), there are 256
+/// #Example
+/// ```
+/// fn lda<AM: AddressingMode<M>>(&mut self, ami: AM){
+///     //ami = addressing mode interface
+///     //	This is how you interact with load/save.
+/// 
+///     ami.load(self);
+///     ami.save(self);
+/// }
+///
+/// self.lda(ZeroPageAM{0x2B});
+/// ```
+///
+/// This struct emulates the NES cpu.
+/// CPU holds within it: a set of registers, a connection to memory,
+/// it's instruction set, and it commands to parse instructinos.
+/// TODO: UNTESTED
+trait AddressingMode<M: MEM> {
+    fn load (&self, cpu: &mut CPU<M>) -> u8;
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+}
+
+/// The commented numbers specify the addressing mode's int value in
+/// the Instruction.mode table.
+
+/// Indirect(10), Relative(9), and Accumulator either do not need
+/// structs or, in accumulator's case are not given a number because
+/// of it only being called when an operand is not given.
+struct AccumulatorAM    {};                     
+struct ImmediateAM      {pub address: u8};      /*2*/ 
+struct AbsoluteAM       {pub address: u16};     /*6*/ 
+struct AbsoluteXAM      {pub address: u16};     /*7*/ 
+struct AbsoluteYAM      {pub address: u16};     /*8*/ 
+struct ZeroPageAM       {pub address: u8};      /*3*/  
+struct ZeroPageXAM      {pub address: u8};      /*4*/ 
+struct ZeroPageYAM      {pub address: u8};      /*5*/ 
+struct IndexedIndirectAM{pub address: u8};      /*12*/ 
+struct IndirectIndexedAM{pub address: u8};      /*11*/ 
+
+
+impl<M:MEM> AddressingMode<M> for AccumulatorAM{
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.a; }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.a = storeval; }
+}
+impl<M:MEM> AddressingMode<M> for ImmediateAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	self.address }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	panic!("No way to store in ImmediateAM!"); }
+}
+impl<M:MEM> AddressingMode<M> for AbsoluteAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getw( self.address ) }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    {	cpu.memory.set( self.address, storeval ); }
+}
+impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getw( self.address + cpu.memory.x ) }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    {	cpu.memory.set( self.address + cpu.memory.x, storeval ); }
+}
+impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getw( self.address + cpu.y ) }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    {	cpu.memory.set( self.address + cpu.y, storeval ); }
+}
+impl<M:MEM> AddressingMode<M> for ZeroPageAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getb( self.address ); }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.memory.set( self.address ); }
+}
+impl<M:MEM> AddressingMode<M> for ZeroPageXAM  {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getb( self.address + cpu.x ); }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.memory.set( self.address + cpu.x , storeval); }
+}
+impl<M:MEM> AddressingMode<M> for ZeroPageYAM  {
+    fn load (&self, cpu: &mut CPU<M>) -> u8
+    {	cpu.memory.getb( self.address + cpu.y ); }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    {	cpu.memory.set( self.address + cpu.y , storeval); }
+}
+impl<M:MEM> AddressingMode<M> for IndexedIndirectAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8 {
+	let high = cpu.memory.getb( self.address + cpu.x );
+        let low = cpu.memory.getb( self.address + cpu.x + 1);
+
+        cpu.memory.getw( bytes_to_word!(high,low) )
+    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+	let high = cpu.memory.getb( self.address + cpu.x );
+        let low = cpu.memory.getb( self.address + cpu.x + 1);
+
+        cpu.memory.set( bytes_to_word!(high,low), storeval );
+    }
+}
+impl<M:MEM> AddressingMode<M> for IndirectIndexedAM {
+    fn load (&self, cpu: &mut CPU<M>) -> u8 {
+	let high = cpu.memory.getb( self.address );
+        let low = cpu.memory.getb( self.address + 1);
+
+        cpu.memory.getw( bytes_to_word!(high,low) + cpu.y as u16 )
+    }
+    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+	let high = cpu.memory.getb( self.address );
+        let low = cpu.memory.getb( self.address + 1);
+
+        cpu.memory.set( bytes_to_word!(high,low) + cpu.y as u16, storeval );
+    }
+}
+
+
+
+//=CPU-INSTRUCTION-INFO-TABLES======================================================================
+//==================================================================================================
+/// Contructs tables for all cpu instructions on all addressing modes.
+///
+/// When tables are initialized with fn new_instructions(), there are 256
 /// indexes per table.
 ///
 /// 6 tables exist: instruction names, instruction sizes, instruction modes,
@@ -517,7 +488,9 @@ pub struct Instructions {
     pub paging:	  [u8;256],
 }
 
-/// initializes struct instruction with all possible 6502 instructions.
+// TODO: Move impl to definition, once project is runnable again.
+    
+/// Initializes struct instruction with all possible 6502 instructions.
 ///
 /// i'm not sure how much memory this process takes, but efforts were made
 /// to use values of lower sizes.
@@ -605,7 +578,31 @@ impl Instructions {
 
 
 
+//General helper macro, might move to a general module.
+macro_rules! bytes_to_word {
+    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
+}
 
+
+#[allow(dead_code)]
+/// Emulates a CPU step.
+///
+/// #Examples
+/// ```
+//
+/// ```
+/// Contains fields for an address, programcounter, and cpu mode.
+pub struct CpuStep {
+	  address:    u16,
+	  pc:         u16, 
+	  mode:       u8, 
+}
+//type cpuop = fn(CpuStep) -> u8;
+
+
+
+//=-TESTING-========================================================================================
+//==================================================================================================
 #[cfg(test)]
 pub mod tests {
     //Tests could be greatly improved with
