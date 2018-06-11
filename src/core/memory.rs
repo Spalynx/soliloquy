@@ -1,24 +1,23 @@
 //For now, memory is a 2kb sized 8 bit array.
 //This might not ever change, but it seems a tad too simplistic.
 pub struct MEM {
-    values:	[u8, 0x800], //2kb internal RAM.
+    values:	[u8; 0x800], //2kb internal RAM.
 }
 
 #[allow(dead_code)]
 impl MEM {
 //Initializes an empty memory struct.
     pub fn new() -> MEM {
-        MEM {
-            values:	[u8, 0x800],
-            //Should be things like PPU memory, etc.
+        return MEM {
+            values:	[0; 0x800],
         }
     }
 
     //Obtains values from full memory map.
-    pub fn getw(&self, address: u16) -> u8 {
-        if(address >= 0x00 && address <= 0x800){
+    pub fn get(&self, address: u16) -> u8 {
+        if address >= 0x00 && address <= 0x800{
             //2kb internal ram
-            self.values[address]
+            self.values[address as usize]
         }
         else {
             panic!("Other values in the memory map not implemented yet!");
@@ -26,23 +25,32 @@ impl MEM {
     }
 
     //Much faster, only has to access the first page of memory.
-    pub fn getb(&self, address: u8) -> u8 {
-        if (address > 255){
+    pub fn get_zp(&self, address: u8) -> u8 {
+        if address > 255 {
             panic!("Went over!");
         }
 
-        self.values[address]
+        self.values[address as usize]
     }
 
     // block any illegal storing.
     pub fn set(&mut self, address: u16, val: u8){
-        if(address >= 0x00 && address <= 0x800){
+        if address >= 0x00 && address <= 0x800 {
             //2kb internal ram
-            self.values[address] = val;
+            self.values[address as usize] = val;
         }
         else {
             panic!("Other values in the memory map not implemented yet!");
         }
+    }
+    //Sets a value in the zero page.
+    //Much faster, only has to access the first page of memory.
+    pub fn set_zp(&mut self, address: u8, val: u8) {
+        if address > 255 {
+            panic!("Went over!");
+        }
+
+        self.values[address as usize] = val;
     }
 }
 

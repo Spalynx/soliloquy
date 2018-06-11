@@ -3,6 +3,13 @@
  *  Init: 12/8/17
  */
 
+use core::memory::MEM;
+#[macro_use]
+
+//General helper macro, might move to a general module.
+macro_rules! bytes_to_word {
+    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
+}
 
 //CPU=DEFINITION====================================================================================
 //==================================================================================================
@@ -26,7 +33,7 @@ pub struct CPU {
     pub cycles:         u64,    //Clock cycle counter. Other hardware relies on this. [5]
     pub pc:             u16,    //Program Counter - Supports 65536 direct memory locations.
     pub sp:             u8,     //Stack Pointer - Accessed using interrupts, pulls, pushes,
-    				// and transfers.
+    // and transfers.
 
     pub a:              u8,     //Accumulator
     pub x:              u8,     // x register
@@ -35,6 +42,7 @@ pub struct CPU {
     pub status:          u8,     //CPU Flags See [1] for reference
 
     pub interrupt:      u8,     // interrupt type to perform
+    pub stall:          u8,    // number of cycles to stall
 }
 
 
@@ -51,7 +59,7 @@ impl CPU {
     /// To initialize memory, call new_memory().
     pub fn new() -> CPU {
         CPU{
-            memory:     std::MEM.new(),
+            memory:         MEM::new(),
             cycles:         0,    //Number of cycles
             pc:             0,    //Program Counter
             sp:             0,     //Stack Pointer
@@ -66,6 +74,9 @@ impl CPU {
             stall:          0,    // number of cycles to stall
         }
     }
+    pub fn new_memory(&mut self, mem: MEM){
+        self.memory = mem;
+    }
 
     ///Meta-Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ///--------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,29 +86,34 @@ impl CPU {
     /// sure if I want to impl with a param of the incoming opcode, or
     /// if there should be some buffer?
     fn step() -> i32{
+        /*
         let step = CpuStep {
-	          address:    0,
-	          pc:         0, 
-	          mode:       0, 
+            address:    0,
+            pc:         0, 
+            mode:       0, 
+        }
+        */
 
         1
     }
 
     fn parse_opcodes() {
-        
+
     }
 
     /// throw_interrupt
     /// Receives a string as a param, and throws one of the 3 (?) cpu interrupts.
     /// NOTE: This is me pushing off interrupts until I actually understand what they do.
-    fn throw_interrupt($mut self, int: &'static str){
+    fn throw_interrupt(&mut self, int: &'static str){
 
     }
 
     /// Sets flags based upon a given byte.
     pub fn set_flag(&mut self, flag: &'static str, val: bool){
-        /// Yes, I know that this is a really slow way to access
-        /// flags, but I plan on refactoring with actual opcodes.
+
+        // Yes, I know that this is a really slow way to access
+        // flags, but I plan on refactoring with actual opcodes.
+
         self.status = match flag.as_ref() {
             "N" | "n" => self.status | (1 << 8),
             "V" | "v" => self.status | (1 << 7),
@@ -107,6 +123,7 @@ impl CPU {
             "I" | "i" => self.status | (1 << 3),
             "Z" | "z" => self.status | (1 << 2),
             "C" | "c" => self.status | (1 << 1),
+            _ => panic!("NOT A FLAG"),
         };
     }
     pub fn get_flag(&mut self, flag: &'static str) -> bool{
@@ -119,6 +136,7 @@ impl CPU {
             "I" | "i" => self.status & (1 << 3) == 4,
             "Z" | "z" => self.status & (1 << 2) == 2,
             "C" | "c" => self.status & (1 << 1) == 1,
+            _ => panic!("NOT A FLAG"),
         }
     }
     pub fn print_status(&self) {
@@ -139,6 +157,15 @@ impl CPU {
     ///---------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// Refer to [3] for all cpu explanations.
 
+    /// LDA (LoaD Accumulator with memory)
+    /// One of the most used opcodes, loads the accumulator with a given value.
+    fn LDA <AM: AddressingMode> (&mut self, ami: AM){
+        self.a = ami.load(self);
+    }
+
+}
+    //Folded opcodes
+    /*
     /// ADC
     /// ADd with Carry. ADC results are based on the decimal flag. In
     /// decimal mode, addition is carried out as if the values are in Binary
@@ -216,6 +243,9 @@ impl CPU {
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
 
+        
+
+
     /// CLC
     /// Clear Carry. Sets carry to false.
     pub fn CLC(&self) {
@@ -240,6 +270,26 @@ impl CPU {
     pub fn CLV(&self) {
         self.set_flag("V", false);
     }
+    /// SEC 
+    /// SEt Carry. Sets carry to true.
+    pub fn SEC(&self) {
+        self.set_flag("C", true);
+    }
+
+    /// SED 
+    /// SEt Decimal. Sets decimal to true.
+    pub fn SED(&self) {
+        self.set_flag("D", true);
+    }
+
+    /// SEI 
+    /// SEt Interrupt. Sets interrupt to true.
+    pub fn SED(&self) {
+        self.set_flag("I", true);
+    }
+
+        
+
 
     ///CMP (CoMPare accumulator) 
     ///Affects Flags: S Z C 
@@ -269,11 +319,6 @@ impl CPU {
     pub fn JMP(&self) {}
     pub fn JSR(&self) {}
 
-    /// LDA (LoaD Accumulator with memory)
-    /// One of the most used opcodes, loads the accumulator with a given value.
-    fn LDA <AM: AddressingMode<M>> (&mut self, ami: AM){
-        self.a = ami.load(self);
-    }
 
     ///LDX (LoaD X with memory) 
     pub fn LDX(&self, operand: i8) {
@@ -312,23 +357,6 @@ impl CPU {
     pub fn RTS(&self) {}
     pub fn SBC(&self) {}
 
-    /// SEC 
-    /// SEt Carry. Sets carry to true.
-    pub fn SEC(&self) {
-        self.set_flag("C", true);
-    }
-
-    /// SED 
-    /// SEt Decimal. Sets decimal to true.
-    pub fn SED(&self) {
-        self.set_flag("D", true);
-    }
-
-    /// SEI 
-    /// SEt Interrupt. Sets interrupt to true.
-    pub fn SED(&self) {
-        self.set_flag("I", true);
-    }
 
     pub fn STA(&self) {}
     pub fn STX(&self) {}
@@ -339,8 +367,8 @@ impl CPU {
     pub fn TXA(&self) {}
     pub fn TXS(&self) {}
     pub fn TYA(&self) {}
+    */
 
-}
 
 //=ADDRESSING-MODES=================================================================================
 //==================================================================================================
@@ -352,7 +380,7 @@ impl CPU {
 ///
 /// #Example
 /// ```
-/// fn lda<AM: AddressingMode<M>>(&mut self, ami: AM){
+/// fn lda<AM: AddressingMode> (&mut self, ami: AM){
 ///     //ami = addressing mode interface
 ///     //	This is how you interact with load/save.
 /// 
@@ -367,9 +395,9 @@ impl CPU {
 /// CPU holds within it: a set of registers, a connection to memory,
 /// it's instruction set, and it commands to parse instructinos.
 /// TODO: UNTESTED
-trait AddressingMode<M: MEM> {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+trait AddressingMode {
+    fn load (&self, cpu: &mut CPU) -> u8;
+    fn save (&self, cpu: &mut CPU, storeval: u8);
 }
 
 /// The commented numbers specify the addressing mode's int value in
@@ -378,92 +406,92 @@ trait AddressingMode<M: MEM> {
 /// Indirect(10), Relative(9), and Accumulator either do not need
 /// structs or, in accumulator's case are not given a number because
 /// of it only being called when an operand is not given.
-struct AccumulatorAM    {};                     
-struct ImmediateAM      {pub address: u8};      /*2*/ 
-struct AbsoluteAM       {pub address: u16};     /*6*/ 
-struct AbsoluteXAM      {pub address: u16};     /*7*/ 
-struct AbsoluteYAM      {pub address: u16};     /*8*/ 
-struct ZeroPageAM       {pub address: u8};      /*3*/  
-struct ZeroPageXAM      {pub address: u8};      /*4*/ 
-struct ZeroPageYAM      {pub address: u8};      /*5*/ 
-struct IndexedIndirectAM{pub address: u8};      /*12*/ 
-struct IndirectIndexedAM{pub address: u8};      /*11*/ 
+struct AccumulatorAM;    
+struct ImmediateAM      {pub address: u8}      /*2*/ 
+struct AbsoluteAM       {pub address: u16}     /*6*/ 
+struct AbsoluteXAM      {pub address: u16}     /*7*/ 
+struct AbsoluteYAM      {pub address: u16}     /*8*/ 
+struct ZeroPageAM       {pub address: u8}      /*3*/  
+struct ZeroPageXAM      {pub address: u8}      /*4*/ 
+struct ZeroPageYAM      {pub address: u8}      /*5*/ 
+struct IndexedIndirectAM{pub address: u8}      /*12*/ 
+struct IndirectIndexedAM{pub address: u8}      /*11*/ 
 
-
-impl<M:MEM> AddressingMode<M> for AccumulatorAM{
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.a; }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+//+! Fold these addressingmode impls.
+impl AddressingMode for AccumulatorAM{
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.a	}
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.a = storeval; }
 }
-impl<M:MEM> AddressingMode<M> for ImmediateAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for ImmediateAM {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	self.address }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	panic!("No way to store in ImmediateAM!"); }
 }
-impl<M:MEM> AddressingMode<M> for AbsoluteAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getw( self.address ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+impl AddressingMode for AbsoluteAM {
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.memory.get( self.address ) }
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getw( self.address + cpu.memory.x ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
-    {	cpu.memory.set( self.address + cpu.memory.x, storeval ); }
+impl AddressingMode for AbsoluteXAM {
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.memory.get( self.address + cpu.x as u16 ) }
+    fn save (&self, cpu: &mut CPU, storeval: u8)
+    {	cpu.memory.set( self.address + cpu.x as u16, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getw( self.address + cpu.y ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
-    {	cpu.memory.set( self.address + cpu.y, storeval ); }
+impl AddressingMode for AbsoluteYAM {
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.memory.get( self.address + cpu.y as u16) }
+    fn save (&self, cpu: &mut CPU, storeval: u8)
+    {	cpu.memory.set( self.address + cpu.y as u16, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for ZeroPageAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getb( self.address ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	cpu.memory.set( self.address ); }
+impl AddressingMode for ZeroPageAM {
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.memory.get_zp( self.address ) }
+    fn save (&self, cpu: &mut CPU, storeval: u8)
+    {	cpu.memory.set_zp( self.address, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for ZeroPageXAM  {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getb( self.address + cpu.x ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	cpu.memory.set( self.address + cpu.x , storeval); }
+impl AddressingMode for ZeroPageXAM  {
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.memory.get_zp( self.address + cpu.x ) }
+    fn save (&self, cpu: &mut CPU, storeval: u8)
+    {	cpu.memory.set_zp( self.address + cpu.x , storeval); }
 }
-impl<M:MEM> AddressingMode<M> for ZeroPageYAM  {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
-    {	cpu.memory.getb( self.address + cpu.y ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
-    {	cpu.memory.set( self.address + cpu.y , storeval); }
+impl AddressingMode for ZeroPageYAM  {
+    fn load (&self, cpu: &mut CPU) -> u8
+    {	cpu.memory.get_zp( self.address + cpu.y ) }
+    fn save (&self, cpu: &mut CPU, storeval: u8)
+    {	cpu.memory.set_zp( self.address + cpu.y , storeval); }
 }
-impl<M:MEM> AddressingMode<M> for IndexedIndirectAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8 {
-	let high = cpu.memory.getb( self.address + cpu.x );
-        let low = cpu.memory.getb( self.address + cpu.x + 1);
+impl AddressingMode for IndexedIndirectAM {
+    fn load (&self, cpu: &mut CPU) -> u8 {
+	let high = cpu.memory.get_zp( self.address + cpu.x );
+        let low = cpu.memory.get_zp( self.address + cpu.x + 1);
 
-        cpu.memory.getw( bytes_to_word!(high,low) )
+        cpu.memory.get( bytes_to_word!(high as u16,low as u16) )
     }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
-	let high = cpu.memory.getb( self.address + cpu.x );
-        let low = cpu.memory.getb( self.address + cpu.x + 1);
+    fn save (&self, cpu: &mut CPU, storeval: u8){
+	let high = cpu.memory.get_zp( self.address + cpu.x );
+        let low = cpu.memory.get_zp( self.address + cpu.x + 1);
 
-        cpu.memory.set( bytes_to_word!(high,low), storeval );
+        cpu.memory.set( bytes_to_word!(high as u16,low as u16), storeval );
     }
 }
-impl<M:MEM> AddressingMode<M> for IndirectIndexedAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8 {
-	let high = cpu.memory.getb( self.address );
-        let low = cpu.memory.getb( self.address + 1);
+impl AddressingMode for IndirectIndexedAM {
+    fn load (&self, cpu: &mut CPU) -> u8 {
+	let high = cpu.memory.get_zp( self.address );
+        let low = cpu.memory.get_zp( self.address + 1);
 
-        cpu.memory.getw( bytes_to_word!(high,low) + cpu.y as u16 )
+        cpu.memory.get( bytes_to_word!(high as u16,low as u16) + cpu.y as u16 )
     }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
-	let high = cpu.memory.getb( self.address );
-        let low = cpu.memory.getb( self.address + 1);
+    fn save (&self, cpu: &mut CPU, storeval: u8){
+	let high = cpu.memory.get_zp( self.address );
+        let low = cpu.memory.get_zp( self.address + 1);
 
-        cpu.memory.set( bytes_to_word!(high,low) + cpu.y as u16, storeval );
+        cpu.memory.set( bytes_to_word!(high as u16,low as u16) + cpu.y as u16, storeval );
     }
 }
 
@@ -576,10 +604,6 @@ impl Instructions {
 
 
 
-//General helper macro, might move to a general module.
-macro_rules! bytes_to_word {
-    ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
-}
 
 
 #[allow(dead_code)]
@@ -611,7 +635,8 @@ pub mod tests {
     fn test_cpu_init(){
         let test_cpu = super::CPU::new();
         
-        assert_eq!(test_cpu.memory,			0);
+        //Memory will be tested in the MEM file.
+        //TODO test new_mem();
         assert_eq!(test_cpu.cycles,			0);
         assert_eq!(test_cpu.pc,				0);
         assert_eq!(test_cpu.sp,				0);
@@ -624,7 +649,7 @@ pub mod tests {
 
     #[test]
     fn test_instruction_init(){
-        let test_instr = super::Instruction::new();
+        let test_instr = super::Instructions::new();
 
         //I'm pretty sure that these fields are arrays, and therefore have len().
         //If this fails, DELET THIS!
@@ -635,11 +660,11 @@ pub mod tests {
         assert_eq!(test_instr.paging.len()	,256);
     }
 
+    /*
     #[test]
     fn test_status(){
         let test_cpu = super::CPU::new();
-        let status = {"N", "n", "V", "v", "s", "B", "b", "D", "d", "I", "i", "Z",
-        "z", "C", "c"};
+        let status = {"N", "n", "V", "v", "s", "B", "b", "D", "d", "I", "i", "Z", "z", "C", "c"};
 
         //Should cycle through each flag setting it true, and testing to see if
         // it actually happened.
@@ -652,6 +677,15 @@ pub mod tests {
         }
     }
 
+    */
+
+    #[test]
+    fn testOP_lda(){
+        /// self.lda(ZeroPageAM{0x2B});
+        let test_cpu = super::CPU::new();
+    }
+
+    /*
     #[test]
     fn testOP_adc(){
         //Testing for basic ADd with Carry.
@@ -681,17 +715,13 @@ pub mod tests {
         test_cpu.SED();
         assert!();
     }
-
-    fn testOP_lda(){
-        let test_cpu = super::CPU::new();
-    }
-/// self.lda(ZeroPageAM{0x2B});
-
-    /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
     #[test]
-    fn test_status_setclear_instructions(){
+    fn testOP_flags(){
+        /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
         let test_cpu = super::CPU::new();
     }
+    */
+
 }
 
 
