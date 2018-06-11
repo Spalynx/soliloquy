@@ -367,9 +367,9 @@ impl CPU {
 /// CPU holds within it: a set of registers, a connection to memory,
 /// it's instruction set, and it commands to parse instructinos.
 /// TODO: UNTESTED
-trait AddressingMode<M: MEM> {
-    fn load (&self, cpu: &mut CPU<M>) -> u8;
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8) -> u8;
+trait AddressingMode {
+    fn load (&self, cpu: &mut CPU) -> u8;
+    fn save (&self, cpu: &mut CPU, storeval: u8) -> u8;
 }
 
 /// The commented numbers specify the addressing mode's int value in
@@ -390,76 +390,76 @@ struct IndexedIndirectAM{pub address: u8};      /*12*/
 struct IndirectIndexedAM{pub address: u8};      /*11*/ 
 
 
-impl<M:MEM> AddressingMode<M> for AccumulatorAM{
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for AccumulatorAM{
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.a; }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.a = storeval; }
 }
-impl<M:MEM> AddressingMode<M> for ImmediateAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for ImmediateAM {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	self.address }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	panic!("No way to store in ImmediateAM!"); }
 }
-impl<M:MEM> AddressingMode<M> for AbsoluteAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for AbsoluteAM {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.getw( self.address ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    fn save (&self, cpu: &mut CPU, storeval: u16)
     {	cpu.memory.set( self.address, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for AbsoluteXAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for AbsoluteXAM {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.getw( self.address + cpu.memory.x ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    fn save (&self, cpu: &mut CPU, storeval: u16)
     {	cpu.memory.set( self.address + cpu.memory.x, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for AbsoluteYAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for AbsoluteYAM {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.getw( self.address + cpu.y ) }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u16)
+    fn save (&self, cpu: &mut CPU, storeval: u16)
     {	cpu.memory.set( self.address + cpu.y, storeval ); }
 }
-impl<M:MEM> AddressingMode<M> for ZeroPageAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for ZeroPageAM {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.getb( self.address ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address ); }
 }
-impl<M:MEM> AddressingMode<M> for ZeroPageXAM  {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for ZeroPageXAM  {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.getb( self.address + cpu.x ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address + cpu.x , storeval); }
 }
-impl<M:MEM> AddressingMode<M> for ZeroPageYAM  {
-    fn load (&self, cpu: &mut CPU<M>) -> u8
+impl AddressingMode for ZeroPageYAM  {
+    fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.getb( self.address + cpu.y ); }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8)
+    fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address + cpu.y , storeval); }
 }
-impl<M:MEM> AddressingMode<M> for IndexedIndirectAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8 {
+impl AddressingMode for IndexedIndirectAM {
+    fn load (&self, cpu: &mut CPU) -> u8 {
 	let high = cpu.memory.getb( self.address + cpu.x );
         let low = cpu.memory.getb( self.address + cpu.x + 1);
 
         cpu.memory.getw( bytes_to_word!(high,low) )
     }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+    fn save (&self, cpu: &mut CPU, storeval: u8){
 	let high = cpu.memory.getb( self.address + cpu.x );
         let low = cpu.memory.getb( self.address + cpu.x + 1);
 
         cpu.memory.set( bytes_to_word!(high,low), storeval );
     }
 }
-impl<M:MEM> AddressingMode<M> for IndirectIndexedAM {
-    fn load (&self, cpu: &mut CPU<M>) -> u8 {
+impl AddressingMode for IndirectIndexedAM {
+    fn load (&self, cpu: &mut CPU) -> u8 {
 	let high = cpu.memory.getb( self.address );
         let low = cpu.memory.getb( self.address + 1);
 
         cpu.memory.getw( bytes_to_word!(high,low) + cpu.y as u16 )
     }
-    fn save (&self, cpu: &mut CPU<M>, storeval: u8){
+    fn save (&self, cpu: &mut CPU, storeval: u8){
 	let high = cpu.memory.getb( self.address );
         let low = cpu.memory.getb( self.address + 1);
 
