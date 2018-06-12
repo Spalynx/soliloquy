@@ -387,7 +387,6 @@ impl CPU {
 ///     ami.load(self, cpu);
 ///     ami.save(self, cpu, 0x255);
 /// }
-///
 /// self.lda(ZeroPageAM{0x2B});
 /// ```
 ///
