@@ -104,29 +104,38 @@ impl CPU {
     /// throw_interrupt
     /// Receives a string as a param, and throws one of the 3 (?) cpu interrupts.
     /// NOTE: This is me pushing off interrupts until I actually understand what they do.
-    fn throw_interrupt(&mut self, int: &'static str){
-
+    fn throw_interrupt(&mut self, interrupt: &'static str){
+        println!("{}", interrupt);
     }
 
     /// Sets flags based upon a given byte.
-    pub fn set_flag(&mut self, flag: &'static str, val: bool){
+    pub fn set_status(&mut self, flag: &'static str, val: bool){
 
         // Yes, I know that this is a really slow way to access
         // flags, but I plan on refactoring with actual opcodes.
-
+        
+        //This whole system is messy, can't wait to remove.
         self.status = match flag.as_ref() {
-            "N" | "n" => self.status | (1 << 8),
-            "V" | "v" => self.status | (1 << 7),
-            "S" | "s" => self.status | (1 << 6),
-            "B" | "b" => self.status | (1 << 5),
-            "D" | "d" => self.status | (1 << 4),
-            "I" | "i" => self.status | (1 << 3),
-            "Z" | "z" => self.status | (1 << 2),
-            "C" | "c" => self.status | (1 << 1),
+            "N" | "n" => if val { self.status | (1 << 7)}
+                         else   { self.status ^ (1 << 7)},
+            "V" | "v" => if val { self.status | (1 << 6)}
+                         else   { self.status ^ (1 << 6)},
+            "S" | "s" => if val { self.status | (1 << 5)}
+                         else   { self.status ^ (1 << 5)},
+            "B" | "b" => if val { self.status | (1 << 4)}
+                         else   { self.status ^ (1 << 4)},
+            "D" | "d" => if val { self.status | (1 << 3)}
+                         else   { self.status ^ (1 << 3)},
+            "I" | "i" => if val { self.status | (1 << 2)}
+                         else   { self.status ^ (1 << 2)},
+            "Z" | "z" => if val { self.status | (1 << 1)}
+                         else   { self.status ^ (1 << 1)},
+            "C" | "c" => if val { self.status | (1 << 0)}
+                         else   { self.status ^ (1 << 0)},
             _ => panic!("NOT A FLAG"),
         };
     }
-    pub fn get_flag(&mut self, flag: &'static str) -> bool{
+    pub fn get_status(&mut self, flag: &'static str) -> bool{
         return match flag.as_ref() {
             "N" | "n" => self.status & (1 << 8) == 128,
             "V" | "v" => self.status & (1 << 7) == 64,
@@ -173,29 +182,29 @@ impl CPU {
     pub fn ADC(&mut self, step: CpuStep) {
         let a: u16 = self.a as u16;
         let b: u16 = step.address;
-        let c: u16 = self.get_flag("C") as u16;
+        let c: u16 = self.get_status("C") as u16;
 
         //Intentionally cutting off anything over 256.
         self.a = (a + b + c) as u8;
 
         //
-        self.set_flag("Z", self.a > 0);
-        self.set_flag("N", self.a > 0);
+        self.set_status("Z", self.a > 0);
+        self.set_status("N", self.a > 0);
 
 
         //Standard stuff, filling carry if we go over 256.
         if a + b + c > 0xFF
-        {	self.set_flag("C", true);	}
+        {	self.set_status("C", true);	}
         else
-        {	self.set_flag("C", false);	} 
+        {	self.set_status("C", false);	} 
 
         //Now I'm legit copying Fogelman...
         //So, 0x80 = 128 and I think 1 << 8.
         // TODO understand this.
 	if (( a^b ) & 0x80) == 0 && (( a^self.a) & 0x80) != 0
-        {	self.set_flag("V", true);	}
+        {	self.set_status("V", true);	}
         else
-        {	self.set_flag("V", false);	} 
+        {	self.set_status("V", false);	} 
     }
 
     /// AND
@@ -207,17 +216,17 @@ impl CPU {
 
         self.a = self.a & self.mem;
 
-        self.set_flag("Z", self.a > 0);
-        self.set_flag("N", self.a > 0);
+        self.set_status("Z", self.a > 0);
+        self.set_status("N", self.a > 0);
     }
     
     /// ASL
     /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
     pub fn ASL(&mut self) {
         if self.a & 0x1000000 == 0x1000000 {
-            self.set_flag("C", true);
+            self.set_status("C", true);
         } 
-        else { self.set_flag("C", false); }
+        else { self.set_status("C", false); }
 
         self.a = self.a << 1;
     }
@@ -237,8 +246,8 @@ impl CPU {
     pub fn BRK(&mut self) {
         self.throw_interrupt("NMI");
 
-        self.set_flag("B", true);
-        self.set_flag("U", true);
+        self.set_status("B", true);
+        self.set_status("U", true);
     }
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
@@ -249,43 +258,43 @@ impl CPU {
     /// CLC
     /// Clear Carry. Sets carry to false.
     pub fn CLC(&self) {
-        self.set_flag("C", false);
+        self.set_status("C", false);
     }
 
 
     /// CLD
     /// Clear Decimal. Sets decimal to false.
     pub fn CLD(&self) {
-        self.set_flag("D", false);
+        self.set_status("D", false);
     }
 
     /// CLI
     /// Clear Interrupt. Sets interrupt to false.
     pub fn CLI(&self) {
-        self.set_flag("I", false);
+        self.set_status("I", false);
     }
 
     /// CLV
     /// Clear O*V*ERFLOW. Sets overflow to false.
     pub fn CLV(&self) {
-        self.set_flag("V", false);
+        self.set_status("V", false);
     }
     /// SEC 
     /// SEt Carry. Sets carry to true.
     pub fn SEC(&self) {
-        self.set_flag("C", true);
+        self.set_status("C", true);
     }
 
     /// SED 
     /// SEt Decimal. Sets decimal to true.
     pub fn SED(&self) {
-        self.set_flag("D", true);
+        self.set_status("D", true);
     }
 
     /// SEI 
     /// SEt Interrupt. Sets interrupt to true.
     pub fn SED(&self) {
-        self.set_flag("I", true);
+        self.set_status("I", true);
     }
 
         
@@ -323,7 +332,7 @@ impl CPU {
     ///LDX (LoaD X with memory) 
     pub fn LDX(&self, operand: i8) {
         if (operand > 0){
-            self.set_flag("N", false);
+            self.set_status("N", false);
         }
         //sets negative flag equal to 7th bit
         //sets the zero flag if the operand is $#00
@@ -344,8 +353,8 @@ impl CPU {
     pub fn ORA(&mut self, mem: u8) {
         self.a = self.a | self.mem;
 
-        self.set_flag("Z", self.a > 0);
-        self.set_flag("N", self.a > 0);
+        self.set_status("Z", self.a > 0);
+        self.set_status("N", self.a > 0);
     }
     pub fn PHA(&self) {}
     pub fn PHP(&self) {}
@@ -668,11 +677,11 @@ pub mod tests {
         //Should cycle through each flag setting it true, and testing to see if
         // it actually happened.
         for f in status {
-            test_cpu.set_flag(f, 1);
-            assert_eq!(test_cpu.get_flag(f), 1);
+            test_cpu.set_status(f, 1);
+            assert_eq!(test_cpu.get_status(f), 1);
 
             //Reset flag.
-            test_cpu.set_flag(f, 0);
+            test_cpu.set_status(f, 0);
         }
     }
 
@@ -693,7 +702,7 @@ pub mod tests {
         test_cpu.LDA(254);
         test_cpu.ADC(6);
         assert_eq!(test_cpu.A, 5);
-        assert_eq!(test_cpu.get_flag("C"), 1);
+        assert_eq!(test_cpu.get_status("C"), 1);
     }
     #[test]
     fn testOP_adc_signed (){
@@ -704,7 +713,7 @@ pub mod tests {
         test_cpu.ADC(0b00000010u8); //+2
         assert_eq!(test_cpu.A, 0b10000001u8); // = -127
         //Overflow should be set because bit 7 is '1'.
-        assert_eq!(test_cpu.get_flag("O"), 1);
+        assert_eq!(test_cpu.get_status("O"), 1);
     }
     #[test]
     fn testOP_adc_decimal(){

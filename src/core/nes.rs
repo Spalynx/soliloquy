@@ -5,10 +5,11 @@
  *      Though, that is a large stretch goal.
  * Author: Spalynx.
  */
-mod cpu;
-mod cartridge;
+use super::*;
+use core::cartridge::ROM;
+use core::cpu::CPU;
 
-struct NES {
+pub struct NES {
     rom:    ROM,
     cpu:    CPU,
 }
