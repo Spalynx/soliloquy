@@ -1,7 +1,12 @@
 #+Title: CPU TODO LIST
-#+subtitle: And quick notes for faster reuptake.
+#+subtitle: And quick notes for faster daily reuptake.
 
 * General Testing
-** DONE new()
+** DONE test_new()
 ** DONE Status/Flags
-** DONE new_mem()
+** DONE test_new_memory()
+** TODO test_AM()
+
+* OPCODES
+** TODO LDA
+*** TODO testOP_LDA()
