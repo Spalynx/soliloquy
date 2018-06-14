@@ -137,14 +137,14 @@ impl CPU {
     }
     pub fn get_status(&mut self, flag: &'static str) -> bool{
         return match flag.as_ref() {
-            "N" | "n" => self.status & (1 << 8) == 128,
-            "V" | "v" => self.status & (1 << 7) == 64,
-            "S" | "s" => self.status & (1 << 6) == 32,
-            "B" | "b" => self.status & (1 << 5) == 16,
-            "D" | "d" => self.status & (1 << 4) == 8,
-            "I" | "i" => self.status & (1 << 3) == 4,
-            "Z" | "z" => self.status & (1 << 2) == 2,
-            "C" | "c" => self.status & (1 << 1) == 1,
+            "N" | "n" => self.status & (1 << 7) == 128,
+            "V" | "v" => self.status & (1 << 6) == 64,
+            "S" | "s" => self.status & (1 << 5) == 32,
+            "B" | "b" => self.status & (1 << 4) == 16,
+            "D" | "d" => self.status & (1 << 3) == 8,
+            "I" | "i" => self.status & (1 << 2) == 4,
+            "Z" | "z" => self.status & (1 << 1) == 2,
+            "C" | "c" => self.status & (1 << 0) == 1,
             _ => panic!("NOT A FLAG"),
         }
     }
@@ -643,49 +643,67 @@ pub mod tests {
     fn test_cpu_init(){
         let test_cpu = super::CPU::new();
         
-        //Memory will be tested in the MEM file.
-        //TODO test new_mem();
-        assert_eq!(test_cpu.cycles,			0);
-        assert_eq!(test_cpu.pc,				0);
-        assert_eq!(test_cpu.sp,				0);
-        assert_eq!(test_cpu.x,				0);
-        assert_eq!(test_cpu.y,				0);
-        assert_eq!(test_cpu.status,			0);
-        assert_eq!(test_cpu.interrupt,			0);
-        assert_eq!(test_cpu.stall, 			0);
+        //Testing each struct field initialization.
+        assert_eq!(test_cpu.cycles,   0);
+        assert_eq!(test_cpu.pc,       0);
+        assert_eq!(test_cpu.sp,       0);
+        assert_eq!(test_cpu.x,        0);
+        assert_eq!(test_cpu.y,        0);
+        assert_eq!(test_cpu.status,   0);
+        assert_eq!(test_cpu.interrupt,0);
+        assert_eq!(test_cpu.stall,    0);
     }
 
     #[test]
     fn test_instruction_init(){
         let test_instr = super::Instructions::new();
 
-        //I'm pretty sure that these fields are arrays, and therefore have len().
-        //If this fails, DELET THIS!
-        assert_eq!(test_instr.names.len()		,256);
-        assert_eq!(test_instr.sizes.len()		,256);
-        assert_eq!(test_instr.modes.len()		,256);
-        assert_eq!(test_instr.speeds.len()	,256);
-        assert_eq!(test_instr.paging.len()	,256);
+        //Testing the instruction table for init.
+        assert_eq!(test_instr.names.len()     ,256);
+        assert_eq!(test_instr.sizes.len()     ,256);
+        assert_eq!(test_instr.modes.len()     ,256);
+        assert_eq!(test_instr.speeds.len()    ,256);
+        assert_eq!(test_instr.paging.len()    ,256);
+
+        //This can be expanded later when testing opcode parsing.
     }
 
-    /*
     #[test]
     fn test_status(){
-        let test_cpu = super::CPU::new();
-        let status = {"N", "n", "V", "v", "s", "B", "b", "D", "d", "I", "i", "Z", "z", "C", "c"};
+        let mut test_cpu = super::CPU::new();
 
-        //Should cycle through each flag setting it true, and testing to see if
-        // it actually happened.
-        for f in status {
-            test_cpu.set_status(f, 1);
-            assert_eq!(test_cpu.get_status(f), 1);
+        //Array of status codes.
+        let status = ["N", "n", "V", "v", "S", "s", "B", "b", "D", "d", "I", "i", "Z", "z", "C", "c"];
 
-            //Reset flag.
-            test_cpu.set_status(f, 0);
+        //Loops through array of status codes, and sets/resets each flag.
+        for f in status.iter() {
+            //Setting each flag.
+            test_cpu.set_status(f, true);
+            assert_eq!(test_cpu.get_status(f), true);
+
+            //Resetting each flag.
+            test_cpu.set_status(f, false);
+            assert_eq!(test_cpu.get_status(f), false);
         }
     }
 
-    */
+    #[test]
+    fn test_new_memory(){
+        let mut cpu = super::CPU::new();
+        let mem = super::MEM::new();
+
+        cpu.new_memory(mem);
+
+        //Testing access/mutability.
+        cpu.memory.set_zp(0x1A, 10);
+        assert_eq!(cpu.memory.get_zp(0x1A), 10);
+        cpu.memory.set_zp(0x0, 254);
+        assert_eq!(cpu.memory.get_zp(0x0), 254);
+        cpu.memory.set(0x800-1, 111);
+        assert_eq!(cpu.memory.get(0x800-1), 111);
+
+        //Further mem testing should be done in it's module.
+    }
 
     #[test]
     fn testOP_lda(){
