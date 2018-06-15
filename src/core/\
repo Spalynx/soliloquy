@@ -194,8 +194,6 @@ impl CPU {
     fn LDA <AM: AddressingMode> (&mut self, am: AM){
         self.a = am.load(self);
     }
-
-
 }
     //Folded opcodes
     /*
