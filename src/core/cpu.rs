@@ -193,9 +193,19 @@ impl CPU {
     /// One of the most used opcodes, loads the accumulator with a given value.
     fn LDA <AM: AddressingMode> (&mut self, am: AM){
         self.a = am.load(self);
+
+        //Setting flags based upon accumulator value.
+        if self.a == 0 {
+            self.set_status("Z", true);
+        }
+        else if self.a > 128 {
+            self.set_status("N", true);
+        }
+        else {
+            self.set_status("Z", false);
+            self.set_status("N", false);
+        }
     }
-
-
 }
     //Folded opcodes
     /*
@@ -750,7 +760,23 @@ pub mod tests {
     #[test]
     fn testOP_lda(){
         /// self.lda(ZeroPageAM{0x2B});
-        let test_cpu = super::CPU::new();
+        let mut cpu = super::CPU::new();
+
+        cpu.memory.set(0xAF, 123);  // Random position in zero page.
+        cpu.memory.set(0x755, 456); // Random position non zero page.
+
+        //The rest should be mechanically similar to these 3, and tested in test_AM.
+        //assert_eq!(cpu.LDA(ImmediateAM{address: 10}), cpu.a, "AM: Immediate.");
+        cpu.LDA(AbsoluteAM{address:  0x755});
+        assert_eq!(456, cpu.a, "AM: Absolute");
+        cpu.LDA(ZeroPageAM{address:  0xAF});
+        assert_eq!(123, cpu.a, "AM: Absolute");
+
+        //Testing flag changes.
+        cpu.LDA(ImmediateAM{address: 0});
+        assert_eq!(cpu.get_status("Z"), true, "Testing zero.");
+        cpu.LDA(ImmediateAM{address: 243});
+        assert_eq!(cpu.get_status("N"), true, "Testing negative.");
     }
 
     /*
