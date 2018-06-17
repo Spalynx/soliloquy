@@ -3,10 +3,36 @@
 
 * General Testing
 ** DONE test_new()
-** DONE Status/Flags
+** DONE test_status_each()
+** DONE test_status_settingtwice()
 ** DONE test_new_memory()
 ** TODO test_AM()
 
 * OPCODES
-** TODO LDA
+** DONE LDA
 *** TODO testOP_LDA()
+** DONE CLC, CLD, CLI, CLV, SEC, SED, SEI.
+*** DONE testOP_flags()
+
+
+* Notes
+//[1]	0: carry flag
+//	1: zero flag
+//  	2: interrupt disable flag
+//  	3: decimal mode flag
+//  	4: break command flag
+//  	5: unused flag
+//  	6: overflow flag
+//  	7: negative flag
+//
+//[3] 	izx = indexed indirect =  12
+//    	izy = indirect indexed = 11
+//    	ind = indirect = 10
+//    	zp = zero page = 3
+//    	zpx = zero page x = 4
+//    	zpy = zero page y = 5
+//    	abs = absolute val = 6
+//    	abx = absolute val x = 7 
+//    	aby = absolute val y = 8
+//    	imm = immediate = 2
+//    	rel = relative = 9
