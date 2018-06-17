@@ -10,9 +10,13 @@
 
 * OPCODES
 ** DONE LDA
-*** TODO testOP_LDA()
+*** DONE testOP_LDA()
 ** DONE CLC, CLD, CLI, CLV, SEC, SED, SEI.
 *** DONE testOP_flags()
+** TODO LDX
+*** TODO testOP_LDX()
+** TODO LDY
+*** TODO testOP_LDY()
 
 
 * Notes

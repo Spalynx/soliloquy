@@ -11,6 +11,7 @@ pub mod cpu_test {
     // [before_each]/[assemblyintialize]... Maybe one day!
     use super::*;
 
+    //~~~CPU~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #[test]
     fn test_cpu_init(){
         let test_cpu = super::CPU::new();
@@ -27,25 +28,12 @@ pub mod cpu_test {
     }
 
     #[test]
-    fn test_instruction_init(){
-        let test_instr = super::Instructions::new();
-
-        //Testing the instruction table for init.
-        assert_eq!(test_instr.names.len()     ,256);
-        assert_eq!(test_instr.sizes.len()     ,256);
-        assert_eq!(test_instr.modes.len()     ,256);
-        assert_eq!(test_instr.speeds.len()    ,256);
-        assert_eq!(test_instr.paging.len()    ,256);
-
-        //This can be expanded later when testing opcode parsing.
-    }
-
-    #[test]
     fn test_status_each(){
         let mut cpu = super::CPU::new();
 
         //Array of status codes.
-        let status = ["N", "n", "V", "v", "S", "s", "B", "b", "D", "d", "I", "i", "Z", "z", "C", "c"];
+        let status = ["N", "n", "V", "v", "S", "s", "B", "b",
+                      "D", "d", "I", "i", "Z", "z", "C", "c"];
 
         //Loops through array of status codes, and sets/resets each flag.
         for f in status.iter() {
@@ -94,6 +82,8 @@ pub mod cpu_test {
 
         //Further mem testing should be done in it's module.
     }
+
+    //~~~CPU~OPCODES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     #[test]
     fn testOP_flags(){
@@ -156,6 +146,24 @@ pub mod cpu_test {
         assert_eq!(cpu.get_status("Z"), true, "Testing zero.");
         cpu.LDA(ImmediateAM{address: 243});
         assert_eq!(cpu.get_status("N"), true, "Testing negative.");
+    }
+
+    #[test]
+    fn test_AM(){}
+
+    //~~~INSTRUCTION~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #[test]
+    fn test_instruction_init(){
+        let test_instr = super::Instructions::new();
+
+        //Testing the instruction table for init.
+        assert_eq!(test_instr.names.len()     ,256);
+        assert_eq!(test_instr.sizes.len()     ,256);
+        assert_eq!(test_instr.modes.len()     ,256);
+        assert_eq!(test_instr.speeds.len()    ,256);
+        assert_eq!(test_instr.paging.len()    ,256);
+
+        //This can be expanded later when testing opcode parsing.
     }
 
     /*

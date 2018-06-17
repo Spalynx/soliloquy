@@ -167,6 +167,23 @@ impl CPU {
         println!();
     }
 
+    /// Sets the Z/N flags based upon accumulator value.
+    ///     I think that this will be used often, but not sure how
+    ///     much.
+    fn setZN_accumulator(){
+        //Setting flags based upon accumulator value.
+        if self.a == 0 {
+            self.set_status("Z", true);
+        }
+        else if self.a > 128 {
+            self.set_status("N", true);
+        }
+        else {
+            self.set_status("Z", false);
+            self.set_status("N", false);
+        }
+    }
+
     ///CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ///---------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /// Refer to [3] for all cpu explanations.
@@ -193,20 +210,9 @@ impl CPU {
     //#! Register Loads.
     /// LDA (LoaD Accumulator with memory)
     /// One of the most used opcodes, loads the accumulator with a given value.
-    fn LDA <AM: AddressingMode> (&mut self, am: AM){
+    pub fn LDA <AM: AddressingMode> (&mut self, am: AM){
         self.a = am.load(self);
-
-        //Setting flags based upon accumulator value.
-        if self.a == 0 {
-            self.set_status("Z", true);
-        }
-        else if self.a > 128 {
-            self.set_status("N", true);
-        }
-        else {
-            self.set_status("Z", false);
-            self.set_status("N", false);
-        }
+        self.setZN_accumulator();
     }
 }
 /*
