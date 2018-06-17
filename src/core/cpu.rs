@@ -59,7 +59,6 @@ pub struct CPU {
 impl CPU {
     /// Initializes an empty CPU struct
     /// All values initialized as empty.
-    /// To initialize memory, call new_memory().
     pub fn new() -> CPU {
         CPU{
             memory:         MEM::new(),
@@ -77,6 +76,8 @@ impl CPU {
             stall:          0,    // number of cycles to stall
         }
     }
+    /// Though memory is already initialized, I felt it appropriate to
+    /// keep the manual option available.
     pub fn new_memory(&mut self, mem: MEM){
         self.memory = mem;
     }
@@ -170,7 +171,7 @@ impl CPU {
     /// Sets the Z/N flags based upon accumulator value.
     ///     I think that this will be used often, but not sure how
     ///     much.
-    fn setZN_accumulator(){
+    fn setZN_accumulator(&mut self){
         //Setting flags based upon accumulator value.
         if self.a == 0 {
             self.set_status("Z", true);

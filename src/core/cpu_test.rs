@@ -149,7 +149,42 @@ pub mod cpu_test {
     }
 
     #[test]
-    fn test_AM(){}
+    fn test_AM(){
+        //All of these are being tested in one large module because
+        // I'm too lazy to give it's own module, and I don't expect
+        // much trouble from these.
+
+        let mut cpu = super::CPU::new();
+        // AccumulatorAM
+            cpu.a = 10;
+            assert_eq!(10, AccumulatorAM.load(&mut cpu), "Accumulator load");
+            AccumulatorAM.save(&mut cpu, 11);
+            assert_eq!(11, AccumulatorAM.load(&mut cpu), "Accumulator save");
+
+        // ImmediateAM
+            cpu.memory.set(0xAF, 12);
+            assert_eq!(12, cpu.memory.get(0xAF), "Immediate get");
+        
+            
+        /*
+        // AbsoluteAM
+        AbsoluteAM       {pub address: u16}
+        // AbsoluteXAM
+        AbsoluteXAM      {pub address: u16}
+        // AbsoluteYAM
+        AbsoluteYAM      {pub address: u16}
+        // ZeroPageAM
+        ZeroPageAM       {pub address: u8}
+        // ZeroPageXAM
+        ZeroPageXAM      {pub address: u8}
+        // ZeroPageYAM
+        ZeroPageYAM      {pub address: u8}
+        // IndexedIndirectAM
+        IndexedIndirectAM{pub address: u8}
+        // IndirectIndexedAM
+        IndirectIndexedAM{pub address: u8}
+        */
+    }
 
     //~~~INSTRUCTION~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #[test]
