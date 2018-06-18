@@ -472,28 +472,28 @@ impl AddressingMode for ZeroPageYAM  {
 }
 impl AddressingMode for IndexedIndirectAM {
     fn load (&self, cpu: &mut CPU) -> u8 {
-	let low  = cpu.memory.get_zp( self.address + cpu.x );
+	let low= cpu.memory.get_zp( self.address + cpu.x );
         let high = cpu.memory.get_zp( self.address + cpu.x + 1);
 
         cpu.memory.get( bytes_to_word!(high as u16,low as u16) )
     }
     fn save (&self, cpu: &mut CPU, storeval: u8){
-	let low  = cpu.memory.get_zp( self.address + cpu.x );
-        let high = cpu.memory.get_zp( self.address + cpu.x + 1);
+	let high = cpu.memory.get_zp( self.address + cpu.x );
+        let low = cpu.memory.get_zp( self.address + cpu.x + 1);
 
         cpu.memory.set( bytes_to_word!(high as u16,low as u16), storeval );
     }
 }
 impl AddressingMode for IndirectIndexedAM {
     fn load (&self, cpu: &mut CPU) -> u8 {
-	let low  = cpu.memory.get_zp( self.address );
-        let high = cpu.memory.get_zp( self.address + 1);
+	let high = cpu.memory.get_zp( self.address );
+        let low = cpu.memory.get_zp( self.address + 1);
 
         cpu.memory.get( bytes_to_word!(high as u16,low as u16) + cpu.y as u16 )
     }
     fn save (&self, cpu: &mut CPU, storeval: u8){
-	let low  = cpu.memory.get_zp( self.address );
-        let high = cpu.memory.get_zp( self.address + 1);
+	let high = cpu.memory.get_zp( self.address );
+        let low = cpu.memory.get_zp( self.address + 1);
 
         cpu.memory.set( bytes_to_word!(high as u16,low as u16) + cpu.y as u16,
                         storeval );

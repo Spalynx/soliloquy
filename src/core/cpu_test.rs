@@ -128,7 +128,6 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_lda(){
-        /// self.lda(ZeroPageAM{0x2B});
         let mut cpu = super::CPU::new();
 
         cpu.memory.set(0xAF, 123);  // Random position in zero page.
@@ -144,7 +143,8 @@ pub mod cpu_test {
         //Testing flag changes.
         cpu.LDA(ImmediateAM{address: 0});
         assert_eq!(cpu.get_status("Z"), true, "Testing zero.");
-        cpu.LDA(ImmediateAM{address: 243});
+
+        cpu.LDA(ImmediateAM{address: 254});
         assert_eq!(cpu.get_status("N"), true, "Testing negative.");
     }
 
@@ -156,34 +156,72 @@ pub mod cpu_test {
 
         let mut cpu = super::CPU::new();
         // AccumulatorAM
-            cpu.a = 10;
-            assert_eq!(10, AccumulatorAM.load(&mut cpu), "Accumulator load");
-            AccumulatorAM.save(&mut cpu, 11);
-            assert_eq!(11, AccumulatorAM.load(&mut cpu), "Accumulator save");
+        cpu.a = 10;
+        assert_eq!(AccumulatorAM.load(&mut cpu), 10, "Accumulator load");
+        AccumulatorAM.save(&mut cpu, 11);
+        assert_eq!(AccumulatorAM.load(&mut cpu), 11, "Accumulator save");
 
         // ImmediateAM
-            cpu.memory.set(0xAF, 12);
-            assert_eq!(12, cpu.memory.get(0xAF), "Immediate get");
+        assert_eq!(ImmediateAM{address: 12}.load(&mut cpu),
+                   12, "Immediate load");
+        
+        // AbsoluteAM
+        AbsoluteAM{address: 0x7FF}.save(&mut cpu, 13);
+        assert_eq!(cpu.memory.get(0x7FF), 13,  "Absolute save");
+        assert_eq!(cpu.memory.get(0x7FF),
+                   AbsoluteAM{address: 0x7FF}.load(&mut cpu), "Absolute load");
         
             
-        /*
-        // AbsoluteAM
-        AbsoluteAM       {pub address: u16}
+        //Avoiding a reliance on LDX/LDY. 
+        //Also assuming that absolute is working.
+
         // AbsoluteXAM
-        AbsoluteXAM      {pub address: u16}
+        cpu.x = 10;
+        AbsoluteXAM{address: 255}.save(&mut cpu, 14);
+        assert_eq!(AbsoluteXAM{address: 255}.load(&mut cpu),
+                   AbsoluteAM {address: 265}.load(&mut cpu), "Absolute X save/load");
+
         // AbsoluteYAM
-        AbsoluteYAM      {pub address: u16}
+        cpu.y = 25;
+        AbsoluteYAM{address: 800}.save(&mut cpu, 15);
+        assert_eq!(AbsoluteYAM{address: 800}.load(&mut cpu),
+                   AbsoluteAM {address: 825}.load(&mut cpu), "Absolute Y save/load");
+
         // ZeroPageAM
-        ZeroPageAM       {pub address: u8}
+        ZeroPageAM{address: 125}.save(&mut cpu, 16);
+        assert_eq!(ZeroPageAM{address: 125}.load(&mut cpu),
+                   16, "Zero page");
+
         // ZeroPageXAM
-        ZeroPageXAM      {pub address: u8}
+        cpu.x = 5;
+        ZeroPageXAM{address: 125}.save(&mut cpu, 17);
+        assert_eq!(ZeroPageAM{address: 130}.load(&mut cpu),
+                   ZeroPageXAM{address: 125}.load(&mut cpu), "Zero page + X");
+
         // ZeroPageYAM
-        ZeroPageYAM      {pub address: u8}
+        cpu.y = 5;
+        ZeroPageYAM{address: 125}.save(&mut cpu, 18);
+        assert_eq!(ZeroPageAM{address: 130}.load(&mut cpu),
+                   ZeroPageYAM{address: 125}.load(&mut cpu), "Zero page + Y");
+
         // IndexedIndirectAM
-        IndexedIndirectAM{pub address: u8}
+        cpu.x = 10;
+        cpu.memory.set(165, 01);
+        cpu.memory.set(166, 00);
+        IndexedIndirectAM{address: 155}.save(&mut cpu, 19);
+        assert_eq!(cpu.memory.get(0001), 19, "IndexIndir save");
+        assert_eq!(IndexedIndirectAM{address: 155}.load(&mut cpu),
+                   19, "IndexIndir load");
+
         // IndirectIndexedAM
-        IndirectIndexedAM{pub address: u8}
-        */
+        cpu.y = 20;
+        cpu.memory.set(245, 02);
+        cpu.memory.set(246, 00);
+        IndirectIndexedAM{address: 245}.save(&mut cpu, 20);
+        assert_eq!(cpu.memory.get(0022), 20, "IndirIndex save");
+        assert_eq!(IndirectIndexedAM{address: 245}.load(&mut cpu),
+                   20, "IndirIndex load");
+        
     }
 
     //~~~INSTRUCTION~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

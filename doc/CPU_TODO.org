@@ -6,7 +6,7 @@
 ** DONE test_status_each()
 ** DONE test_status_settingtwice()
 ** DONE test_new_memory()
-** TODO test_AM()
+** DONE test_AM()
 
 * OPCODES
 ** DONE LDA
