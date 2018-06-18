@@ -15,7 +15,7 @@ impl MEM {
 
     //Obtains values from full memory map.
     pub fn get(&self, address: u16) -> u8 {
-        if address >= 0x00 && address <= 0x800{
+        if address <= 0x800{
             //2kb internal ram
             self.values[address as usize]
         }
@@ -26,16 +26,13 @@ impl MEM {
 
     //Much faster, only has to access the first page of memory.
     pub fn get_zp(&self, address: u8) -> u8 {
-        if address > 255 {
-            panic!("Went over!");
-        }
-
-        self.values[address as usize]
+        let zp = address & 255;
+        return self.values[zp as usize];
     }
 
     // block any illegal storing.
     pub fn set(&mut self, address: u16, val: u8){
-        if address >= 0x00 && address <= 0x800 {
+        if address <= 0x800 {
             //2kb internal ram
             self.values[address as usize] = val;
         }
@@ -46,11 +43,8 @@ impl MEM {
     //Sets a value in the zero page.
     //Much faster, only has to access the first page of memory.
     pub fn set_zp(&mut self, address: u8, val: u8) {
-        if address > 255 {
-            panic!("Went over!");
-        }
-
-        self.values[address as usize] = val;
+        let zp = address & 255;
+        self.values[zp as usize] = val;
     }
 }
 

@@ -2,7 +2,12 @@
  *  Author: Spalynx
  *  Init: 12/8/17
  */
-use core::memory::MEM;
+
+//Because OPCODES are cooler in CAPS!
+    #![allow(non_snake_case)]
+
+//Imports
+    use core::memory::MEM;
 
 //Test module definition.
     #[cfg(test)]
@@ -168,15 +173,18 @@ impl CPU {
         println!();
     }
 
+
     /// Sets the Z/N flags based upon accumulator value.
     ///     I think that this will be used often, but not sure how
     ///     much.
-    fn setZN_accumulator(&mut self){
+    fn set_zn(&mut self, val: u8){
         //Setting flags based upon accumulator value.
-        if self.a == 0 {
+        if val == 0 {
             self.set_status("Z", true);
+            self.set_status("N", false);
         }
-        else if self.a > 128 {
+        else if val > 128 {
+            self.set_status("Z", false);
             self.set_status("N", true);
         }
         else {
@@ -193,6 +201,7 @@ impl CPU {
     //   Why not set_status()? Simply: Not fast enough.
     //   Wondering if I should make /fake/ OPs for other flags.
     /// CLC - Clear Carry. Sets carry to false.
+
     pub fn CLC(&mut self) {     self.status = self.status ^ (1);}
     /// CLD - Clear Decimal. Sets decimal to false.
     pub fn CLD(&mut self) {     self.status = self.status ^ (1 << 3);   }
@@ -213,20 +222,25 @@ impl CPU {
     /// One of the most used opcodes, loads the accumulator with a given value.
     pub fn LDA <AM: AddressingMode> (&mut self, am: AM){
         self.a = am.load(self);
-        self.setZN_accumulator();
+        let a = self.a; //Can't mutably borrow, but can't deref u8? ok.
+        self.set_zn(a);
     }
 
     ///LDX (LoaD X with memory) 
-    pub fn LDX(&mut self, operand: u8) {
-        if operand > 0{
-            self.set_status("N", false);
-        }
-        //sets negative flag equal to 7th bit
-        //sets the zero flag if the operand is $#00
-        self.x = operand;
+    pub fn LDX <AM: AddressingMode> (&mut self, am: AM){
+        self.x = am.load(self);
+
+        let x = self.x;
+        self.set_zn(x);
     }
 
-    pub fn LDY(&mut self) {}
+    ///LDY (LoaD Y with memory) 
+    pub fn LDY <AM: AddressingMode> (&mut self, am: AM){
+        self.y = am.load(self);
+
+        let y = self.y;
+        self.set_zn(y);
+    }
 }
 /*
     //Folded opcodes
@@ -374,7 +388,7 @@ impl CPU {
     pub fn TXA(&self) {}
     pub fn TXS(&self) {}
     pub fn TYA(&self) {}
-    */
+*/
 
 
 //=ADDRESSING-MODES=============================================================
@@ -400,7 +414,7 @@ impl CPU {
 /// This struct emulates the NES cpu.
 /// CPU holds within it: a set of registers, a connection to memory,
 /// it's instruction set, and it commands to parse instructinos.
-trait AddressingMode {
+pub trait AddressingMode {
     fn load (&self, cpu: &mut CPU) -> u8;
     fn save (&self, cpu: &mut CPU, storeval: u8);
 }
@@ -411,16 +425,16 @@ trait AddressingMode {
 /// Indirect(10), Relative(9), and Accumulator either do not need
 /// structs or, in accumulator's case are not given a number because
 /// of it only being called when an operand is not given.
-struct AccumulatorAM;    
-struct ImmediateAM      {pub address: u8}      /*2*/ 
-struct AbsoluteAM       {pub address: u16}     /*6*/ 
-struct AbsoluteXAM      {pub address: u16}     /*7*/ 
-struct AbsoluteYAM      {pub address: u16}     /*8*/ 
-struct ZeroPageAM       {pub address: u8}      /*3*/  
-struct ZeroPageXAM      {pub address: u8}      /*4*/ 
-struct ZeroPageYAM      {pub address: u8}      /*5*/ 
-struct IndexedIndirectAM{pub address: u8}      /*12*/ 
-struct IndirectIndexedAM{pub address: u8}      /*11*/ 
+pub struct AccumulatorAM;    
+pub struct ImmediateAM      {pub address: u8}      /*2*/ 
+pub struct AbsoluteAM       {pub address: u16}     /*6*/ 
+pub struct AbsoluteXAM      {pub address: u16}     /*7*/ 
+pub struct AbsoluteYAM      {pub address: u16}     /*8*/ 
+pub struct ZeroPageAM       {pub address: u8}      /*3*/  
+pub struct ZeroPageXAM      {pub address: u8}      /*4*/ 
+pub struct ZeroPageYAM      {pub address: u8}      /*5*/ 
+pub struct IndexedIndirectAM{pub address: u8}      /*12*/ 
+pub struct IndirectIndexedAM{pub address: u8}      /*11*/ 
 
 //+! Fold these addressingmode impls.
 impl AddressingMode for AccumulatorAM{

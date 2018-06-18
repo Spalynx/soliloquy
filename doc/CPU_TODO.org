@@ -13,10 +13,10 @@
 *** DONE testOP_LDA()
 ** DONE CLC, CLD, CLI, CLV, SEC, SED, SEI.
 *** DONE testOP_flags()
-** TODO LDX
-*** TODO testOP_LDX()
-** TODO LDY
-*** TODO testOP_LDY()
+** DONE LDX
+*** DONE testOP_LDX()
+** DONE LDY
+*** DONE testOP_LDY()
 ** TODO ADC
 *** TODO testOP_ADC()
 *** TODO testOP_ADC_signed()

@@ -7,4 +7,17 @@ use core::cpu::*;
 
 fn main() {
     let mut c = CPU::new();
+
+    c.LDA(ImmediateAM{address: 0xFF});
+    c.print_status();
+    c.LDX(ImmediateAM{address: 0x00});
+    c.print_status();
+    c.LDY(ImmediateAM{address: 0xFF});
+    c.print_status();
+    c.LDA(ImmediateAM{address: 0x00});
+    c.print_status();
+    c.LDX(ImmediateAM{address: 0xFF});
+    c.print_status();
+    c.LDY(ImmediateAM{address: 0x00});
+    c.print_status();
 }

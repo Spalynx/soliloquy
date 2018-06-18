@@ -3,7 +3,7 @@
  *  Init: 6/17/18
  */
 use core::cpu::*;
-use core::memory::*;
+//use core::memory::*;
 
 #[cfg(test)]
 pub mod cpu_test {
@@ -83,71 +83,6 @@ pub mod cpu_test {
         //Further mem testing should be done in it's module.
     }
 
-    //~~~CPU~OPCODES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    #[test]
-    fn testOP_flags(){
-        //Testing CLC, CLD, CLI, CLV, SEC, SED, SEI.
-        // Reliant on test_status() being correct.
-        //Yes, I understand that I should split this up,
-        // but cargo test doesn't really avoid bpcode atm.
-
-        let mut cpu = super::CPU::new();
-
-        //~! CLEARS
-
-        //Carry clear.
-        cpu.set_status("C", true);
-        cpu.CLC();
-        assert_eq!(cpu.get_status("C"), false);
-        //Decimal clear.
-        cpu.set_status("D", true);
-        cpu.CLD();
-        assert_eq!(cpu.get_status("D"), false);
-        //Interrupt carry.
-        cpu.set_status("I", true);
-        cpu.CLI();
-        assert_eq!(cpu.get_status("I"), false);
-
-        //~! SETS
-        //Carry set.
-        cpu.set_status("C", false);
-        cpu.SEC();
-        assert_eq!(cpu.get_status("C"), true);
-        //Decimal set.
-        cpu.set_status("D", false);
-        cpu.SED();
-        assert_eq!(cpu.get_status("D"), true);
-        //Interrupt set.
-        cpu.set_status("I", false);
-        cpu.SEI();
-        assert_eq!(cpu.get_status("I"), true);
-        
-
-    }
-
-    #[test]
-    fn testOP_lda(){
-        let mut cpu = super::CPU::new();
-
-        cpu.memory.set(0xAF, 123);  // Random position in zero page.
-        cpu.memory.set(0x755, 456); // Random position non zero page.
-
-        //The rest should be mechanically similar to these 3, and tested in test_AM.
-        //assert_eq!(cpu.LDA(ImmediateAM{address: 10}), cpu.a, "AM: Immediate.");
-        cpu.LDA(AbsoluteAM{address:  0x755});
-        assert_eq!(456, cpu.a, "AM: Absolute");
-        cpu.LDA(ZeroPageAM{address:  0xAF});
-        assert_eq!(123, cpu.a, "AM: Absolute");
-
-        //Testing flag changes.
-        cpu.LDA(ImmediateAM{address: 0});
-        assert_eq!(cpu.get_status("Z"), true, "Testing zero.");
-
-        cpu.LDA(ImmediateAM{address: 254});
-        assert_eq!(cpu.get_status("N"), true, "Testing negative.");
-    }
-
     #[test]
     fn test_AM(){
         //All of these are being tested in one large module because
@@ -223,6 +158,107 @@ pub mod cpu_test {
                    20, "IndirIndex load");
         
     }
+
+
+
+    //~~~CPU~OPCODES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    #[test]
+    fn testOP_flags(){
+        //Testing CLC, CLD, CLI, CLV, SEC, SED, SEI.
+        // Reliant on test_status() being correct.
+        //Yes, I understand that I should split this up,
+        // but cargo test doesn't really avoid bpcode atm.
+
+        let mut cpu = super::CPU::new();
+
+        //~! CLEARS
+
+        //Carry clear.
+        cpu.set_status("C", true);
+        cpu.CLC();
+        assert_eq!(cpu.get_status("C"), false);
+        //Decimal clear.
+        cpu.set_status("D", true);
+        cpu.CLD();
+        assert_eq!(cpu.get_status("D"), false);
+        //Interrupt carry.
+        cpu.set_status("I", true);
+        cpu.CLI();
+        assert_eq!(cpu.get_status("I"), false);
+
+        //~! SETS
+        //Carry set.
+        cpu.set_status("C", false);
+        cpu.SEC();
+        assert_eq!(cpu.get_status("C"), true);
+        //Decimal set.
+        cpu.set_status("D", false);
+        cpu.SED();
+        assert_eq!(cpu.get_status("D"), true);
+        //Interrupt set.
+        cpu.set_status("I", false);
+        cpu.SEI();
+        assert_eq!(cpu.get_status("I"), true);
+        
+
+    }
+
+    #[test]
+    fn testOP_LDA(){
+        let mut cpu = super::CPU::new();
+
+        cpu.memory.set(0x755, 234); // Random position non zero page.
+        cpu.memory.set(0xAF, 123);  // Random position in zero page.
+
+        //The rest should be mechanically similar to these 3, and tested in test_AM.
+        //assert_eq!(cpu.LDA(ImmediateAM{address: 10}), cpu.a, "AM: Immediate.");
+        cpu.LDA(AbsoluteAM{address:  0x755});
+        assert_eq!(234, cpu.a, "AM: Absolute");
+        cpu.LDA(ZeroPageAM{address:  0xAF});
+        assert_eq!(123, cpu.a, "AM: Absolute");
+
+        //Testing flag changes.
+        cpu.LDA(ImmediateAM{address: 0});
+        assert_eq!(cpu.get_status("Z"), true, "Testing zero.");
+
+        cpu.LDA(ImmediateAM{address: 254});
+        assert_eq!(cpu.get_status("N"), true, "Testing negative.");
+    }
+
+    #[test]
+    fn testOP_LDX(){
+        let mut cpu = super::CPU::new();
+        
+        //Test actual load of x.
+        cpu.memory.set_zp(0xFF, 12);
+        cpu.LDX(ZeroPageAM{address: 0xFF});
+        assert_eq!(cpu.x, 12);
+
+        //Make sure flags are being set.
+        cpu.LDX(ImmediateAM{address: 0});   //Zero is set.
+        assert!(cpu.get_status("Z"));
+        cpu.LDX(ImmediateAM{address: 245}); //Bit 7 is set.
+        assert!(cpu.get_status("N"));
+    }
+
+    #[test]
+    fn testOP_LDY(){
+        let mut cpu = super::CPU::new();
+
+        //Test actual load of x.
+        cpu.memory.set_zp(0x0, 13);
+        cpu.LDY(ZeroPageAM{address: 0x0});
+        assert_eq!(cpu.y, 13);
+
+        //Make sure flags are being set.
+        cpu.LDY(ImmediateAM{address: 0});   //Zero is set.
+        assert!(cpu.get_status("Z"));
+        cpu.LDY(ImmediateAM{address: 245}); //Bit 7 is set.
+        assert!(cpu.get_status("N"));
+    }
+
+
 
     //~~~INSTRUCTION~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #[test]
