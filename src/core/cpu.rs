@@ -215,6 +215,18 @@ impl CPU {
         self.a = am.load(self);
         self.setZN_accumulator();
     }
+
+    ///LDX (LoaD X with memory) 
+    pub fn LDX(&mut self, operand: u8) {
+        if operand > 0{
+            self.set_status("N", false);
+        }
+        //sets negative flag equal to 7th bit
+        //sets the zero flag if the operand is $#00
+        self.x = operand;
+    }
+
+    pub fn LDY(&mut self) {}
 }
 /*
     //Folded opcodes
@@ -326,17 +338,6 @@ impl CPU {
     pub fn JSR(&self) {}
 
 
-    ///LDX (LoaD X with memory) 
-    pub fn LDX(&self, operand: i8) {
-        if (operand > 0){
-            self.set_status("N", false);
-        }
-        //sets negative flag equal to 7th bit
-        //sets the zero flag if the operand is $#00
-        this.x = operand;
-    }
-
-    pub fn LDY(&self) {}
     pub fn LSR(&self) {}
 
     /// NOP

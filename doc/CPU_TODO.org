@@ -17,6 +17,10 @@
 *** TODO testOP_LDX()
 ** TODO LDY
 *** TODO testOP_LDY()
+** TODO ADC
+*** TODO testOP_ADC()
+*** TODO testOP_ADC_signed()
+*** TODO testOP_ADC_decimal()
 
 
 * Notes

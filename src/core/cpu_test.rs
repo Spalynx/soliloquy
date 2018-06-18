@@ -241,7 +241,7 @@ pub mod cpu_test {
 
     /*
     #[test]
-    fn testOP_adc(){
+    fn testOP_ADC(){
         //Testing for basic ADd with Carry.
         let test_cpu = super::CPU::new();
 
@@ -251,7 +251,7 @@ pub mod cpu_test {
         assert_eq!(test_cpu.get_status("C"), 1);
     }
     #[test]
-    fn testOP_adc_signed (){
+    fn testOP_ADC_signed (){
         //Testing signed arithmetic.
         let test_cpu = super::CPU::new();
 
@@ -262,7 +262,7 @@ pub mod cpu_test {
         assert_eq!(test_cpu.get_status("O"), 1);
     }
     #[test]
-    fn testOP_adc_decimal(){
+    fn testOP_ADC_decimal(){
         //TODO: Test adc with a decimal.
         let test_cpu = super::CPU::new();
 
