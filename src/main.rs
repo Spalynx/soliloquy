@@ -7,6 +7,7 @@ use core::cpu::*;
 
 fn main() {
     let mut c = CPU::new();
+    print!("Testing.");
 
     c.LDA(ImmediateAM{address: 0xFF});
     c.print_status();

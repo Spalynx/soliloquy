@@ -241,10 +241,8 @@ impl CPU {
         let y = self.y;
         self.set_zn(y);
     }
-}
-/*
-    //Folded opcodes
 
+    /*
     /// ADC
     /// ADd with Carry. ADC results are based on the decimal flag. In
     /// decimal mode, addition is carried out as if the values are in Binary
@@ -276,6 +274,11 @@ impl CPU {
         else
         {	self.set_status("V", false);	} 
     }
+    */
+}
+/*
+    //Folded opcodes
+
 
     /// AND
     /// Bitwise AND with accumulator, takes memory address as parameter, and comp/replaces cpu.a.

@@ -275,17 +275,42 @@ pub mod cpu_test {
         //This can be expanded later when testing opcode parsing.
     }
 
-    /*
     #[test]
     fn testOP_ADC(){
         //Testing for basic ADd with Carry.
-        let test_cpu = super::CPU::new();
+        let mut cpu = super::CPU::new();
 
-        test_cpu.LDA(254);
-        test_cpu.ADC(6);
-        assert_eq!(test_cpu.A, 5);
-        assert_eq!(test_cpu.get_status("C"), 1);
+
+        //Filling register a with first value.
+        cpu.a = 255;
+        //Adding second value to A.
+        cpu.ADC(ImmediateAM{address: 255})
+
+        //Assert that the value has changed correctly.
+            assert_eq!(cpu.a, 254);
+        //Assert that flags have be suitably modified.
+            assert_eq!(cpu.get_status("C"), true);
+            //status("N") should be false, because set_ZN wasn't run.
     }
+    fn testOP_ADC_memory_with_lda(){
+        //Testing for basic ADd with Carry.
+        let mut cpu = super::CPU::new();
+
+
+
+        //Filling register a with first value.
+        cpu.memory.set(0x755, 237); 
+        cpu.LDA(AbsoluteAM{address:  0x755});
+        //Adding second value to A.
+        cpu.ADC(ImmediateAM{address: 255})
+
+        //Assert that the value has changed correctly.
+            assert_eq!(cpu.a, 236);
+        //Assert that flags have be suitably modified.
+            assert_eq!(cpu.get_status("C"), true);
+            assert_eq!(cpu.get_status("N"), true);
+    }
+    /*
     #[test]
     fn testOP_ADC_signed (){
         //Testing signed arithmetic.
