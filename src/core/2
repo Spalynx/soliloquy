@@ -251,18 +251,18 @@ impl CPU {
         let b: u16 = am.load(self) as u16;
         let c: u16 = self.get_status("C") as u16; //Should be 1 or 0.
         
-        //d is the sum.
-        let d = a + b + c;
+        let result = a + b + c;
 
-        self.set_status("Z", d == 0);
-        self.set_status("C", d > 255);
-        self.set_status("N", d > 127);
+        self.set_status("Z", result == 0);
+        self.set_status("C", result > 255);
+        self.set_status("N", result > 127);
         //From disch on nesdev.
-        //Overflow is like carry for decimal math.
-        self.set_status("V", ((a^d)&(b^d)&(128))==128 ); 
+        //I don't think I'm cut out for binary operations.
+        //Checks to see if a change is made across the 0x80 boundary.
+        self.set_status("V", ((a^c)&(b^c)&0x80)>128); //Overflow is like carry for decimal math.
+        if (a^c)&(b^c)^0x80  > 0x7F {self.set_status("V", true);} else {self.set_status("V", false);}
 
-
-        self.a = d as u8;
+        self.a = result as u8;
     }
     /*
     pub fn ADC(&mut self, step: CpuStep) {

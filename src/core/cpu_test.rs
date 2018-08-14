@@ -276,40 +276,54 @@ pub mod cpu_test {
     }
 
     #[test]
-    fn testOP_ADC(){
-        //Testing for basic ADd with Carry.
+    fn testOP_ADC_carry(){
         let mut cpu = super::CPU::new();
 
-
-        //Filling register a with first value.
         cpu.a = 255;
-        //Adding second value to A.
-        cpu.ADC(ImmediateAM{address: 255})
+        cpu.ADC(ImmediateAM{address: 255});
 
-        //Assert that the value has changed correctly.
-            assert_eq!(cpu.a, 254);
-        //Assert that flags have be suitably modified.
-            assert_eq!(cpu.get_status("C"), true);
-            //status("N") should be false, because set_ZN wasn't run.
+        assert_eq!(cpu.a, 254);
+        assert_eq!(cpu.get_status("C"), true);
     }
-    fn testOP_ADC_memory_with_lda(){
-        //Testing for basic ADd with Carry.
+    #[test]
+    fn testOP_ADC_zero(){
         let mut cpu = super::CPU::new();
 
+        cpu.a = 0;
+        cpu.ADC(ImmediateAM{address: 0});
 
-
-        //Filling register a with first value.
-        cpu.memory.set(0x755, 237); 
-        cpu.LDA(AbsoluteAM{address:  0x755});
-        //Adding second value to A.
-        cpu.ADC(ImmediateAM{address: 255})
-
-        //Assert that the value has changed correctly.
-            assert_eq!(cpu.a, 236);
-        //Assert that flags have be suitably modified.
-            assert_eq!(cpu.get_status("C"), true);
-            assert_eq!(cpu.get_status("N"), true);
+        assert_eq!(cpu.a, 0);
+        assert_eq!(cpu.get_status("Z"), true);
     }
+    #[test]
+    fn testOP_ADC_overflow(){
+        let mut cpu = super::CPU::new();
+
+        cpu.a = 126;
+        cpu.ADC(ImmediateAM{address: 5});
+
+        let d = 126;
+        let e = 5;
+        let f = d+e;
+        println!("In carry: {}",((d^f)&(e^f)&(128))==128);
+        assert_eq!(cpu.a, 131);
+        assert_eq!(cpu.get_status("V"), true);
+    }
+    #[test]
+    fn testOP_ADC_memory_with_lda(){
+        let mut cpu = super::CPU::new();
+
+        
+        cpu.memory.set(0x755, 237); 
+        cpu.LDA(AbsoluteAM{address:  0x755}); //Filling register a with first value.
+        cpu.ADC(ImmediateAM{address: 255});   //Adding second value to A.
+
+        
+        assert_eq!(cpu.a, 236);               //Assert that the value has changed correctly.
+        assert_eq!(cpu.get_status("C"), true);//Assert that flags have be suitably modified.
+        assert_eq!(cpu.get_status("N"), true);
+    }
+
     /*
     #[test]
     fn testOP_ADC_signed (){
