@@ -118,8 +118,22 @@ impl CPU {
         println!("{}", interrupt);
     }
 
+
     /// Sets flags based upon a given byte.
-    pub fn set_status(&mut self, flag: &'static str, val: bool){
+    /// Bit crunching here to reduce overhead, as flags are going to change often.
+    pub fn set_status(&mut self, status_num: u8, val: bool){
+        //Panic on non-valid status.
+        if status_num > 7 {
+            panic!("Status position ${} is not possible!", status_num);
+        }
+
+        self.status = 	if val {self.status |  (1 << status_num)} //Setting status to true...
+        		else   {self.status & !(1 << status_num)} //Setting status to false....
+    }
+
+
+    /// Sets flags based upon a given byte.
+    pub fn set_status_old(&mut self, flag: &'static str, val: bool){
 
         // Yes, I know that this is a really slow way to access
         // flags, but I plan on refactoring with actual opcodes.
@@ -180,16 +194,16 @@ impl CPU {
     fn set_zn(&mut self, val: u8){
         //Setting flags based upon accumulator value.
         if val == 0 {
-            self.set_status("Z", true);
-            self.set_status("N", false);
+            self.set_status(1, true);
+            self.set_status(7, false);
         }
         else if val > 128 {
-            self.set_status("Z", false);
-            self.set_status("N", true);
+            self.set_status(1, false);
+            self.set_status(7, true);
         }
         else {
-            self.set_status("Z", false);
-            self.set_status("N", false);
+            self.set_status(1, false);
+            self.set_status(7, false);
         }
     }
 
@@ -198,7 +212,7 @@ impl CPU {
     /// Refer to [3] for all cpu explanations.
 
     //#! Flag OPCODES.
-    //   Why not set_status()? Simply: Not fast enough.
+    //   Why not set_status_old()? Simply: Not fast enough.
     //   Wondering if I should make /fake/ OPs for other flags.
     /// CLC - Clear Carry. Sets carry to false.
 
@@ -254,12 +268,12 @@ impl CPU {
         //d is the sum.
         let d = a + b + c;
 
-        self.set_status("Z", d == 0);
-        self.set_status("C", d > 255);
-        self.set_status("N", d > 127);
+        self.set_status(1, d == 0);
+        self.set_status(0, d > 255);
+        self.set_status(7, d > 127);
         //From disch on nesdev.
         //Overflow is like carry for decimal math.
-        self.set_status("V", ((a^d)&(b^d)&(128))==128 ); 
+        self.set_status(6, ((a^d)&(b^d)&(128))==128 ); 
 
 
         self.a = d as u8;
@@ -269,23 +283,23 @@ impl CPU {
 
 
         //
-        self.set_status("Z", self.a > 0);
-        self.set_status("N", self.a > 0);
+        self.set_status_old("Z", self.a > 0);
+        self.set_status_old("N", self.a > 0);
 
 
         //Standard stuff, filling carry if we go over 256.
         if a + b + c > 0xFF
-        {	self.set_status("C", true);	}
+        {	self.set_status_old("C", true);	}
         else
-        {	self.set_status("C", false);	} 
+        {	self.set_status_old("C", false);	} 
 
         //Now I'm legit copying Fogelman...
         //So, 0x80 = 128 and I think 1 << 8.
         // TODO understand this.
 	if (( a^b ) & 0x80) == 0 && (( a^self.a) & 0x80) != 0
-        {	self.set_status("V", true);	}
+        {	self.set_status_old("V", true);	}
         else
-        {	self.set_status("V", false);	} 
+        {	self.set_status_old("V", false);	} 
     }
     */
 }
@@ -302,17 +316,17 @@ impl CPU {
 
         self.a = self.a & self.mem;
 
-        self.set_status("Z", self.a > 0);
-        self.set_status("N", self.a > 0);
+        self.set_status_old("Z", self.a > 0);
+        self.set_status_old("N", self.a > 0);
     }
     
     /// ASL
     /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
     pub fn ASL(&mut self) {
         if self.a & 0x1000000 == 0x1000000 {
-            self.set_status("C", true);
+            self.set_status_old("C", true);
         } 
-        else { self.set_status("C", false); }
+        else { self.set_status_old("C", false); }
 
         self.a = self.a << 1;
     }
@@ -332,8 +346,8 @@ impl CPU {
     pub fn BRK(&mut self) {
         self.throw_interrupt("NMI");
 
-        self.set_status("B", true);
-        self.set_status("U", true);
+        self.set_status_old("B", true);
+        self.set_status_old("U", true);
     }
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
@@ -381,8 +395,8 @@ impl CPU {
     pub fn ORA(&mut self, mem: u8) {
         self.a = self.a | self.mem;
 
-        self.set_status("Z", self.a > 0);
-        self.set_status("N", self.a > 0);
+        self.set_status_old("Z", self.a > 0);
+        self.set_status_old("N", self.a > 0);
     }
     pub fn PHA(&self) {}
     pub fn PHP(&self) {}

@@ -32,18 +32,30 @@ pub mod cpu_test {
         let mut cpu = super::CPU::new();
 
         //Array of status codes.
-        let status = ["N", "n", "V", "v", "S", "s", "B", "b",
-                      "D", "d", "I", "i", "Z", "z", "C", "c"];
+
+        let status = ["C", "Z", "I", "D", "B", "S", "V", "N",
+                      "c", "z", "i", "d", "b", "s", "v", "n"];
 
         //Loops through array of status codes, and sets/resets each flag.
         for f in status.iter() {
             //Setting each flag.
-            cpu.set_status(f, true);
+            cpu.set_status_old(f, true);
             assert_eq!(cpu.get_status(f), true);
 
             //Resetting each flag.
-            cpu.set_status(f, false);
+            cpu.set_status_old(f, false);
             assert_eq!(cpu.get_status(f), false);
+        }
+
+        for f in 0..8 {
+            //Setting each flag.
+            println!("{} : {}", f, status[f as usize]);
+            cpu.set_status(f, true);
+            assert_eq!(cpu.get_status(status[f as usize]), true);
+
+            //Resetting each flag.
+            cpu.set_status(f, false);
+            assert_eq!(cpu.get_status(status[f as usize]), false);
         }
 
     }
@@ -55,13 +67,13 @@ pub mod cpu_test {
         let mut cpu = super::CPU::new();
 
         //False
-        cpu.set_status("I", false);
-        cpu.set_status("I", false);
+        cpu.set_status(2, false);
+        cpu.set_status(2, false);
         assert_eq!(cpu.get_status("I"), false);
         
         //True
-        cpu.set_status("V", true);
-        cpu.set_status("V", true);
+        cpu.set_status(6, true);
+        cpu.set_status(6, true);
         assert_eq!(cpu.get_status("V"), true);
     }
 
@@ -175,29 +187,29 @@ pub mod cpu_test {
         //~! CLEARS
 
         //Carry clear.
-        cpu.set_status("C", true);
+        cpu.set_status(0, true);
         cpu.CLC();
         assert_eq!(cpu.get_status("C"), false);
         //Decimal clear.
-        cpu.set_status("D", true);
+        cpu.set_status(3, true);
         cpu.CLD();
         assert_eq!(cpu.get_status("D"), false);
         //Interrupt carry.
-        cpu.set_status("I", true);
+        cpu.set_status(2, true);
         cpu.CLI();
         assert_eq!(cpu.get_status("I"), false);
 
         //~! SETS
         //Carry set.
-        cpu.set_status("C", false);
+        cpu.set_status(0, false);
         cpu.SEC();
         assert_eq!(cpu.get_status("C"), true);
         //Decimal set.
-        cpu.set_status("D", false);
+        cpu.set_status(3, false);
         cpu.SED();
         assert_eq!(cpu.get_status("D"), true);
         //Interrupt set.
-        cpu.set_status("I", false);
+        cpu.set_status(2, false);
         cpu.SEI();
         assert_eq!(cpu.get_status("I"), true);
         
