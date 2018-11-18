@@ -1,4 +1,4 @@
-#+Title: CPU TODO LIST
+#+Title: NES TODO LIST
 #+subtitle: And quick notes for faster daily reuptake.
 
 * v0.1 : "CPU"
