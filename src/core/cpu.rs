@@ -275,7 +275,6 @@ impl CPU {
         //Overflow is like carry for decimal math.
         self.set_status(6, ((a^d)&(b^d)&(128))==128 ); 
 
-
         self.a = d as u8;
     }
     /*

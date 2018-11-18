@@ -17,10 +17,17 @@
 *** DONE testOP_LDX()
 ** DONE LDY
 *** DONE testOP_LDY()
-** TODO ADC
-*** TODO testOP_ADC()
-*** TODO testOP_ADC_signed()
-*** TODO testOP_ADC_decimal()
+** DONE ADC
+CLOSED: [2018-11-06 Tue 12:54]
+- State "DONE"       from "TODO"       [2018-11-06 Tue 12:54]
+*** DONE testOP_ADC()
+CLOSED: [2018-11-18 Sun 10:42]
+- State "DONE"       from "TODO"       [2018-11-18 Sun 10:42]
+*** STARTED testOP_ADC_signed()
+:LOGBOOK:
+CLOCK: [2018-11-18 Sun 10:51]--[2018-11-18 Sun 11:58] =>  1:07
+:END:
+*** STARTED testOP_ADC_decimal()
 
 
 * Notes

@@ -336,26 +336,31 @@ pub mod cpu_test {
         assert_eq!(cpu.get_status("N"), true);
     }
 
-    /*
     #[test]
     fn testOP_ADC_signed (){
         //Testing signed arithmetic.
-        let test_cpu = super::CPU::new();
+        let mut test_cpu = super::CPU::new();
 
-        test_cpu.LDA(0b01111111u8); //+127
-        test_cpu.ADC(0b00000010u8); //+2
-        assert_eq!(test_cpu.A, 0b10000001u8); // = -127
-        //Overflow should be set because bit 7 is '1'.
-        assert_eq!(test_cpu.get_status("O"), 1);
+        test_cpu.LDA(ImmediateAM{address: 0b01111111u8}); //+127
+        test_cpu.ADC(ImmediateAM{address: 0b00000010u8}); //+2
+
+        //Tests of this addition:
+        assert_eq!(test_cpu.a, 0b10000001u8); // = -127
+        assert_eq!(test_cpu.get_status("V"), true, "Overflow of signed arith failed."); 
+        assert_eq!(test_cpu.get_status("N"), true, "7th bit of A was not set."); 
     }
     #[test]
     fn testOP_ADC_decimal(){
-        //TODO: Test adc with a decimal.
-        let test_cpu = super::CPU::new();
+        let mut test_cpu = super::CPU::new();
 
+        //Set to decimal mode:
         test_cpu.SED();
-        assert!();
+        //Add two decimal mode numbers:
+
+        //Testing this addition:
+        assert!(false);
     }
+    /*
     #[test]
     fn testOP_flags(){
         /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
