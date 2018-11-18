@@ -360,12 +360,28 @@ pub mod cpu_test {
         //Testing this addition:
         assert!(false);
     }
-    /*
     #[test]
-    fn testOP_flags(){
-        /// TEST -> CLC, CLD, CLI, CLV, SEC, SED, SEI
-        let test_cpu = super::CPU::new();
+    fn testOP_SBC() {
+        assert!(false);
     }
-    */
-
+    #[test]
+    fn testOP_SBC_signed() {
+        assert!(false);
+    }
+    #[test]
+    fn testOP_SBC_decimal() {
+        assert!(false);
+    }
+    #[test]
+    fn testOP_AND() {
+        assert!(false);
+    }
+    #[test]
+    fn testOP_EOR() {
+        assert!(false);
+    }
+    #[test]
+    fn testOP_ORA() {
+        assert!(false);
+    }
 }

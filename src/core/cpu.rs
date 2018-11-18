@@ -256,6 +256,7 @@ impl CPU {
         self.set_zn(y);
     }
 
+    //#! Primary Arithmetic Operations
     /// ADC
     /// ADd with Carry. ADC results are based on the decimal flag. In
     /// decimal mode, addition is carried out as if the values are in Binary
@@ -277,48 +278,29 @@ impl CPU {
 
         self.a = d as u8;
     }
-    /*
-    pub fn ADC(&mut self, step: CpuStep) {
 
-
-        //
-        self.set_status_old("Z", self.a > 0);
-        self.set_status_old("N", self.a > 0);
-
-
-        //Standard stuff, filling carry if we go over 256.
-        if a + b + c > 0xFF
-        {	self.set_status_old("C", true);	}
-        else
-        {	self.set_status_old("C", false);	} 
-
-        //Now I'm legit copying Fogelman...
-        //So, 0x80 = 128 and I think 1 << 8.
-        // TODO understand this.
-	if (( a^b ) & 0x80) == 0 && (( a^self.a) & 0x80) != 0
-        {	self.set_status_old("V", true);	}
-        else
-        {	self.set_status_old("V", false);	} 
-    }
-    */
-}
-/*
-    //Folded opcodes
-
+    /// SBC
+    /// Subtract with borrow.
+    pub fn SBC(&self) {}
 
     /// AND
-    /// Bitwise AND with accumulator, takes memory address as parameter, and comp/replaces cpu.a.
-    pub fn AND(&mut self, mem: u8) {
-        /// For now, We're gonna act like the ROM interpreting program will supply
-        /// the memory to the function. If this doesn't happen to be true, maybe we
-        /// can read directly from file. (Seems messy).
+    /// Bitwise AND with accumulator, takes memory address as parameter,
+    /// and comp/replaces cpu.a.
+    pub fn AND(&mut self) {}
 
-        self.a = self.a & self.mem;
+    /// EOR
+    /// Bitwise XOR with accumulator.
+    pub fn EOR(&self) {}
 
-        self.set_status_old("Z", self.a > 0);
-        self.set_status_old("N", self.a > 0);
-    }
-    
+    /// ORA
+    /// Bitwise OR with accumulator, param of memory val to bitwise OR cpu.a.
+    pub fn ORA(&mut self) {}
+
+} //IMPL CPU
+
+/*
+
+    //#! Bit Manipulation
     /// ASL
     /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
     pub fn ASL(&mut self) {
@@ -329,15 +311,32 @@ impl CPU {
 
         self.a = self.a << 1;
     }
+    pub fn LSR(&self) {}
+    pub fn ROL(&self) {}
+    pub fn ROR(&self) {}
 
-    pub fn BCC(&self) {}
-    pub fn BCS(&self) {}
-    pub fn BEQ(&self) {}
+
+
+    //#! Register/Memory Manipulation
+    pub fn DEC(&self) {}
+    pub fn DEX(&self) {}
+    pub fn DEY(&self) {}
+    pub fn INC(&self) {}
+    pub fn INX(&self) {}
+    pub fn INY(&self) {}
+    pub fn STA(&self) {}
+    pub fn STX(&self) {}
+    pub fn STY(&self) {}
+    pub fn TAX(&self) {}
+    pub fn TAY(&self) {}
+    pub fn TSX(&self) {}
+    pub fn TXA(&self) {}
+    pub fn TXS(&self) {}
+    pub fn TYA(&self) {}
+
+
+    //#! General Operations
     pub fn BIT(&self) {}
-    pub fn BMI(&self) {}
-    pub fn BNE(&self) {}
-    pub fn BPL(&self) {}
-    
     /// BRK
     /// Break. Throws a NMI, and increments the program counter by one.
     // BRK is a 2 byte opcode. The first is #$00 and the second is a padding byte.
@@ -348,10 +347,20 @@ impl CPU {
         self.set_status_old("B", true);
         self.set_status_old("U", true);
     }
-    pub fn BVC(&self) {}
-    pub fn BVS(&self) {}
+    /// NOP
+    /// AFAIK, IT DOES NOTHING. PRODUCTIVITY.
+    /// Arguably, it looks like this opcode is meant to be a way to manually step.
+    pub fn NOP(&self) {}
+    pub fn RTI(&self) {}
+    pub fn RTS(&self) {}
 
-        
+    //#! Stack Manipulation
+    pub fn PHA(&self) {}
+    pub fn PHP(&self) {}
+    pub fn PLA(&self) {}
+    pub fn PLP(&self) {}
+
+    //#! Comparators (Probably used in jumping)
     ///CMP (CoMPare accumulator) 
     ///Affects Flags: S Z C 
     ///+ add 1 cycle if page boundary crossed
@@ -360,63 +369,26 @@ impl CPU {
     ///set. The equal (Z) and sign (S) flags will be set based on equality or lack
     ///thereof and the sign (i.e. A>=$80) of the accumulator. 
     pub fn CMP(&self) {}
-
     ///CPX (ComPare X register) 
     ///Operation and flag results are identical to equivalent mode accumulator CMP
     ///ops. 
     pub fn CPX(&self) {}
-
     ///CPY (ComPare Y register) 
     ///Operation and flag results are identical to equivalent mode accumulator CMP
     ///ops. 
     pub fn CPY(&self) {}
-    pub fn DEC(&self) {}
-    pub fn DEX(&self) {}
-    pub fn DEY(&self) {}
-    pub fn EOR(&self) {}
-    pub fn INC(&self) {}
-    pub fn INX(&self) {}
-    pub fn INY(&self) {}
+
+    //#! Branching/Jumping
+    pub fn BCC(&self) {}
+    pub fn BCS(&self) {}
+    pub fn BEQ(&self) {}
+    pub fn BMI(&self) {}
+    pub fn BNE(&self) {}
+    pub fn BPL(&self) {}
     pub fn JMP(&self) {}
     pub fn JSR(&self) {}
-
-
-    pub fn LSR(&self) {}
-
-    /// NOP
-    /// AFAIK, IT DOES NOTHING. PRODUCTIVITY.
-    /// Arguably, it looks like this opcode is meant to be a way to manually step.
-    pub fn NOP(&self) {
-    }
-
-    /// ORA
-    /// Bitwise OR with accumulator, param of memory val to bitwise OR cpu.a.
-    pub fn ORA(&mut self, mem: u8) {
-        self.a = self.a | self.mem;
-
-        self.set_status_old("Z", self.a > 0);
-        self.set_status_old("N", self.a > 0);
-    }
-    pub fn PHA(&self) {}
-    pub fn PHP(&self) {}
-    pub fn PLA(&self) {}
-    pub fn PLP(&self) {}
-    pub fn ROL(&self) {}
-    pub fn ROR(&self) {}
-    pub fn RTI(&self) {}
-    pub fn RTS(&self) {}
-    pub fn SBC(&self) {}
-
-
-    pub fn STA(&self) {}
-    pub fn STX(&self) {}
-    pub fn STY(&self) {}
-    pub fn TAX(&self) {}
-    pub fn TAY(&self) {}
-    pub fn TSX(&self) {}
-    pub fn TXA(&self) {}
-    pub fn TXS(&self) {}
-    pub fn TYA(&self) {}
+    pub fn BVC(&self) {}
+    pub fn BVS(&self) {}
 */
 
 

@@ -1,35 +1,65 @@
 #+Title: CPU TODO LIST
 #+subtitle: And quick notes for faster daily reuptake.
 
-* General Testing
-** DONE test_new()
-** DONE test_status_each()
-** DONE test_status_settingtwice()
-** DONE test_new_memory()
-** DONE test_AM()
-
-* OPCODES
-** DONE LDA
-*** DONE testOP_LDA()
-** DONE CLC, CLD, CLI, CLV, SEC, SED, SEI.
-*** DONE testOP_flags()
-** DONE LDX
-*** DONE testOP_LDX()
-** DONE LDY
-*** DONE testOP_LDY()
-** DONE ADC
-CLOSED: [2018-11-06 Tue 12:54]
-- State "DONE"       from "TODO"       [2018-11-06 Tue 12:54]
-*** DONE testOP_ADC()
+* v0.1 : "CPU"
+** DONE [100%] v0.0.0
+*** DONE Basic File Structure
+CLOSED: [2018-11-18 Sun 12:37]
+- State "DONE"       from "TODO"       [2018-11-18 Sun 12:37]
+*** DONE Basic CPU Struct/IMPL
+CLOSED: [2018-11-18 Sun 12:37]
+- State "DONE"       from "TODO"       [2018-11-18 Sun 12:37]
+**** DONE test_new()
+*** DONE Addressing Modes
+CLOSED: [2018-11-18 Sun 12:37]
+- State "DONE"       from "TODO"       [2018-11-18 Sun 12:37]
+**** DONE test_AM()
+** DONE [100%] v0.1.0
+*** DONE Flags
+**** DONE test_status_each()
+**** DONE test_status_settingtwice()
+*** DONE Basic Memory/Registers
+**** DONE test_new_memory()
+*** DONE CLC, CLD, CLI, CLV, SEC, SED, SEI.
+**** DONE testOP_flags()
+*** DONE LDA
+**** DONE testOP_LDA()
+*** DONE LDX
+**** DONE testOP_LDX()
+*** DONE LDY
+CLOSED: [2018-11-18 Sun 12:38]
+- State "DONE"       from "TODO"       [2018-11-18 Sun 12:38]
+**** DONE testOP_LDY()
+** TODO [0%] v0.1.1 : "Primary Arithmetic Operations"
+*** TODO ADC : "Add with Carry"
+**** DONE testOP_ADC()
 CLOSED: [2018-11-18 Sun 10:42]
 - State "DONE"       from "TODO"       [2018-11-18 Sun 10:42]
-*** STARTED testOP_ADC_signed()
+**** DONE testOP_ADC_signed()
+CLOSED: [2018-11-18 Sun 12:12]
+- State "DONE"       from "TODO"       [2018-11-18 Sun 12:12]
 :LOGBOOK:
-CLOCK: [2018-11-18 Sun 10:51]--[2018-11-18 Sun 11:58] =>  1:07
+CLOCK: [2018-11-18 Sun 10:51]--[2018-11-18 Sun 12:06] =>  1:15
 :END:
-*** STARTED testOP_ADC_decimal()
-
-
+**** STARTED testOP_ADC_decimal()
+*** TODO SBC : "Subtract with Borrow"
+**** TODO testOP_SBC()
+**** TODO testOP_SBC_signed()
+**** TODO testOP_SBC_decimal()
+*** TODO AND : "Bitwise AND with Accumulator"
+**** TODO testOP_AND()
+*** TODO EOR : "Bitwise Exclusive OR with Accumulator"
+**** TODO testOP_EOR()
+*** TODO ORA : "Bitwise OR with Accumulator"
+**** TODO testOP_ORA()
+** TODO [0%] v0.1.2 : "Bit Manipulation"
+** TODO [0%] v0.1.3 : "Register/Memory Manipulation"
+** TODO [0%] v0.1.4 : "General Operations"
+** TODO [0%] v0.1.5 : "Stack Manipulation"
+** TODO [0%] v0.1.6 : "Comparators"
+** TODO [0%] v0.1.7 : "Branching/Jumping"
+* v0.2 : "Memory"
+* v0.3 : "PPU"
 * Notes
 //[1]	0: carry flag
 //	1: zero flag
