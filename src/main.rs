@@ -21,4 +21,5 @@ fn main() {
     c.print_status();
     c.LDY(ImmediateAM{address: 0x00});
     c.print_status();
+
 }

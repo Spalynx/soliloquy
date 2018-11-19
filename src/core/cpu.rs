@@ -188,7 +188,7 @@ impl CPU {
     }
 
 
-    /// Sets the Z/N flags based upon accumulator value.
+    /// Sets the Z/N flags based upon a given value.
     ///     I think that this will be used often, but not sure how
     ///     much.
     fn set_zn(&mut self, val: u8){
@@ -197,7 +197,7 @@ impl CPU {
             self.set_status(1, true);
             self.set_status(7, false);
         }
-        else if val > 128 {
+        else if val >= 128 {
             self.set_status(1, false);
             self.set_status(7, true);
         }
@@ -298,7 +298,7 @@ impl CPU {
         let a: u8 = self.a;
         let b: u8 = am.load(self);
 
-        self.LDA(ImmediateAM{address: a & b})
+        self.LDA(ImmediateAM{address: (a & b)});
     }
 
     /// ORA
@@ -307,7 +307,7 @@ impl CPU {
         let a: u8 = self.a;
         let b: u8 = am.load(self);
 
-        self.LDA(ImmediateAM{address: a | b})
+        self.LDA(ImmediateAM{address: (a | b)})
     }
 
     /// EOR
@@ -316,7 +316,7 @@ impl CPU {
         let a: u8 = self.a;
         let b: u8 = am.load(self);
 
-        self.LDA(ImmediateAM{address: a ^ b})
+        self.LDA(ImmediateAM{address: (a ^ b)})
     }
 
 } //IMPL CPU

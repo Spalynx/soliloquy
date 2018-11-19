@@ -30,9 +30,11 @@ CLOSED: [2018-11-18 Sun 12:37]
 CLOSED: [2018-11-18 Sun 12:38]
 - State "DONE"       from "TODO"       [2018-11-18 Sun 12:38]
 **** DONE testOP_LDY()
-** TODO [40%] v0.1.1 : "Primary Arithmetic Operations"
+** DONE [100%] v0.1.1 : "Primary Arithmetic Operations"
+CLOSED: [2018-11-19 Mon 13:05]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 13:05]
 :LOGBOOK:
-CLOCK: [2018-11-19 Mon 12:10]
+CLOCK: [2018-11-19 Mon 12:10]--[2018-11-19 Mon 13:05] =>  0:55
 :END:
 *** DONE ADC : "Add with Carry"
 CLOSED: [2018-11-19 Mon 09:59]
@@ -63,18 +65,24 @@ CLOSED: [2018-11-19 Mon 11:38]
 CLOSED: [2018-11-19 Mon 11:38]
 - State "WAIT"       from              [2018-11-19 Mon 11:38] \\
   Same as [[testOP_ADC_decimal()]]...
-*** TODO AND : "Bitwise AND with Accumulator"
+*** DONE AND : "Bitwise AND with Accumulator"
+CLOSED: [2018-11-19 Mon 13:05]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 13:05]
 **** DONE testOP_AND()
 CLOSED: [2018-11-19 Mon 12:03]
 - State "DONE"       from "TODO"       [2018-11-19 Mon 12:03]
-*** TODO EOR : "Bitwise Exclusive OR with Accumulator"
+*** DONE EOR : "Bitwise Exclusive OR with Accumulator"
+CLOSED: [2018-11-19 Mon 13:05]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 13:05]
 **** DONE testOP_EOR()
 CLOSED: [2018-11-19 Mon 12:10]
 - State "DONE"       from "TODO"       [2018-11-19 Mon 12:10]
 :LOGBOOK:
 CLOCK: [2018-11-19 Mon 12:03]--[2018-11-19 Mon 12:10] =>  0:07
 :END:
-*** TODO ORA : "Bitwise OR with Accumulator"
+*** DONE ORA : "Bitwise OR with Accumulator"
+CLOSED: [2018-11-19 Mon 13:05]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 13:05]
 **** DONE testOP_ORA()
 CLOSED: [2018-11-19 Mon 12:10]
 - State "DONE"       from "TODO"       [2018-11-19 Mon 12:10]
