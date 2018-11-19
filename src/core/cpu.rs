@@ -319,10 +319,6 @@ impl CPU {
         self.LDA(ImmediateAM{address: (a ^ b)})
     }
 
-} //IMPL CPU
-
-/*
-
     //#! Bit Manipulation
     /// ASL
     /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
@@ -334,12 +330,21 @@ impl CPU {
 
         self.a = self.a << 1;
     }
+    /// LSR
+    /// Logical Shift Right
     pub fn LSR(&self) {}
+    /// ROL
+    /// Rotate Left
     pub fn ROL(&self) {}
+    /// ROR
+    /// Rotate Right
     pub fn ROR(&self) {}
 
 
 
+} //IMPL CPU
+
+/*
     //#! Register/Memory Manipulation
     pub fn DEC(&self) {}
     pub fn DEX(&self) {}

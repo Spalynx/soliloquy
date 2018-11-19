@@ -435,4 +435,8 @@ pub mod cpu_test {
         assert_eq!(cpu.get_status("Z"), true); 
         
     }
+    fn testOP_ASL() { assert!(false) }
+    fn testOP_LSR() { assert!(false) }
+    fn testOP_ROL() { assert!(false) }
+    fn testOP_ROR() { assert!(false) }
 }
