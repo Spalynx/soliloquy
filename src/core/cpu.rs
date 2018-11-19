@@ -214,8 +214,8 @@ impl CPU {
     //#! Flag OPCODES.
     //   Why not set_status_old()? Simply: Not fast enough.
     //   Wondering if I should make /fake/ OPs for other flags.
-    /// CLC - Clear Carry. Sets carry to false.
 
+    /// CLC - Clear Carry. Sets carry to false.
     pub fn CLC(&mut self) {     self.status = self.status ^ (1);}
     /// CLD - Clear Decimal. Sets decimal to false.
     pub fn CLD(&mut self) {     self.status = self.status ^ (1 << 3);   }
@@ -281,7 +281,15 @@ impl CPU {
 
     /// SBC
     /// Subtract with borrow.
-    pub fn SBC(&self) {}
+    /// This function implements all of ADC functionality by simply negating the
+    ///  value of the operand.
+    /// NOTE: Without carry being added, the sent value is off-by-one. Supposedly
+    ///       it is common practice to call SEC() prior to SBC(val).
+    pub fn SBC <AM: AddressingMode>(&mut self, am: AM){
+        let b: u8 = am.load(self) as u8;
+
+        self.ADC(ImmediateAM{address: b^0xFF});
+    }
 
     /// AND
     /// Bitwise AND with accumulator, takes memory address as parameter,

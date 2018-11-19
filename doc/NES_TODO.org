@@ -30,7 +30,7 @@ CLOSED: [2018-11-18 Sun 12:37]
 CLOSED: [2018-11-18 Sun 12:38]
 - State "DONE"       from "TODO"       [2018-11-18 Sun 12:38]
 **** DONE testOP_LDY()
-** TODO [20%] v0.1.1 : "Primary Arithmetic Operations"
+** TODO [40%] v0.1.1 : "Primary Arithmetic Operations"
 *** DONE ADC : "Add with Carry"
 CLOSED: [2018-11-19 Mon 09:59]
 - State "DONE"       from "TODO"       [2018-11-19 Mon 09:59]
@@ -47,10 +47,19 @@ CLOCK: [2018-11-18 Sun 10:51]--[2018-11-18 Sun 12:06] =>  1:15
 CLOSED: [2018-11-19 Mon 09:58]
 - State "WAIT"       from              [2018-11-19 Mon 09:58] \\
   See documentation on issue #1, or src/core/cpu_test.rs::testOP_ADC_decimal().
-*** TODO SBC : "Subtract with Borrow"
-**** TODO testOP_SBC()
-**** TODO testOP_SBC_signed()
-**** TODO testOP_SBC_decimal()
+*** DONE SBC : "Subtract with Borrow"
+CLOSED: [2018-11-19 Mon 11:39]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 11:39]
+**** DONE testOP_SBC()
+CLOSED: [2018-11-19 Mon 11:38]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 11:38]
+**** DONE testOP_SBC_signed()
+CLOSED: [2018-11-19 Mon 11:38]
+- State "DONE"       from "TODO"       [2018-11-19 Mon 11:38]
+**** WAIT testOP_SBC_decimal()
+CLOSED: [2018-11-19 Mon 11:38]
+- State "WAIT"       from              [2018-11-19 Mon 11:38] \\
+  Same as [[testOP_ADC_decimal()]]...
 *** TODO AND : "Bitwise AND with Accumulator"
 **** TODO testOP_AND()
 *** TODO EOR : "Bitwise Exclusive OR with Accumulator"

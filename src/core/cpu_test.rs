@@ -339,7 +339,6 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ADC_signed (){
-        //Testing signed arithmetic.
         let mut test_cpu = super::CPU::new();
 
         test_cpu.LDA(ImmediateAM{address: 0b01111111u8}); //+127
@@ -376,14 +375,31 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_SBC() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.SEC(); //C is set in subtraction.
+        cpu.memory.set(0x755, 237); 
+        cpu.LDA(AbsoluteAM{address:  0x755}); //Filling register a with first value.
+        cpu.SBC(ImmediateAM{address: 20});   //Subtracting second value to A.
+
+        assert_eq!(cpu.a, 217);
     }
     #[test]
     fn testOP_SBC_signed() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.SEC(); //C is set in subtraction.
+        cpu.LDA(ImmediateAM{address: 0b00000001u8}); //+1
+        cpu.SBC(ImmediateAM{address: 0b00000010u8}); //+2
+
+        //Tests of this addition:
+        assert_eq!(cpu.a, 0b11111111u8); // = -1 (254)
+        assert_eq!(cpu.get_status("C"), false, "SBC-Signed-Borrow Required"); 
     }
     #[test]
     fn testOP_SBC_decimal() {
+        ///Same hold as testOP_ADC_decimal()...
+        /// Task state on WAIT.
         assert!(false);
     }
     #[test]
