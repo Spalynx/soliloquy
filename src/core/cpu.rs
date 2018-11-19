@@ -294,15 +294,30 @@ impl CPU {
     /// AND
     /// Bitwise AND with accumulator, takes memory address as parameter,
     /// and comp/replaces cpu.a.
-    pub fn AND(&mut self) {}
+    pub fn AND <AM: AddressingMode>(&mut self, am: AM){
+        let a: u8 = self.a;
+        let b: u8 = am.load(self);
 
-    /// EOR
-    /// Bitwise XOR with accumulator.
-    pub fn EOR(&self) {}
+        self.LDA(ImmediateAM{address: a & b})
+    }
 
     /// ORA
     /// Bitwise OR with accumulator, param of memory val to bitwise OR cpu.a.
-    pub fn ORA(&mut self) {}
+    pub fn ORA <AM: AddressingMode>(&mut self, am: AM){
+        let a: u8 = self.a;
+        let b: u8 = am.load(self);
+
+        self.LDA(ImmediateAM{address: a | b})
+    }
+
+    /// EOR
+    /// Bitwise XOR with accumulator.
+    pub fn EOR <AM: AddressingMode>(&mut self, am: AM){
+        let a: u8 = self.a;
+        let b: u8 = am.load(self);
+
+        self.LDA(ImmediateAM{address: a ^ b})
+    }
 
 } //IMPL CPU
 

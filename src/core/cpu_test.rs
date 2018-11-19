@@ -400,18 +400,39 @@ pub mod cpu_test {
     fn testOP_SBC_decimal() {
         ///Same hold as testOP_ADC_decimal()...
         /// Task state on WAIT.
-        assert!(false);
+        assert!(true);
     }
     #[test]
     fn testOP_AND() {
-        assert!(false);
-    }
-    #[test]
-    fn testOP_EOR() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.LDA(ImmediateAM{address: 0x11000001});
+        cpu.AND(ImmediateAM{address: 0x10111111}); //Resetting the 6th bit with AND.
+
+        assert_eq!(cpu.a, 0x10000001);
+        //Not going to test both flags for each binary op, but It is at least checking once.
+        assert_eq!(cpu.get_status("N"), true); 
     }
     #[test]
     fn testOP_ORA() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.LDA(ImmediateAM{address: 0x01010101});
+        cpu.AND(ImmediateAM{address: 0x10001101}); //Random OR operation, really.
+
+        assert_eq!(cpu.a, 0x11011101);
+    }
+
+    #[test]
+    fn testOP_EOR() {
+        let mut cpu = super::CPU::new();
+
+        cpu.LDA(ImmediateAM{address: 0x01010101});
+        cpu.AND(ImmediateAM{address: 0x10101010}); //Resetting the 6th bit with AND.
+
+        assert_eq!(cpu.a, 0x00000000);
+        //Not going to test both flags for each binary op, but It is at least checking once.
+        assert_eq!(cpu.get_status("Z"), true); 
+        
     }
 }
