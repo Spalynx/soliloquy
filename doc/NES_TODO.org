@@ -86,9 +86,11 @@ CLOSED: [2018-11-19 Mon 13:05]
 **** DONE testOP_ORA()
 CLOSED: [2018-11-19 Mon 12:10]
 - State "DONE"       from "TODO"       [2018-11-19 Mon 12:10]
-** TODO [75%] v0.1.2 : "Bit Manipulation"
+** DONE [100%] v0.1.2 : "Bit Manipulation"
+CLOSED: [2018-11-21 Wed 10:46]
+- State "DONE"       from "TODO"       [2018-11-21 Wed 10:46]
 :LOGBOOK:
-CLOCK: [2018-11-21 Wed 09:24]
+CLOCK: [2018-11-21 Wed 09:24]--[2018-11-21 Wed 10:46] =>  1:22
 :END:
 *** DONE ASL : "Arithmatic Shift Left"
 CLOSED: [2018-11-21 Wed 09:24]
@@ -109,7 +111,9 @@ CLOSED: [2018-11-21 Wed 10:31]
 **** DONE testOP_ROL
 CLOSED: [2018-11-21 Wed 10:31]
 - State "DONE"       from "TODO"       [2018-11-21 Wed 10:31]
-*** TODO ROR : "Rotate Right"
+*** DONE ROR : "Rotate Right"
+CLOSED: [2018-11-21 Wed 10:46]
+- State "DONE"       from "TODO"       [2018-11-21 Wed 10:46]
 **** DONE testOP_ROR
 CLOSED: [2018-11-21 Wed 10:31]
 - State "DONE"       from "TODO"       [2018-11-21 Wed 10:31]
@@ -145,7 +149,16 @@ CLOSED: [2018-11-21 Wed 10:31]
 *** TODO TYA : "Transfer Index Y to Accumulator"
 **** TODO testOP_TYA
 ** TODO [0%] v0.1.4 : "General Operations"
+*** TODO BIT : "Test Bits in Memory with Accumulator"
+**** TODO testOP_BIT
+*** TODO BRK : "Break"
+**** TODO testOP_BRK
+*** TODO NOP : "No Operation"
+**** TODO testOP_NOP
+*** TODO RTI : "Return From Interrupt"
+**** TODO testOP_RTI
 ** TODO [0%] v0.1.5 : "Stack Manipulation"
+*** TODO RTS : "Return from Subroutine"
 ** TODO [0%] v0.1.6 : "Comparators"
 ** TODO [0%] v0.1.7 : "Branching/Jumping"
 * v0.2 : "Memory"

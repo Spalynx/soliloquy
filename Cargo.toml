@@ -1,6 +1,6 @@
 [package]
 name = "soliloquy"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Spalynx <Spalynx@gmail.com>"]
 
 readme = "README.md"

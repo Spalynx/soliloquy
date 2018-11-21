@@ -485,4 +485,35 @@ pub mod cpu_test {
         assert_eq!(cpu.get_status("C"), false);
         assert_eq!(cpu.get_status("N"), true);
     }
+
+    #[test]
+    fn testOP_TYA() { assert!(false);}
+    #[test]
+    fn testOP_TXS() { assert!(false);}
+    #[test]
+    fn testOP_TXA() { assert!(false);}
+    #[test]
+    fn testOP_TSX() { assert!(false);}
+    #[test]
+    fn testOP_TAY() { assert!(false);}
+    #[test]
+    fn testOP_TAX() { assert!(false);}
+    #[test]
+    fn testOP_STY() { assert!(false);}
+    #[test]
+    fn testOP_STX() { assert!(false);}
+    #[test]
+    fn testOP_STA() { assert!(false);}
+    #[test]
+    fn testOP_INY() { assert!(false);}
+    #[test]
+    fn testOP_INX() { assert!(false);}
+    #[test]
+    fn testOP_INC() { assert!(false);}
+    #[test]
+    fn testOP_DEY() { assert!(false);}
+    #[test]
+    fn testOP_DEX() { assert!(false);}
+    #[test]
+    fn testOP_DEC() { assert!(false);}
 }

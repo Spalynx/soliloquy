@@ -321,7 +321,8 @@ impl CPU {
 
     //#! Bit Manipulation
     /// ASL
-    /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
+    /// Arithmatic shift left. Shifts all bits left one position.
+    /// 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
     /// Modifies either accumulator or memory, this can be controlled via addressing modes.
     pub fn ASL <AM: AddressingMode>(&mut self, am: AM){
         let mut b: u8 = am.load(self);
@@ -355,17 +356,15 @@ impl CPU {
         let mut b: u8 = am.load(self);
 
         //End result of Carry
-        let new_C = if b & 128 == 128 {
-            true
-        } else {false};
+        let new_C =
+            if b & 128 == 128 { true  }
+            else              { false };
 
         //Perform shift.
         b <<= 1;
 
         //Check end result of bit 1.
-        if self.get_status("C") {
-            b |= 1;
-        }
+        if self.get_status("C") { b |= 1; }
 
         self.set_status(0,new_C);
         self.set_zn(b);
@@ -380,43 +379,69 @@ impl CPU {
         let mut b: u8 = am.load(self);
 
         //End result of Carry
-        let new_C = if b & 1 == 1 {
-            true
-        } else { false };
+        let new_C =
+            if b & 1 == 1 { true  }
+            else          { false };
 
         //Perform shift
         b >>= 1;
 
         //Check end result of bit 7
-        if self.get_status("C") {
-            b |= 128;
-        }
+        if self.get_status("C") { b |= 128; }
 
         self.set_status(0, new_C);
         self.set_zn(b);
         am.save(self, b);
     }
+
+    /// DEC
+    /// "Decrement Memory By One"
+    pub fn DEC() {}
+    /// DEX
+    /// "Decrement Index Register X by One"
+    pub fn DEX() {}
+    /// DEY
+    /// "Decrement Index Register Y by One"
+    pub fn DEY() {}
+    /// INC
+    /// "Increment Memory By One"
+    pub fn INC() {}
+    /// INX
+    /// "Increment Index Register X by One"
+    pub fn INX() {}
+    /// INY
+    /// "Increment Index Register Y by One"
+    pub fn INY() {}
+    /// STA
+    /// "Store Accumulator in Memory"
+    pub fn STA() {}
+    /// STX
+    /// "Store Index Register X in Memory"
+    pub fn STX() {}
+    /// STY
+    /// "Store Index Register Y in Memory"
+    pub fn STY() {}
+    /// TAX
+    /// "Transfer Accumulator to Index X"
+    pub fn TAX() {}
+    /// TAY
+    /// "Transfer Accumulator to Index Y"
+    pub fn TAY() {}
+    /// TSX
+    /// "Transfer Stack Pointer to Index"
+    pub fn TSX() {}
+    /// TXA
+    /// "Transfer Index X to Accumulator"
+    pub fn TXA() {}
+    /// TXS
+    /// "Transfer Index X to Stack Pointer"
+    pub fn TXS() {}
+    /// TYA
+    /// "Transfer Index Y to Accumulator"
+    pub fn TYA() {}
 } //IMPL CPU
 
 /*
-    //#! Register/Memory Manipulation
-    pub fn DEC(&self) {}
-    pub fn DEX(&self) {}
-    pub fn DEY(&self) {}
-    pub fn INC(&self) {}
-    pub fn INX(&self) {}
-    pub fn INY(&self) {}
-    pub fn STA(&self) {}
-    pub fn STX(&self) {}
-    pub fn STY(&self) {}
-    pub fn TAX(&self) {}
-    pub fn TAY(&self) {}
-    pub fn TSX(&self) {}
-    pub fn TXA(&self) {}
-    pub fn TXS(&self) {}
-    pub fn TYA(&self) {}
-
-
     //#! General Operations
     pub fn BIT(&self) {}
     /// BRK
@@ -434,13 +459,13 @@ impl CPU {
     /// Arguably, it looks like this opcode is meant to be a way to manually step.
     pub fn NOP(&self) {}
     pub fn RTI(&self) {}
-    pub fn RTS(&self) {}
 
     //#! Stack Manipulation
     pub fn PHA(&self) {}
     pub fn PHP(&self) {}
     pub fn PLA(&self) {}
     pub fn PLP(&self) {}
+    pub fn RTS(&self) {}
 
     //#! Comparators (Probably used in jumping)
     ///CMP (CoMPare accumulator) 
