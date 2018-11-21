@@ -86,12 +86,23 @@ CLOSED: [2018-11-19 Mon 13:05]
 **** DONE testOP_ORA()
 CLOSED: [2018-11-19 Mon 12:10]
 - State "DONE"       from "TODO"       [2018-11-19 Mon 12:10]
-** TODO [0%] v0.1.2 : "Bit Manipulation"
-*** TODO ASL : "Arithmatic Shift Left"
+** TODO [50%] v0.1.2 : "Bit Manipulation"
+:LOGBOOK:
+CLOCK: [2018-11-21 Wed 09:24]
+:END:
+*** DONE ASL : "Arithmatic Shift Left"
+CLOSED: [2018-11-21 Wed 09:24]
+- State "DONE"       from "TODO"       [2018-11-21 Wed 09:24]
 Refer to 10.5 in KIM guide.
-**** TODO testOP_ASL
-*** TODO LSR : "Logical Shift Right"
-**** TODO testOP_LSR
+**** DONE testOP_ASL
+CLOSED: [2018-11-21 Wed 09:24]
+- State "DONE"       from "TODO"       [2018-11-21 Wed 09:24]
+*** DONE LSR : "Logical Shift Right"
+CLOSED: [2018-11-21 Wed 09:30]
+- State "DONE"       from "TODO"       [2018-11-21 Wed 09:30]
+**** DONE testOP_LSR
+CLOSED: [2018-11-21 Wed 09:29]
+- State "DONE"       from "TODO"       [2018-11-21 Wed 09:29]
 *** TODO ROL : "Rotate Left"
 **** TODO testOP_ROL
 *** TODO ROR : "Rotate Right"

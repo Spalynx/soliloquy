@@ -322,17 +322,32 @@ impl CPU {
     //#! Bit Manipulation
     /// ASL
     /// Arithmatic shift left. Shifts all bits left one position. 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
-    pub fn ASL(&mut self) {
-        if self.a & 0x1000000 == 0x1000000 {
-            self.set_status_old("C", true);
-        } 
-        else { self.set_status_old("C", false); }
+    /// Modifies either accumulator or memory, this can be controlled via addressing modes.
+    pub fn ASL <AM: AddressingMode>(&mut self, am: AM){
+        let mut b: u8 = am.load(self);
 
-        self.a = self.a << 1;
+        //Using SEC/CLC should be faster than set_status.
+        if b & 128 == 128 {   self.SEC(); }
+        else {                self.CLC(); }
+
+        b <<= 1;
+        self.set_zn(b);
+        am.save(self, b);
     }
+
     /// LSR
     /// Logical Shift Right
-    pub fn LSR(&self) {}
+    pub fn LSR <AM: AddressingMode>(&mut self, am: AM){
+        let mut b: u8 = am.load(self);
+
+        //Using SEC/CLC should be faster than set_status.
+        if b & 1 == 1 {       self.SEC(); }
+        else {                self.CLC(); }
+
+        b >>= 1;
+        self.set_zn(b);
+        am.save(self, b);
+    }
     /// ROL
     /// Rotate Left
     pub fn ROL(&self) {}

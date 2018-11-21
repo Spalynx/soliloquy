@@ -435,8 +435,38 @@ pub mod cpu_test {
         assert_eq!(cpu.get_status("Z"), true); 
         
     }
-    fn testOP_ASL() { assert!(false) }
-    fn testOP_LSR() { assert!(false) }
-    fn testOP_ROL() { assert!(false) }
-    fn testOP_ROR() { assert!(false) }
+
+    #[test]
+    fn testOP_ASL() {
+        let mut cpu = super::CPU::new();
+
+        cpu.LDA(ImmediateAM{address: 0b11111111u8});
+        cpu.ASL(AccumulatorAM); 
+
+        assert_eq!(cpu.a, 0b11111110u8);
+        assert_eq!(cpu.get_status("C"), true);
+        assert_eq!(cpu.get_status("N"), true);
+    }
+
+    #[test]
+    fn testOP_LSR() {
+        let mut cpu = super::CPU::new();
+
+        cpu.LDA(ImmediateAM{address: 0b11111111u8});
+        cpu.LSR(AccumulatorAM); 
+
+        assert_eq!(cpu.a, 0b01111111u8);
+        assert_eq!(cpu.get_status("C"), true);
+        assert_eq!(cpu.get_status("N"), false); //"N" should always reset
+    }
+
+    #[test]
+    fn testOP_ROL() {
+        assert!(false);
+    }
+
+    #[test]
+    fn testOP_ROR() {
+        assert!(false);
+    }
 }
