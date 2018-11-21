@@ -462,11 +462,27 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ROL() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.SEC();
+        cpu.LDA(ImmediateAM{address: 0b01111110u8});
+        cpu.ROL(AccumulatorAM); 
+
+        assert_eq!(cpu.a, 0b11111101u8);
+        assert_eq!(cpu.get_status("C"), false);
+        assert_eq!(cpu.get_status("N"), true);
     }
 
     #[test]
     fn testOP_ROR() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.SEC();
+        cpu.LDA(ImmediateAM{address: 0b01111110u8});
+        cpu.ROR(AccumulatorAM); 
+
+        assert_eq!(cpu.a, 0b10111111u8);
+        assert_eq!(cpu.get_status("C"), false);
+        assert_eq!(cpu.get_status("N"), true);
     }
 }

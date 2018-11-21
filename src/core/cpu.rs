@@ -348,15 +348,54 @@ impl CPU {
         self.set_zn(b);
         am.save(self, b);
     }
+
     /// ROL
     /// Rotate Left
-    pub fn ROL(&self) {}
+    pub fn ROL <AM: AddressingMode>(&mut self, am: AM){
+        let mut b: u8 = am.load(self);
+
+        //End result of Carry
+        let new_C = if b & 128 == 128 {
+            true
+        } else {false};
+
+        //Perform shift.
+        b <<= 1;
+
+        //Check end result of bit 1.
+        if self.get_status("C") {
+            b |= 1;
+        }
+
+        self.set_status(0,new_C);
+        self.set_zn(b);
+        am.save(self, b);
+
+    }
+
     /// ROR
     /// Rotate Right
-    pub fn ROR(&self) {}
+    /// Available on Microprocessors after June, 1976.
+    pub fn ROR <AM: AddressingMode>(&mut self, am: AM){
+        let mut b: u8 = am.load(self);
 
+        //End result of Carry
+        let new_C = if b & 1 == 1 {
+            true
+        } else { false };
 
+        //Perform shift
+        b >>= 1;
 
+        //Check end result of bit 7
+        if self.get_status("C") {
+            b |= 128;
+        }
+
+        self.set_status(0, new_C);
+        self.set_zn(b);
+        am.save(self, b);
+    }
 } //IMPL CPU
 
 /*
