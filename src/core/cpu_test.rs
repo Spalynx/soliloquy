@@ -506,12 +506,42 @@ pub mod cpu_test {
         cpu.DEC(ZeroPageAM{address: 0xFF});
 
         assert_eq!(ZeroPageAM{address: 0xFF}.load(&mut cpu), 127);
-        assert_eq!(cpu.get_status("N", false);
+        assert_eq!(cpu.get_status("N"), false);
     }
     #[test]
-    fn testOP_DEX() { assert!(false);}
+    fn testOP_DEX() {
+        let mut cpu = super::CPU::new();
+
+        //Testing Z flag in relation to DEX, and proper decrement.
+        cpu.x = 1;
+        cpu.DEX();
+        assert_eq!(cpu.get_status("Z"), true);
+        assert_eq!(cpu.x, 0);
+       
+        //Same for N flag in relation to DEX.
+        cpu.x = 128;
+        cpu.set_status(7, true);
+        cpu.DEX();
+        assert_eq!(cpu.get_status("N"), false);
+        assert_eq!(cpu.x, 127);
+    }
     #[test]
-    fn testOP_DEY() { assert!(false);}
+    fn testOP_DEY() {
+        let mut cpu = super::CPU::new();
+
+        //Testing Z flag in relation to DEY, and proper decrement.
+        cpu.y = 1;
+        cpu.DEY();
+        assert_eq!(cpu.get_status("Z"), true);
+        assert_eq!(cpu.y, 0);
+       
+        //Same for N flag in relation to DEY.
+        cpu.y = 128;
+        cpu.set_status(7, true);
+        cpu.DEY();
+        assert_eq!(cpu.get_status("N"), false);
+        assert_eq!(cpu.y, 127);
+    }
     #[test]
     fn testOP_INC() { assert!(false);}
     #[test]

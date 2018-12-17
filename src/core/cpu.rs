@@ -395,49 +395,49 @@ impl CPU {
 
     /// DEC
     /// "Decrement Memory By One"
-    pub fn DEC() {}
+    pub fn DEC <AM: AddressingMode>(&mut self, am: AM){}
     /// DEX
     /// "Decrement Index Register X by One"
-    pub fn DEX() {}
+    pub fn DEX(&mut self) {}
     /// DEY
     /// "Decrement Index Register Y by One"
-    pub fn DEY() {}
+    pub fn DEY(&mut self) {}
     /// INC
     /// "Increment Memory By One"
-    pub fn INC() {}
+    pub fn INC(&mut self) {}
     /// INX
     /// "Increment Index Register X by One"
-    pub fn INX() {}
+    pub fn INX(&mut self) {}
     /// INY
     /// "Increment Index Register Y by One"
-    pub fn INY() {}
+    pub fn INY(&mut self) {}
     /// STA
     /// "Store Accumulator in Memory"
-    pub fn STA() {}
+    pub fn STA(&mut self) {}
     /// STX
     /// "Store Index Register X in Memory"
-    pub fn STX() {}
+    pub fn STX(&mut self) {}
     /// STY
     /// "Store Index Register Y in Memory"
-    pub fn STY() {}
+    pub fn STY(&mut self) {}
     /// TAX
     /// "Transfer Accumulator to Index X"
-    pub fn TAX() {}
+    pub fn TAX(&mut self) {}
     /// TAY
     /// "Transfer Accumulator to Index Y"
-    pub fn TAY() {}
+    pub fn TAY(&mut self) {}
     /// TSX
     /// "Transfer Stack Pointer to Index"
-    pub fn TSX() {}
+    pub fn TSX(&mut self) {}
     /// TXA
     /// "Transfer Index X to Accumulator"
-    pub fn TXA() {}
+    pub fn TXA(&mut self) {}
     /// TXS
     /// "Transfer Index X to Stack Pointer"
-    pub fn TXS() {}
+    pub fn TXS(&mut self) {}
     /// TYA
     /// "Transfer Index Y to Accumulator"
-    pub fn TYA() {}
+    pub fn TYA(&mut self) {}
 } //IMPL CPU
 
 /*
