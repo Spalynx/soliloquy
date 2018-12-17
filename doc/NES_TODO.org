@@ -117,13 +117,25 @@ CLOSED: [2018-11-21 Wed 10:46]
 **** DONE testOP_ROR
 CLOSED: [2018-11-21 Wed 10:31]
 - State "DONE"       from "TODO"       [2018-11-21 Wed 10:31]
-** TODO [0%] v0.1.3 : "Register/Memory Manipulation"
-*** TODO DEC : "Increment Memory By One"
-**** TODO testOP_DEC
-*** TODO DEX : "Decrement Index Register X by One"
-**** TODO testOP_DEX
-*** TODO DEY : "Decrement Index Register Y by One"
-**** TODO testOP_DEY
+** TODO [20%] v0.1.3 : "Register/Memory Manipulation"
+*** DONE DEC : "Increment Memory By One"
+CLOSED: [2018-12-17 Mon 17:46]
+- State "DONE"       from "TODO"       [2018-12-17 Mon 17:46]
+**** DONE testOP_DEC
+CLOSED: [2018-12-17 Mon 17:14]
+- State "DONE"       from "TODO"       [2018-12-17 Mon 17:14]
+*** DONE DEX : "Decrement Index Register X by One"
+CLOSED: [2018-12-17 Mon 17:46]
+- State "DONE"       from "TODO"       [2018-12-17 Mon 17:46]
+**** DONE testOP_DEX
+CLOSED: [2018-12-17 Mon 17:14]
+- State "DONE"       from "TODO"       [2018-12-17 Mon 17:14]
+*** DONE DEY : "Decrement Index Register Y by One"
+CLOSED: [2018-12-17 Mon 17:46]
+- State "DONE"       from "TODO"       [2018-12-17 Mon 17:46]
+**** DONE testOP_DEY
+CLOSED: [2018-12-17 Mon 17:14]
+- State "DONE"       from "TODO"       [2018-12-17 Mon 17:14]
 *** TODO INC : "Increment Memory By One"
 **** TODO testOP_INC
 *** TODO INX : "Increment Index Register X by One"

@@ -395,13 +395,36 @@ impl CPU {
 
     /// DEC
     /// "Decrement Memory By One"
-    pub fn DEC <AM: AddressingMode>(&mut self, am: AM){}
+    /// Subtracts 1 from a memory location, changing the "Z" and "N" flags based
+    ///  upon the resulting value.
+    /// Theoretically, this is used by two's complement subtraction.
+    /// As far as I know, implementing actual twos complement would be slower.
+    pub fn DEC <AM: AddressingMode>(&mut self, am: AM){
+        let dec_M = am.load(self) - 1;
+
+        self.set_zn(dec_M);
+        am.save(self, dec_M);
+    }
     /// DEX
     /// "Decrement Index Register X by One"
-    pub fn DEX(&mut self) {}
+    /// Decrements register X by one, and sets "Z" if the result is 0, and
+    ///  sets "N" if the result is negative.
+    pub fn DEX(&mut self) {
+        let dec_X = self.x - 1;
+
+        self.set_zn(dec_X);
+        self.x = dec_X;
+    }
     /// DEY
     /// "Decrement Index Register Y by One"
-    pub fn DEY(&mut self) {}
+    /// Decrements register Y by one, and sets "Z" if the result is 0, and
+    ///  sets "N" if the result is negative.
+    pub fn DEY(&mut self) {
+        let dec_Y = self.y - 1;
+
+        self.set_zn(dec_Y);
+        self.y = dec_Y;
+    }
     /// INC
     /// "Increment Memory By One"
     pub fn INC(&mut self) {}
