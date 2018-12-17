@@ -1,4 +1,4 @@
-/*  Unit test module of the MOS 6052 CPU (cpu.rs).
+ /*  Unit test module of the MOS 6052 CPU (cpu.rs).
  *  Author: Spalynx
  *  Init: 6/17/18
  */
@@ -487,7 +487,43 @@ pub mod cpu_test {
     }
 
     #[test]
-    fn testOP_TYA() { assert!(false);}
+    fn testOP_DEC() {
+        let mut cpu = super::CPU::new();
+
+        //Testing Z flag in relation to DEC.
+        cpu.memory.set(0x755, 1);
+
+        cpu.DEC(AbsoluteAM{address: 0x755});
+        assert_eq!(cpu.memory.get(0x755), 0);
+        assert_eq!(cpu.get_status("Z"), true);
+        
+        //Testing N flag in relation to DEC.
+        // Setting the value to 128 (and N flag to true), and seeing if
+        //  the N flag is modified on decrement.
+        cpu.set_status(7, true);
+        ZeroPageAM{address: 0xFF}.save(&mut cpu, 128);
+
+        cpu.DEC(ZeroPageAM{address: 0xFF});
+
+        assert_eq!(ZeroPageAM{address: 0xFF}.load(&mut cpu), 127);
+        assert_eq!(cpu.get_status("N", false);
+    }
+    #[test]
+    fn testOP_DEX() { assert!(false);}
+    #[test]
+    fn testOP_DEY() { assert!(false);}
+    #[test]
+    fn testOP_INC() { assert!(false);}
+    #[test]
+    fn testOP_INX() { assert!(false);}
+    #[test]
+    fn testOP_INY() { assert!(false);}
+    #[test]
+    fn testOP_STA() { assert!(false);}
+    #[test]
+    fn testOP_STX() { assert!(false);}
+    #[test]
+    fn testOP_STY() { assert!(false);}
     #[test]
     fn testOP_TXS() { assert!(false);}
     #[test]
@@ -499,21 +535,5 @@ pub mod cpu_test {
     #[test]
     fn testOP_TAX() { assert!(false);}
     #[test]
-    fn testOP_STY() { assert!(false);}
-    #[test]
-    fn testOP_STX() { assert!(false);}
-    #[test]
-    fn testOP_STA() { assert!(false);}
-    #[test]
-    fn testOP_INY() { assert!(false);}
-    #[test]
-    fn testOP_INX() { assert!(false);}
-    #[test]
-    fn testOP_INC() { assert!(false);}
-    #[test]
-    fn testOP_DEY() { assert!(false);}
-    #[test]
-    fn testOP_DEX() { assert!(false);}
-    #[test]
-    fn testOP_DEC() { assert!(false);}
+    fn testOP_TYA() { assert!(false);}
 }

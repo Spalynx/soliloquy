@@ -1,6 +1,5 @@
 /*  Emulates the MOS Technology 6052 CPU of the NES.
  *  Author: Spalynx
- *  Init: 12/8/17
  */
 
 //Because OPCODES are cooler in CAPS!
