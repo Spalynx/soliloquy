@@ -543,11 +543,50 @@ pub mod cpu_test {
         assert_eq!(cpu.y, 127);
     }
     #[test]
-    fn testOP_INC() { assert!(false);}
+    fn testOP_INC() {
+        let mut cpu = super::CPU::new();
+
+        //Setting memory value for increment.
+        cpu.memory.set(0x755, 129);
+
+        //Increment value
+        cpu.INC(AbsoluteAM{address: 0x755});
+        //If bit 7 is on as a result of the increment, 'N' = true.
+        assert_eq!(cpu.memory.get(0x755), 130);
+        assert_eq!(cpu.get_status("N"), true);
+    }
     #[test]
-    fn testOP_INX() { assert!(false);}
+    fn testOP_INX() {
+        let mut cpu = super::CPU::new();
+
+        //Setting X to 255 for INX: Tests overflow add, 'N', and 'Z'.
+        cpu.x = 255;
+        cpu.set_status(7, true);
+        cpu.set_status(1, false);
+        cpu.INX();
+
+        //This increment should make X = 0, 'N' = false, 'Z' = true.
+        assert_eq!(cpu.get_status("Z"), true);
+        assert_eq!(cpu.get_status("N"), false);
+        assert_eq!(cpu.x, 0);
+    }
     #[test]
-    fn testOP_INY() { assert!(false);}
+    fn testOP_INY() {
+        //NOTE: A carbon copy of testOP_INX.
+        //TODO: BP tests might not be useful. Possibly prune dupes?
+        let mut cpu = super::CPU::new();
+
+        //Setting Y to 255 for INY: Tests overflow add, 'N', and 'Z'.
+        cpu.y = 255;
+        cpu.set_status(7, true);
+        cpu.set_status(1, false);
+        cpu.INY();
+
+        //This increment should make Y = 0, 'N' = false, 'Z' = true.
+        assert_eq!(cpu.get_status("Z"), true);
+        assert_eq!(cpu.get_status("N"), false);
+        assert_eq!(cpu.y, 0);
+    }
     #[test]
     fn testOP_STA() { assert!(false);}
     #[test]

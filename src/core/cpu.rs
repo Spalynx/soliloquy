@@ -427,7 +427,10 @@ impl CPU {
     }
     /// INC
     /// "Increment Memory By One"
-    pub fn INC(&mut self) {}
+    pub fn INC<AM: AddressingMode>(&mut self, am: AM){
+
+    }
+
     /// INX
     /// "Increment Index Register X by One"
     pub fn INX(&mut self) {}
