@@ -616,15 +616,56 @@ pub mod cpu_test {
         assert_eq!(cpu.memory.get(0x741), 255, "Did store happen?");
     }
     #[test]
-    fn testOP_TXS() { assert!(false);}
+    fn testOP_TXS() {
+        let mut cpu = super::CPU::new();
+
+        cpu.x = 255;
+        cpu.TXS();
+        assert_eq!(cpu.sp, 255); //No flag change.
+    }
     #[test]
-    fn testOP_TXA() { assert!(false);}
+    fn testOP_TSX() {
+        let mut cpu = super::CPU::new();
+
+        cpu.sp = 255;
+        cpu.TSX();
+        assert_eq!(cpu.x, 255); //Changes 'Z, N'
+        assert_eq!(cpu.get_status("N"), true);
+    }
     #[test]
-    fn testOP_TSX() { assert!(false);}
+    fn testOP_TXA() {
+        let mut cpu = super::CPU::new();
+
+        cpu.x = 255;
+        cpu.TXA();
+        assert_eq!(cpu.a, 255); //Changes 'Z, N'
+        assert_eq!(cpu.get_status("N"), true);
+    }
     #[test]
-    fn testOP_TAY() { assert!(false);}
+    fn testOP_TAY() {
+        let mut cpu = super::CPU::new();
+
+        cpu.a = 0;
+        cpu.TAY();
+        assert_eq!(cpu.y, 0); //Changes 'Z, N'
+        assert_eq!(cpu.get_status("Z"), true);
+    }
     #[test]
-    fn testOP_TAX() { assert!(false);}
+    fn testOP_TAX() {
+        let mut cpu = super::CPU::new();
+
+        cpu.a = 0;
+        cpu.TAX();
+        assert_eq!(cpu.x, 0); //Changes 'Z, N'
+        assert_eq!(cpu.get_status("Z"), true);
+    }
     #[test]
-    fn testOP_TYA() { assert!(false);}
+    fn testOP_TYA() {
+        let mut cpu = super::CPU::new();
+
+        cpu.y = 0;
+        cpu.TYA();
+        assert_eq!(cpu.a, 0); //Changes 'Z, N'
+        assert_eq!(cpu.get_status("Z"), true);
+    }
 }

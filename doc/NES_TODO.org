@@ -173,15 +173,25 @@ CLOSED: [2019-01-03 Thu 23:53]
 CLOSED: [2019-01-03 Thu 23:52]
 - State "DONE"       from "TODO"       [2019-01-03 Thu 23:52]
 *** TODO TAX : "Transfer Accumulator to Index X"
-**** TODO testOP_TAX
+**** DONE testOP_TAX
+CLOSED: [2019-01-04 Fri 11:57]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
 *** TODO TAY : "Transfer Accumulator to Index Y"
-**** TODO testOP_TAY
+**** DONE testOP_TAY
+CLOSED: [2019-01-04 Fri 11:57]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
 *** TODO TSX : "Transfer Stack Pointer to Index"
-**** TODO testOP_TSX
+**** DONE testOP_TSX
+CLOSED: [2019-01-04 Fri 11:57]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
 *** TODO TXA : "Transfer Index X to Accumulator"
-**** TODO testOP_TXA
+**** DONE testOP_TXA
+CLOSED: [2019-01-04 Fri 11:57]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
 *** TODO TXS : "Transfer Index X to Stack Pointer"
-**** TODO testOP_TXS
+**** DONE testOP_TXS
+CLOSED: [2019-01-04 Fri 11:57]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
 *** TODO TYA : "Transfer Index Y to Accumulator"
 **** TODO testOP_TYA
 ** TODO [0%] v0.1.4 : "General Operations"
