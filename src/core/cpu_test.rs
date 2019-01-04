@@ -588,11 +588,33 @@ pub mod cpu_test {
         assert_eq!(cpu.y, 0);
     }
     #[test]
-    fn testOP_STA() { assert!(false);}
+    fn testOP_STA() {
+        //Inane, but we're just gonna test a basic store.
+        let mut cpu = super::CPU::new();
+
+        cpu.a = 255;
+        cpu.STA(AbsoluteAM{address: 0x741});
+        assert_eq!(cpu.memory.get(0x741), 255, "Did store happen?");
+    }
     #[test]
-    fn testOP_STX() { assert!(false);}
+    fn testOP_STX() {
+        //Inane, but we're just gonna test a basic store.
+        let mut cpu = super::CPU::new();
+
+        cpu.x = 255;
+        cpu.STX(AbsoluteAM{address: 0x741});
+        assert_eq!(cpu.memory.get(0x741), 255, "Did store happen?");
+        
+    }
     #[test]
-    fn testOP_STY() { assert!(false);}
+    fn testOP_STY() {
+        //Inane, but we're just gonna test a basic store.
+        let mut cpu = super::CPU::new();
+
+        cpu.y = 255;
+        cpu.STY(AbsoluteAM{address: 0x741});
+        assert_eq!(cpu.memory.get(0x741), 255, "Did store happen?");
+    }
     #[test]
     fn testOP_TXS() { assert!(false);}
     #[test]

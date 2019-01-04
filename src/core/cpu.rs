@@ -452,13 +452,23 @@ impl CPU {
     }
     /// STA
     /// "Store Accumulator in Memory"
-    pub fn STA(&mut self) {}
+    /// Variable 'A' created because of borrowing issues, probably my bad.
+    pub fn STA<AM: AddressingMode>(&mut self, am: AM){
+        let A = self.a;
+        am.save(self, A);
+    }
     /// STX
     /// "Store Index Register X in Memory"
-    pub fn STX(&mut self) {}
+    pub fn STX<AM: AddressingMode>(&mut self, am: AM){
+        let X = self.x;
+        am.save(self, X);
+    }
     /// STY
     /// "Store Index Register Y in Memory"
-    pub fn STY(&mut self) {}
+    pub fn STY<AM: AddressingMode>(&mut self, am: AM){
+        let Y = self.y;
+        am.save(self, Y);
+    }
     /// TAX
     /// "Transfer Accumulator to Index X"
     pub fn TAX(&mut self) {}

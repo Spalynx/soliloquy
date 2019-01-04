@@ -117,7 +117,7 @@ CLOSED: [2018-11-21 Wed 10:46]
 **** DONE testOP_ROR
 CLOSED: [2018-11-21 Wed 10:31]
 - State "DONE"       from "TODO"       [2018-11-21 Wed 10:31]
-** TODO [40%] v0.1.3 : "Register/Memory Manipulation"
+** TODO [60%] v0.1.3 : "Register/Memory Manipulation"
 *** DONE DEC : "Increment Memory By One"
 CLOSED: [2018-12-17 Mon 17:46]
 - State "DONE"       from "TODO"       [2018-12-17 Mon 17:46]
@@ -154,12 +154,24 @@ CLOSED: [2019-01-03 Thu 23:19]
 **** DONE testOP_INY
 CLOSED: [2019-01-03 Thu 23:19]
 - State "DONE"       from "TODO"       [2019-01-03 Thu 23:19]
-*** TODO STA : "Store Accumulator in Memory"
-**** TODO testOP_STA
-*** TODO STX : "Store Index Register X in Memory"
-**** TODO testOP_STX
-*** TODO STY : "Store Index Register Y in Memory"
-**** TODO testOP_STY
+*** DONE STA : "Store Accumulator in Memory"
+CLOSED: [2019-01-03 Thu 23:53]
+- State "DONE"       from "TODO"       [2019-01-03 Thu 23:53]
+**** DONE testOP_STA
+CLOSED: [2019-01-03 Thu 23:52]
+- State "DONE"       from "TODO"       [2019-01-03 Thu 23:52]
+*** DONE STX : "Store Index Register X in Memory"
+CLOSED: [2019-01-03 Thu 23:53]
+- State "DONE"       from "TODO"       [2019-01-03 Thu 23:53]
+**** DONE testOP_STX
+CLOSED: [2019-01-03 Thu 23:52]
+- State "DONE"       from "TODO"       [2019-01-03 Thu 23:52]
+*** DONE STY : "Store Index Register Y in Memory"
+CLOSED: [2019-01-03 Thu 23:53]
+- State "DONE"       from "TODO"       [2019-01-03 Thu 23:53]
+**** DONE testOP_STY
+CLOSED: [2019-01-03 Thu 23:52]
+- State "DONE"       from "TODO"       [2019-01-03 Thu 23:52]
 *** TODO TAX : "Transfer Accumulator to Index X"
 **** TODO testOP_TAX
 *** TODO TAY : "Transfer Accumulator to Index Y"
