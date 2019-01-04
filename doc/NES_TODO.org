@@ -117,7 +117,9 @@ CLOSED: [2018-11-21 Wed 10:46]
 **** DONE testOP_ROR
 CLOSED: [2018-11-21 Wed 10:31]
 - State "DONE"       from "TODO"       [2018-11-21 Wed 10:31]
-** TODO [60%] v0.1.3 : "Register/Memory Manipulation"
+** DONE [100%] v0.1.3 : "Register/Memory Manipulation"
+CLOSED: [2019-01-04 Fri 13:36]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:36]
 *** DONE DEC : "Increment Memory By One"
 CLOSED: [2018-12-17 Mon 17:46]
 - State "DONE"       from "TODO"       [2018-12-17 Mon 17:46]
@@ -172,28 +174,42 @@ CLOSED: [2019-01-03 Thu 23:53]
 **** DONE testOP_STY
 CLOSED: [2019-01-03 Thu 23:52]
 - State "DONE"       from "TODO"       [2019-01-03 Thu 23:52]
-*** TODO TAX : "Transfer Accumulator to Index X"
+*** DONE TAX : "Transfer Accumulator to Index X"
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
 **** DONE testOP_TAX
 CLOSED: [2019-01-04 Fri 11:57]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
-*** TODO TAY : "Transfer Accumulator to Index Y"
+*** DONE TAY : "Transfer Accumulator to Index Y"
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
 **** DONE testOP_TAY
 CLOSED: [2019-01-04 Fri 11:57]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
-*** TODO TSX : "Transfer Stack Pointer to Index"
+*** DONE TSX : "Transfer Stack Pointer to Index"
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
 **** DONE testOP_TSX
 CLOSED: [2019-01-04 Fri 11:57]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
-*** TODO TXA : "Transfer Index X to Accumulator"
+*** DONE TXA : "Transfer Index X to Accumulator"
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
 **** DONE testOP_TXA
 CLOSED: [2019-01-04 Fri 11:57]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
-*** TODO TXS : "Transfer Index X to Stack Pointer"
+*** DONE TXS : "Transfer Index X to Stack Pointer"
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
 **** DONE testOP_TXS
 CLOSED: [2019-01-04 Fri 11:57]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 11:57]
-*** TODO TYA : "Transfer Index Y to Accumulator"
-**** TODO testOP_TYA
+*** DONE TYA : "Transfer Index Y to Accumulator"
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
+**** DONE testOP_TYA
+CLOSED: [2019-01-04 Fri 13:35]
+- State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
 ** TODO [0%] v0.1.4 : "General Operations"
 *** TODO BIT : "Test Bits in Memory with Accumulator"
 **** TODO testOP_BIT

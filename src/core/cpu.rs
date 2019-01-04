@@ -463,51 +463,98 @@ impl CPU {
         let X = self.x;
         am.save(self, X);
     }
+
     /// STY
     /// "Store Index Register Y in Memory"
     pub fn STY<AM: AddressingMode>(&mut self, am: AM){
         let Y = self.y;
         am.save(self, Y);
     }
+
     /// TAX
     /// "Transfer Accumulator to Index X"
-    pub fn TAX(&mut self) {}
+    pub fn TAX(&mut self) {
+        let A = self.a;
+        self.x = A;
+        self.set_zn(A);
+    }
+
     /// TAY
     /// "Transfer Accumulator to Index Y"
-    pub fn TAY(&mut self) {}
-    /// TSX
-    /// "Transfer Stack Pointer to Index"
-    pub fn TSX(&mut self) {}
+    pub fn TAY(&mut self) {
+        let Y = self.y;
+        self.a = Y;
+        self.set_zn(Y);
+
+    }
+
     /// TXA
     /// "Transfer Index X to Accumulator"
-    pub fn TXA(&mut self) {}
-    /// TXS
-    /// "Transfer Index X to Stack Pointer"
-    pub fn TXS(&mut self) {}
+    pub fn TXA(&mut self) {
+        let X = self.x;
+        self.a = X;
+        self.set_zn(X);
+
+    }
+
     /// TYA
     /// "Transfer Index Y to Accumulator"
-    pub fn TYA(&mut self) {}
-} //IMPL CPU
+    pub fn TYA(&mut self) {
+        let Y = self.y;
+        self.a = Y;
+        self.set_zn(Y);
 
-/*
+    }
+
+    /// TXS
+    /// "Transfer Index X to Stack Pointer"
+    pub fn TXS(&mut self) {
+        self.sp = self.x;
+
+    }
+
+    /// TSX
+    /// "Transfer Stack Pointer to Index"
+    pub fn TSX(&mut self) {
+        self.x = self.sp;
+
+    }
+
     //#! General Operations
-    pub fn BIT(&self) {}
+
+    /// BIT
+    /// No info specified
+    pub fn BIT(&self) {
+
+    }
+
     /// BRK
     /// Break. Throws a NMI, and increments the program counter by one.
-    // BRK is a 2 byte opcode. The first is #$00 and the second is a padding byte.
-    //Since the PC increment/decrement is handled in the step function, we skip that part.
+    ///  BRK is a 2 byte opcode. The first is #$00 and the second is a padding byte.
+    ///  Since the PC increment/decrement is handled in the step function,
+    ///  we skip that part.
     pub fn BRK(&mut self) {
         self.throw_interrupt("NMI");
 
         self.set_status_old("B", true);
         self.set_status_old("U", true);
     }
-    /// NOP
-    /// AFAIK, IT DOES NOTHING. PRODUCTIVITY.
-    /// Arguably, it looks like this opcode is meant to be a way to manually step.
-    pub fn NOP(&self) {}
-    pub fn RTI(&self) {}
 
+    /// NOP
+    /// AFAIK, IT DOES NOTHING... PRODUCTIVITY!
+    /// Arguably, it looks like this opcode is meant to be a way to manually step.
+    pub fn NOP(&self) {
+
+    }
+
+    /// RTI
+    /// No info specified
+    pub fn RTI(&self) {
+
+    }
+} //IMPL CPU
+
+/*
     //#! Stack Manipulation
     pub fn PHA(&self) {}
     pub fn PHP(&self) {}

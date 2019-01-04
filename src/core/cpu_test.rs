@@ -629,8 +629,7 @@ pub mod cpu_test {
 
         cpu.sp = 255;
         cpu.TSX();
-        assert_eq!(cpu.x, 255); //Changes 'Z, N'
-        assert_eq!(cpu.get_status("N"), true);
+        assert_eq!(cpu.x, 255); //No flag change.
     }
     #[test]
     fn testOP_TXA() {
@@ -667,5 +666,20 @@ pub mod cpu_test {
         cpu.TYA();
         assert_eq!(cpu.a, 0); //Changes 'Z, N'
         assert_eq!(cpu.get_status("Z"), true);
+    }
+
+    #[test]
+    pub fn testOP_BIT() {
+        assert!(false);
+    }
+
+    #[test]
+    pub fn testOP_BRK() {
+        assert!(false);
+    }
+
+    #[test]
+    pub fn testOP_RTI() {
+        assert!(false);
     }
 }
