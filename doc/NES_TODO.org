@@ -210,13 +210,19 @@ CLOSED: [2019-01-04 Fri 13:35]
 **** DONE testOP_TYA
 CLOSED: [2019-01-04 Fri 13:35]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
-** TODO [0%] v0.1.4 : "General Operations"
+** TODO [25%] v0.1.4 : "General Operations"
 *** TODO BIT : "Test Bits in Memory with Accumulator"
-**** TODO testOP_BIT
+**** DONE testOP_BIT
+CLOSED: [2019-01-05 Sat 13:27]
+- State "DONE"       from "TODO"       [2019-01-05 Sat 13:27]
 *** TODO BRK : "Break"
 **** TODO testOP_BRK
-*** TODO NOP : "No Operation"
-**** TODO testOP_NOP
+*** DONE NOP : "No Operation"
+CLOSED: [2019-01-05 Sat 13:28]
+- State "DONE"       from "TODO"       [2019-01-05 Sat 13:28]
+**** DONE testOP_NOP
+CLOSED: [2019-01-05 Sat 13:28]
+- State "DONE"       from "TODO"       [2019-01-05 Sat 13:28]
 *** TODO RTI : "Return From Interrupt"
 **** TODO testOP_RTI
 ** TODO [0%] v0.1.5 : "Stack Manipulation"

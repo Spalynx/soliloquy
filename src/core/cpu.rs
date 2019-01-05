@@ -49,7 +49,7 @@ pub struct CPU {
     pub x:              u8,     // X register.
     pub y:              u8,     // Y register.
 
-    pub status:          u8,    // CPU Flags See [1] for reference
+    pub status:         u8,     // CPU Flags See [1] for reference
 
     pub interrupt:      u8,     // Interrupt type to perform.
     pub stall:          u8,     // Number of cycles to stall.
@@ -66,18 +66,18 @@ impl CPU {
     pub fn new() -> CPU {
         CPU{
             memory:         MEM::new(),
-            cycles:         0,    //Number of cycles
-            pc:             0,    //Program Counter
-            sp:             0,     //Stack Pointer
+            cycles:         0,		//Number of cycles
+            pc:             0,		//Program Counter
+            sp:             0,		//Stack Pointer, \S 8.13 in KIM-1
 
-            a:              0,     //Accumulator
-            x:              0,     // x register
-            y:              0,     // y register
+            a:              0,		//Accumulator
+            x:              0,		// x register
+            y:              0,		// y register
 
-            status:         0,      //cpu flags
+            status:         0,		//cpu flags
 
-            interrupt:      0,     // interrupt type to perform
-            stall:          0,    // number of cycles to stall
+            interrupt:      0,		// interrupt type to perform
+            stall:          0,		// number of cycles to stall
         }
     }
     /// Though memory is already initialized, I felt it appropriate to
@@ -523,8 +523,34 @@ impl CPU {
     //#! General Operations
 
     /// BIT
-    /// No info specified
+    /// Test Bits in Memory with Accumulator
+    /// Performans an AND between a memory location and the accumulator.
+    /// ONLY CHANGES THE 'N, V, Z' FLAGS!
+    ///   This is useful for testing one bit, and branching if 'Z' is set!
+	
+    /* TEMP! From KIM-1 Programming manual.
+    This instruction performs an AND between a memory location
+     and the accumulator but does not store the result of the AND into
+     the accumulator.
+            The symbolic notation is M /\ A.
+            The bit instruction affects the N flag with N being set to
+     the value of bit 7 of the memory being tested, the V flag with V
+     being set equal to bit 6 of the memory being tested and Z being set
+     by the result of the AND operation between the accumulator and the
+     memory if the result is Zero, Z is reset otherwise.  It does not
+     affect the accumulator.
+    */
     pub fn BIT(&self) {
+
+    }
+
+
+    /// NOP
+    /// AFAIK, IT DOES NOTHING... PRODUCTIVITY!
+    /// Arguably, it looks like this opcode is meant to be a way to manually step.
+    /// This Opcode has given some anxiety, because of unofficial opcodes that are
+    ///   effectively a NOP, but people have implied have differing timings.
+    pub fn NOP(&self) {
 
     }
 
@@ -536,17 +562,13 @@ impl CPU {
     pub fn BRK(&mut self) {
         self.throw_interrupt("NMI");
 
-        self.set_status_old("B", true);
-        self.set_status_old("U", true);
+        // PC + 2 \|/ (FFFE) -> PCL (FFFF) -> PCH
+        // Microprocessor transfers control to the interrupt vector
+        // The B flag is stored on the stack, at stack pointer plus 1, containing
+        // a one in the break bit position. Indicating the interrupt was caused
+        // by a BRK instruction.
+        // The B bit in the stack contains a 0 if it was caused by a normal IRQ.
     }
-
-    /// NOP
-    /// AFAIK, IT DOES NOTHING... PRODUCTIVITY!
-    /// Arguably, it looks like this opcode is meant to be a way to manually step.
-    pub fn NOP(&self) {
-
-    }
-
     /// RTI
     /// No info specified
     pub fn RTI(&self) {

@@ -670,12 +670,25 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_BIT() {
-        assert!(false);
+        //A little hard to test, best way is to try to trigger each flag.
+        let mut cpu = super::CPU::new();
+
+        //Fill first memory location. Sets 'N, V'.
+        cpu.memory.set(0xAA, 0b11000000); 
+        //Run comparison.
+        cpu.BIT(AbsoluteAM{address: 0xAA});
+        assert!(cpu.get_status("N"));
+        assert!(cpu.get_status("V"));
+
+        //Fill second memory location. Sets 'Z'.
+        cpu.memory.set(0xAB, 0);
+        //Run comparison on the second one.
+        cpu.BIT(AbsoluteAM{address: 0xAB});
+        assert!(cpu.get_status("Z"));
     }
 
     #[test]
     pub fn testOP_BRK() {
-        assert!(false);
     }
 
     #[test]
