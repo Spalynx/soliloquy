@@ -682,6 +682,7 @@ pub mod cpu_test {
 
         //Fill second memory location. Sets 'Z'.
         cpu.memory.set(0xAB, 0);
+        cpu.a = 0b11111111;
         //Run comparison on the second one.
         cpu.BIT(AbsoluteAM{address: 0xAB});
         assert!(cpu.get_status("Z"));
@@ -689,6 +690,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_BRK() {
+        assert!(false);
     }
 
     #[test]

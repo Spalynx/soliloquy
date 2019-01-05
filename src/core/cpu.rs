@@ -540,7 +540,20 @@ impl CPU {
      memory if the result is Zero, Z is reset otherwise.  It does not
      affect the accumulator.
     */
-    pub fn BIT(&self) {
+    pub fn BIT<AM: AddressingMode>(&mut self, am: AM){
+        let M = am.load(self);
+
+        //Set bit 7 ('N') to the value being tested.
+        if M & 0b10000000 != 0 	{ self.set_status(7, true); }
+        else 			{ self.set_status(7, false); }
+
+        //Set bit 6 ('V') to the value being tested.
+        if M & 0b01000000 != 0 	{ self.set_status(6, true); }
+        else 			{ self.set_status(6, false); }
+
+        //Set bit 0 ('Z') if the value is zero.
+        if (M & self.a) == 0	{ self.set_status(1, true); }
+        else 			{ self.set_status(1, false); }
 
     }
 
