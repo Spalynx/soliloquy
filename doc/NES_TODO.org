@@ -210,7 +210,9 @@ CLOSED: [2019-01-04 Fri 13:35]
 **** DONE testOP_TYA
 CLOSED: [2019-01-04 Fri 13:35]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
-** TODO [100%] v0.1.4 : "General Operations"
+** DONE [100%] v0.1.4 : "General Operations"
+CLOSED: [2019-02-12 Tue 16:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 *** DONE BIT : "Test Bits in Memory with Accumulator"
 CLOSED: [2019-01-05 Sat 13:45]
 - State "DONE"       from "TODO"       [2019-01-05 Sat 13:45]
@@ -231,23 +233,33 @@ CLOSED: [2019-01-05 Sat 13:28]
 CLOSED: [2019-02-11 Mon 23:12]
 - State "DONE"       from "TODO"       [2019-02-11 Mon 23:12]
 **** TODO testOP_RTI
-** TODO [50%] v0.1.5 : "Stack Manipulation"
+** DONE [100%] v0.1.5 : "Stack Manipulation"
+CLOSED: [2019-02-12 Tue 16:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 *** DONE RTS : "Return from Subroutine"
 CLOSED: [2019-02-12 Tue 15:39]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
-*** TODO testOP_RTS
+*** DONE testOP_RTS
+CLOSED: [2019-02-12 Tue 16:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 *** DONE PHA : "Push Accumulator on Stack"
 CLOSED: [2019-02-12 Tue 15:39]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
-*** TODO testOP_PHA
+*** DONE testOP_PHA
+CLOSED: [2019-02-12 Tue 16:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 *** DONE PHP : "Push processor Status on Stack"
 CLOSED: [2019-02-12 Tue 15:39]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
-*** TODO testOP_PHP
+*** DONE testOP_PHP
+CLOSED: [2019-02-12 Tue 16:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 *** DONE PLP : "Pull processor Status from Stack"
 CLOSED: [2019-02-12 Tue 15:39]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
-*** TODO testOP_PLP
+*** DONE testOP_PLP
+CLOSED: [2019-02-12 Tue 16:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
 ** TODO [0%] v0.1.6 : "Comparators"
 *** TODO CMP : "Compare Accumulator" 
@@ -277,10 +289,18 @@ CLOSED: [2019-02-12 Tue 15:39]
 *** TODO testOP_JSR
 *** TODO testOP_BVC
 *** TODO testOP_BVS
-** TODO [0%] v0.1.8 : "B/Misc."
-*** TODO Accumulator Emulation (Switch statement with OPCODE interp)
+** TODO [0%] v0.1.8 : "Opcode Parsing/Misc."
+*** TODO Opcode Parsing (Switch statement with OPCODE interp)
+*** TODO CPU timing setup
+*** TODO General interrupt work (scheduling etc.)
+*** TODO Start/Reset/Reboot operations
+*** TODO Stepped/Auto ROM feeding.
+** TODO [0%] v0.1.9 : "CPU testing"
+*** TODO Generalized CPU testing
+Mainly using blargg's test ROMS. I'd like to go through the majority of the CPU list on this link: https://wiki.nesdev.com/w/index.php/Emulator_tests
 * v0.2 : "Memory"
 * v0.3 : "PPU"
+* v0.4 : "APU"
 * Notes
 //[1]	0: carry flag
 //	1: zero flag

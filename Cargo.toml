@@ -1,11 +1,11 @@
 [package]
 name = "soliloquy"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Spalynx <Spalynx@gmail.com>"]
 
 readme = "README.md"
 keywords = ["soliloquy", "nes", "Nintendo", "Entertainment", "System", "Emulator"]
-license = "WTFPL"
+license = "WTFPL2"
 
 publish = false
 

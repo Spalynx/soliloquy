@@ -187,6 +187,15 @@ pub mod cpu_test {
     }
 
 
+    #[test]
+    pub fn test_stack_overflow(){
+        assert!(false);
+    }
+
+    #[test]
+    pub fn test_stack_underflow(){
+        assert!(false);
+    }
 
     //~~~CPU~OPCODES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -689,12 +698,49 @@ pub mod cpu_test {
     }
 
     #[test]
-    pub fn testOP_BRK() {
-        assert!(false);
+    pub fn testOP_BRK() { assert!(false); } 
+    #[test]
+    pub fn testOP_RTI() { assert!(false); }
+
+    #[test]
+    pub fn testOP_PHA() {
+        let mut cpu = super::CPU::new();
+        cpu.a = 250;
+        cpu.PHA();
+        assert_eq!(cpu.stack_pop(), 250,  "A != stack top val!");
     }
 
     #[test]
-    pub fn testOP_RTI() {
-        assert!(false);
+    pub fn testOP_PLA() {
+        let mut cpu = super::CPU::new();
+        cpu.stack_push(0xFA);
+        cpu.PLA();
+        assert_eq!(cpu.a, 0xFA,  "A != Popped value!");
     }
+
+    #[test]
+    pub fn testOP_PHP() {
+        let mut cpu = super::CPU::new();
+        cpu.status = 250;
+        cpu.PHP();
+        assert_eq!(cpu.stack_pop(), 250,  "A != stack top val!");
+    }
+
+    #[test]
+    pub fn testOP_PLP() {
+        let mut cpu = super::CPU::new();
+        cpu.stack_push(0xFA);
+        cpu.PLP();
+        assert_eq!(cpu.status, 0xFA,  "A != Popped value!");
+    }
+
+    #[test]
+    pub fn testOP_RTS() {
+        let mut cpu = super::CPU::new();
+        cpu.stack_push(0b10000000);
+        cpu.stack_push(0b00000001);
+        cpu.RTS();
+        assert_eq!(cpu.pc, (0b1000000000000001 + 1), "PC != RTS pulls!");
+    }
+
 }
