@@ -231,13 +231,54 @@ CLOSED: [2019-01-05 Sat 13:28]
 CLOSED: [2019-02-11 Mon 23:12]
 - State "DONE"       from "TODO"       [2019-02-11 Mon 23:12]
 **** TODO testOP_RTI
-** TODO [0%] v0.1.5 : "Stack Manipulation"
-*** TODO RTS : "Return from Subroutine"
-*** TODO PHA : "Push Accumulator on Stack"
-*** TODO PHP : "Push processor Status on Stack"
-*** TODO PLP : "Pull processor Status from Stack"
+** TODO [50%] v0.1.5 : "Stack Manipulation"
+*** DONE RTS : "Return from Subroutine"
+CLOSED: [2019-02-12 Tue 15:39]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
+*** TODO testOP_RTS
+*** DONE PHA : "Push Accumulator on Stack"
+CLOSED: [2019-02-12 Tue 15:39]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
+*** TODO testOP_PHA
+*** DONE PHP : "Push processor Status on Stack"
+CLOSED: [2019-02-12 Tue 15:39]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
+*** TODO testOP_PHP
+*** DONE PLP : "Pull processor Status from Stack"
+CLOSED: [2019-02-12 Tue 15:39]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
+*** TODO testOP_PLP
+- State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
 ** TODO [0%] v0.1.6 : "Comparators"
+*** TODO CMP : "Compare Accumulator" 
+*** TODO CPX : "Compare X Register"
+*** TODO CPY : "Compare Y Register"
+*** TODO testOP_CMP
+*** TODO testOP_CPX
+*** TODO testOP_CPY
 ** TODO [0%] v0.1.7 : "Branching/Jumping"
+*** TODO BCC
+*** TODO BCS
+*** TODO BEQ
+*** TODO BMI
+*** TODO BNE
+*** TODO BPL
+*** TODO JMP
+*** TODO JSR
+*** TODO BVC
+*** TODO BVS
+*** TODO testOP_BCC
+*** TODO testOP_BCS
+*** TODO testOP_BEQ
+*** TODO testOP_BMI
+*** TODO testOP_BNE
+*** TODO testOP_BPL
+*** TODO testOP_JMP
+*** TODO testOP_JSR
+*** TODO testOP_BVC
+*** TODO testOP_BVS
+** TODO [0%] v0.1.8 : "B/Misc."
+*** TODO Accumulator Emulation (Switch statement with OPCODE interp)
 * v0.2 : "Memory"
 * v0.3 : "PPU"
 * Notes

@@ -100,6 +100,13 @@ impl CPU {
 
     ///Meta-Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ///--------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    fn parse_opcode(&mut self, OP: u8){
+        match OP {
+            0x00    =>  self.BRK(), 
+            _       =>  panic!("OPCODE not implemented yet."),
+        }
+    }
 
     /// Runs a cpu cycle with each call
     /// TODO: At the moment, I'm not
@@ -617,6 +624,7 @@ impl CPU {
         self.pc = 0xFFFE
     }
     /// RTI
+    /// Return from Interrupt
     /// Restores the microprocessor to the state previous to the interrupt.
     /// To do this, it reads P and PC from the stack into their places. 
     /// NOTE: Ignores P bits 4 (B) and 5 (s). Checking the B flag (post BRK) must
@@ -629,15 +637,52 @@ impl CPU {
         self.status = P & 0b11001111;
         self.pc     = bytes_to_word!(PCH as u16, PCL as u16);
     }
+
+    //#! Stack Manipulation
+
+    /// PHA
+    /// Push Accumulator on Stack
+    /// Pushes the current accumulator value on the stack.
+    pub fn PHA(&mut self) {
+        let A: u8 = self.a;
+        self.stack_push(A);
+    }
+    /// PLA
+    /// Pull Accumulator from Stack
+    /// Pops the top value off of the stack and places in accumulator.
+    /// NOTE: This implies that popping might not clear the previous value!
+    pub fn PLA(&mut self) {
+        let A: u8 = self.stack_pop();
+        self.a = A;
+    }
+    /// PHP
+    /// Push Processor Status on Stack
+    /// Pushes the status register (P) _unchanged_ onto the stack.
+    pub fn PHP(&mut self) {
+        let P: u8 = self.status;
+        self.stack_push(P); 
+    }
+    /// PLP
+    /// Pull Processor Status from Stack
+    /// Pops the top stack value into the status register (P).
+    pub fn PLP(&mut self) {
+        let P: u8 = self.stack_pop();
+        self.status = P;
+    }
+    /// RTS
+    /// Return From Subroutine
+    /// Loads PCL then PCH from stack, into PC and increments by 1 to point 
+    /// to the instruction following the JSR.
+    /// Note: Since two pops occur, SP gets decremented twice (technically incremented).
+    pub fn RTS(&mut self) {
+        let PCL: u16 = self.stack_pop() as u16;
+        let PCH: u16 = self.stack_pop() as u16;
+
+        self.pc = bytes_to_word!(PCH, PCL) + 1;
+    }
 } //IMPL CPU
 
 /*
-    //#! Stack Manipulation
-    pub fn PHA(&self) {}
-    pub fn PHP(&self) {}
-    pub fn PLA(&self) {}
-    pub fn PLP(&self) {}
-    pub fn RTS(&self) {}
 
     //#! Comparators (Probably used in jumping)
     ///CMP (CoMPare accumulator) 
@@ -648,10 +693,12 @@ impl CPU {
     ///set. The equal (Z) and sign (S) flags will be set based on equality or lack
     ///thereof and the sign (i.e. A>=$80) of the accumulator. 
     pub fn CMP(&self) {}
+
     ///CPX (ComPare X register) 
     ///Operation and flag results are identical to equivalent mode accumulator CMP
     ///ops. 
     pub fn CPX(&self) {}
+
     ///CPY (ComPare Y register) 
     ///Operation and flag results are identical to equivalent mode accumulator CMP
     ///ops. 
