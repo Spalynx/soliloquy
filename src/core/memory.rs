@@ -46,6 +46,19 @@ impl MEM {
         let zp = address & 255;
         self.values[zp as usize] = val;
     }
+
+    //Pushes a byte onto the stack.
+    //Called by cpu.stack_push to actually modify memory.
+    pub fn mem_stack_push(&mut self, sp: u8, val: u8){
+        self.values[(0xFF + (sp as usize))] = val;
+    }
+    //Pops an item off of the stack, and returns it as a u8.
+    //Called by cpu.stack_pop to actually modify memory.
+    pub fn mem_stack_pop(&mut self, sp: u8) -> u8{
+        let temp: u8 = self.values[(0xFF + (sp as usize))];
+        self.values[(0xFF + (sp as usize))] = 0;
+        return temp;
+    }
 }
 
 

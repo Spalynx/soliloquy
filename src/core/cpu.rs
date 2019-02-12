@@ -19,6 +19,14 @@
     macro_rules! bytes_to_word {
         ($h:expr,$l:expr) => (($h << 8) | ($l & 0xff));
     }
+    #[macro_use]
+    macro_rules! word_to_h_byte {
+        ($w:expr) => ($w >> 8);
+    }
+    #[macro_use]
+    macro_rules! word_to_l_byte {
+        ($w:expr) => ($w & 0xff);
+    }
 
 //CPU=DEFINITION================================================================
 //==============================================================================
@@ -39,20 +47,22 @@
 /// it's instruction set, and it commands to parse instructinos.
 pub struct CPU {
     pub memory:         MEM,
-    pub cycles:         u64,    //Clock cycle counter.
-                                //      Other hardware relies on this. [5]
-    pub pc:             u16,    //Program Counter - 65536 memory locations.
-    pub sp:             u8,     //Stack Pointer - Accessed using interrupts,
-                                //     pulls, pushes, and transfers.
 
-    pub a:              u8,     // Accumulator.
-    pub x:              u8,     // X register.
-    pub y:              u8,     // Y register.
+    pub pc:             u16,        //Program Counter - 65536 memory locations.
+    pub cycles:         u64,        //Clock cycle counter.
+                                    //      Other hardware relies on this. [5]
 
-    pub status:         u8,     // CPU Flags See [1] for reference
+    pub sp:             u8,         //Stack Pointer - Accessed using interrupts,
+                                    //     pulls, pushes, and transfers.
 
-    pub interrupt:      u8,     // Interrupt type to perform.
-    pub stall:          u8,     // Number of cycles to stall.
+    pub a:              u8,         // Accumulator.
+    pub x:              u8,         // X register.
+    pub y:              u8,         // Y register.
+
+    pub status:         u8,         // CPU Flags See [1] for reference
+
+    pub interrupt:      u8,         // Interrupt type to perform.
+    pub stall:          u8,         // Number of cycles to stall.
 }
 
 
@@ -66,18 +76,20 @@ impl CPU {
     pub fn new() -> CPU {
         CPU{
             memory:         MEM::new(),
-            cycles:         0,		//Number of cycles
-            pc:             0,		//Program Counter
-            sp:             0,		//Stack Pointer, \S 8.13 in KIM-1
 
-            a:              0,		//Accumulator
-            x:              0,		// x register
-            y:              0,		// y register
+            pc:             0,		        //Program Counter
+            cycles:         0,		        //Number of cycles
 
-            status:         0,		//cpu flags
+            sp:             0xFF,	        //Stack Pointer, \S 8.13 in KIM-1
 
-            interrupt:      0,		// interrupt type to perform
-            stall:          0,		// number of cycles to stall
+            a:              0,		        //Accumulator
+            x:              0,		        // x register
+            y:              0,		        // y register
+
+            status:         0,		        //cpu flags
+
+            interrupt:      0,		        // interrupt type to perform
+            stall:          0,		        // number of cycles to stall
         }
     }
     /// Though memory is already initialized, I felt it appropriate to
@@ -103,10 +115,6 @@ impl CPU {
         */
 
         1
-    }
-
-    fn parse_opcodes() {
-
     }
 
     /// Receives a string as a param, and throws one of the 3 (?) cpu
@@ -204,6 +212,20 @@ impl CPU {
             self.set_status(1, false);
             self.set_status(7, false);
         }
+    }
+
+
+    //The stack is on page 1 of memory. ($0100-$01FF)
+    //
+    fn stack_push(&mut self, val: u8){
+        self.memory.mem_stack_push(self.sp, val);
+        self.sp = self.sp - 1;
+    }
+    // Pops an item from the stack and returns it.
+    fn stack_pop(&mut self) -> u8 {
+        self.sp = self.sp + 1;
+
+        return self.memory.mem_stack_pop(self.sp);
     }
 
     ///CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -564,7 +586,6 @@ impl CPU {
     /// This Opcode has given some anxiety, because of unofficial opcodes that are
     ///   effectively a NOP, but people have implied have differing timings.
     pub fn NOP(&self) {
-
     }
 
     /// BRK
@@ -581,11 +602,32 @@ impl CPU {
         // a one in the break bit position. Indicating the interrupt was caused
         // by a BRK instruction.
         // The B bit in the stack contains a 0 if it was caused by a normal IRQ.
+
+        //Push PC to stack.
+        let mut PC = self.pc;
+        self.stack_push(word_to_h_byte!(PC) as u8);
+        self.stack_push(word_to_l_byte!(PC) as u8);
+
+        //Set BRK flag on status.
+        let mut P = self.status | 0b0010000;
+        //push P
+        self.stack_push(P);
+
+        //PC = Vector
+        self.pc = 0xFFFE
     }
     /// RTI
-    /// No info specified
-    pub fn RTI(&self) {
+    /// Restores the microprocessor to the state previous to the interrupt.
+    /// To do this, it reads P and PC from the stack into their places. 
+    /// NOTE: Ignores P bits 4 (B) and 5 (s). Checking the B flag (post BRK) must
+    /// done manually!
+    pub fn RTI(&mut self) {
+        let P:   u8 = self.stack_pop();
+        let PCL: u8 = self.stack_pop();
+        let PCH: u8 = self.stack_pop();
 
+        self.status = P & 0b11001111;
+        self.pc     = bytes_to_word!(PCH as u16, PCL as u16);
     }
 } //IMPL CPU
 

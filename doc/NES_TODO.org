@@ -210,14 +210,16 @@ CLOSED: [2019-01-04 Fri 13:35]
 **** DONE testOP_TYA
 CLOSED: [2019-01-04 Fri 13:35]
 - State "DONE"       from "TODO"       [2019-01-04 Fri 13:35]
-** TODO [50%] v0.1.4 : "General Operations"
+** TODO [100%] v0.1.4 : "General Operations"
 *** DONE BIT : "Test Bits in Memory with Accumulator"
 CLOSED: [2019-01-05 Sat 13:45]
 - State "DONE"       from "TODO"       [2019-01-05 Sat 13:45]
 **** DONE testOP_BIT
 CLOSED: [2019-01-05 Sat 13:27]
 - State "DONE"       from "TODO"       [2019-01-05 Sat 13:27]
-*** TODO BRK : "Break"
+*** DONE BRK : "Break"
+CLOSED: [2019-02-11 Mon 23:12]
+- State "DONE"       from "TODO"       [2019-02-11 Mon 23:12]
 **** TODO testOP_BRK
 *** DONE NOP : "No Operation"
 CLOSED: [2019-01-05 Sat 13:28]
@@ -225,10 +227,15 @@ CLOSED: [2019-01-05 Sat 13:28]
 **** DONE testOP_NOP
 CLOSED: [2019-01-05 Sat 13:28]
 - State "DONE"       from "TODO"       [2019-01-05 Sat 13:28]
-*** TODO RTI : "Return From Interrupt"
+*** DONE RTI : "Return From Interrupt"
+CLOSED: [2019-02-11 Mon 23:12]
+- State "DONE"       from "TODO"       [2019-02-11 Mon 23:12]
 **** TODO testOP_RTI
 ** TODO [0%] v0.1.5 : "Stack Manipulation"
 *** TODO RTS : "Return from Subroutine"
+*** TODO PHA : "Push Accumulator on Stack"
+*** TODO PHP : "Push processor Status on Stack"
+*** TODO PLP : "Pull processor Status from Stack"
 ** TODO [0%] v0.1.6 : "Comparators"
 ** TODO [0%] v0.1.7 : "Branching/Jumping"
 * v0.2 : "Memory"

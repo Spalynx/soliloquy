@@ -34,7 +34,7 @@ pub mod cpu_test {
         //Testing each struct field initialization.
         assert_eq!(test_cpu.cycles,   0);
         assert_eq!(test_cpu.pc,       0);
-        assert_eq!(test_cpu.sp,       0);
+        assert_eq!(test_cpu.sp,       0xFF);
         assert_eq!(test_cpu.x,        0);
         assert_eq!(test_cpu.y,        0);
         assert_eq!(test_cpu.status,   0);
