@@ -680,30 +680,57 @@ impl CPU {
 
         self.pc = bytes_to_word!(PCH, PCL) + 1;
     }
+
+    //#! Comparators (Probably used in jumping)
+
+    /// CMP
+    /// Compare Accumulator 
+    /// The purpose of the compare instruction is to allow the user
+    /// to compare a value in memory to the accumulator without changing
+    /// the value of the accumulator.
+    pub fn CMP<AM: AddressingMode>(&mut self, am: AM){
+        let M:      u8 = am.load(self);
+        let A:      u8 = self.a;
+        let sub:    i16 = A as i16 - M as i16;
+
+        self.set_status(0, M <= A);     //'C' set on memory being \leq accumulator.
+        self.set_status(1, A == M);     //'Z' set if two values are equal.
+        self.set_status(7, sub > 127);  //'N' set based on result bit 7
+    }
+
+    /// CPX 
+    /// Compare X Register
+    /// Seems to be the same thing as CMP but with X register.
+    /// Operation and flag results are identical to equivalent mode accumulator CMP
+    /// ops. 
+    pub fn CPX<AM: AddressingMode>(&mut self, am: AM){
+        let M:      u8 = am.load(self);
+        let X:      u8 = self.x;
+        let sub:    i16 = X as i16 - M as i16;
+
+        self.set_status(0, M <= X);     //'C' set on memory being \leq X.
+        self.set_status(1, X == M);     //'Z' set if two values are equal.
+        self.set_status(7, sub < 0);  //'N' set based on result bit 7
+    }
+
+    /// CPY 
+    /// Compare Y Register
+    /// Seems to be the same thing as CMP but with Y register.
+    /// Operation and flag results are identical to equivalent mode accumulator CMP
+    /// ops. 
+    pub fn CPY<AM: AddressingMode>(&mut self, am: AM){
+        let M:      u8 = am.load(self);
+        let Y:      u8 = self.y;
+        let sub:    i16 = Y as i16 - M as i16;
+
+        self.set_status(0, M <= Y);     //'C' set on memory being \leq Y.
+        self.set_status(1, Y == M);     //'Z' set if two values are equal.
+        self.set_status(7, sub < 0);   //'N' set based on result bit 7
+
+    }
 } //IMPL CPU
 
 /*
-
-    //#! Comparators (Probably used in jumping)
-    ///CMP (CoMPare accumulator) 
-    ///Affects Flags: S Z C 
-    ///+ add 1 cycle if page boundary crossed
-    ///Compare sets flags as if a subtraction had been carried out. If the value in the
-    ///accumulator is equal or greater than the compared value, the Carry will be
-    ///set. The equal (Z) and sign (S) flags will be set based on equality or lack
-    ///thereof and the sign (i.e. A>=$80) of the accumulator. 
-    pub fn CMP(&self) {}
-
-    ///CPX (ComPare X register) 
-    ///Operation and flag results are identical to equivalent mode accumulator CMP
-    ///ops. 
-    pub fn CPX(&self) {}
-
-    ///CPY (ComPare Y register) 
-    ///Operation and flag results are identical to equivalent mode accumulator CMP
-    ///ops. 
-    pub fn CPY(&self) {}
-
     //#! Branching/Jumping
     pub fn BCC(&self) {}
     pub fn BCS(&self) {}

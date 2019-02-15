@@ -261,13 +261,27 @@ CLOSED: [2019-02-12 Tue 15:39]
 CLOSED: [2019-02-12 Tue 16:30]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 16:30]
 - State "DONE"       from "TODO"       [2019-02-12 Tue 15:39]
-** TODO [0%] v0.1.6 : "Comparators"
-*** TODO CMP : "Compare Accumulator" 
-*** TODO CPX : "Compare X Register"
-*** TODO CPY : "Compare Y Register"
-*** TODO testOP_CMP
-*** TODO testOP_CPX
-*** TODO testOP_CPY
+** DONE [100%] v0.1.6 : "Comparators"
+CLOSED: [2019-02-15 Fri 08:59]
+- State "DONE"       from "TODO"       [2019-02-15 Fri 08:59]
+*** DONE CMP : "Compare Accumulator" 
+CLOSED: [2019-02-12 Tue 21:30]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 21:30]
+*** DONE CPX : "Compare X Register"
+CLOSED: [2019-02-12 Tue 21:34]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 21:34]
+*** DONE CPY : "Compare Y Register"
+CLOSED: [2019-02-12 Tue 21:34]
+- State "DONE"       from "TODO"       [2019-02-12 Tue 21:34]
+*** DONE testOP_CMP
+CLOSED: [2019-02-15 Fri 08:59]
+- State "DONE"       from "TODO"       [2019-02-15 Fri 08:59]
+*** DONE testOP_CPX
+CLOSED: [2019-02-15 Fri 08:59]
+- State "DONE"       from "TODO"       [2019-02-15 Fri 08:59]
+*** DONE testOP_CPY
+CLOSED: [2019-02-15 Fri 08:59]
+- State "DONE"       from "TODO"       [2019-02-15 Fri 08:59]
 ** TODO [0%] v0.1.7 : "Branching/Jumping"
 *** TODO BCC
 *** TODO BCS

@@ -64,7 +64,7 @@ pub mod cpu_test {
 
         for f in 0..8 {
             //Setting each flag.
-            println!("{} : {}", f, status[f as usize]);
+            //println!("{} : {}", f, status[f as usize]);
             cpu.set_status(f, true);
             assert_eq!(cpu.get_status(status[f as usize]), true);
 
@@ -326,7 +326,7 @@ pub mod cpu_test {
         let d = 126;
         let e = 5;
         let f = d+e;
-        println!("In carry: {}",((d^f)&(e^f)&(128))==128);
+        //println!("In carry: {}",((d^f)&(e^f)&(128))==128);
         assert_eq!(cpu.a, 131);
         assert_eq!(cpu.get_status("V"), true);
     }
@@ -743,4 +743,38 @@ pub mod cpu_test {
         assert_eq!(cpu.pc, (0b1000000000000001 + 1), "PC != RTS pulls!");
     }
 
+    #[test]
+    pub fn testOP_CMP() {
+        let mut cpu = super::CPU::new();
+        cpu.memory.set(0xFF, 0xFF);
+        cpu.a = 1;
+        cpu.CMP(AbsoluteAM{address: 0xFF});
+
+        assert_eq!(cpu.get_status("C"), false, "CMP 'C'");
+        assert_eq!(cpu.get_status("N"), false, "CMP 'N'");
+        assert_eq!(cpu.get_status("Z"), false, "CMP 'Z'");
+    }
+    //Another round of copies of the original.
+    #[test]
+    pub fn testOP_CPY() {
+        let mut cpu = super::CPU::new();
+        cpu.memory.set(0xFF, 0x80);
+        cpu.x = 0x7F;
+        cpu.CPY(AbsoluteAM{address: 0xFF});
+
+        assert_eq!(cpu.get_status("C"), false, "CPY 'C'");
+        assert_eq!(cpu.get_status("N"), true , "CPY 'N'");
+        assert_eq!(cpu.get_status("Z"), false, "CPY 'Z'");
+    }
+    #[test]
+    pub fn testOP_CPX() {
+        let mut cpu = super::CPU::new();
+        cpu.memory.set(0xFF, 0x80);
+        cpu.x = 0x7F;
+        cpu.CPX(AbsoluteAM{address: 0xFF});
+
+        assert_eq!(cpu.get_status("C"), false, "CPY 'C'");
+        assert_eq!(cpu.get_status("N"), true , "CPY 'N'");
+        assert_eq!(cpu.get_status("Z"), false, "CPY 'Z'");
+    }
 }
