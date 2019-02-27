@@ -1,15 +1,27 @@
-//For now, memory is a 2kb sized 8 bit array.
-//This might not ever change, but it seems a tad too simplistic.
+/* Emulates the NES MOS6502 CPU memory map.
+ * Author: Spalynx
+ *--------------Memory Map---------------------------------------------
+ * $0000-$07FF     =      Internal CPU RAM
+ * $4020-$FFFF     =      Cartridge Space and Misc (Interrupt Vectors).
+ *---------------------------------------------------------------------
+ */
+
+//Truthfully, I don't think that I'll be able to fully emulate cartridge space.
+//I think that Cartridge.rs will just simply use standard std::fs to access PC
+// locations.
 pub struct MEM {
-    values:	[u8; 0x800], //2kb internal RAM.
+    RAM:	[u8; 0x800],        //2kb internal RAM.
+    CART:   [u8; 0xBFDF],    //Cartridge Space
 }
+
 
 #[allow(dead_code)]
 impl MEM {
 //Initializes an empty memory struct.
     pub fn new() -> MEM {
         return MEM {
-            values:	[0; 0x800],
+            RAM:	    [0; 0x800],
+            CART:	    [0; 0xBFDF],
         }
     }
 
@@ -17,7 +29,10 @@ impl MEM {
     pub fn get(&self, address: u16) -> u8 {
         if address <= 0x800{
             //2kb internal ram
-            self.values[address as usize]
+            self.RAM[address as usize]
+        }
+        else if address >= 0x4020 {
+            self.CART[address as usize]
         }
         else {
             panic!("Other values in the memory map not implemented yet!");
@@ -27,14 +42,18 @@ impl MEM {
     //Much faster, only has to access the first page of memory.
     pub fn get_zp(&self, address: u8) -> u8 {
         let zp = address & 255;
-        return self.values[zp as usize];
+        return self.RAM[zp as usize];
     }
 
     // block any illegal storing.
     pub fn set(&mut self, address: u16, val: u8){
         if address <= 0x800 {
             //2kb internal ram
-            self.values[address as usize] = val;
+            self.RAM[address as usize] = val;
+        }
+        else if address >= 0x4020 {
+            //~6kb Cartridge space.
+            self.CART[address as usize] = val;
         }
         else {
             panic!("Other values in the memory map not implemented yet!");
@@ -44,19 +63,19 @@ impl MEM {
     //Much faster, only has to access the first page of memory.
     pub fn set_zp(&mut self, address: u8, val: u8) {
         let zp = address & 255;
-        self.values[zp as usize] = val;
+        self.RAM[zp as usize] = val;
     }
 
     //Pushes a byte onto the stack.
     //Called by cpu.stack_push to actually modify memory.
     pub fn mem_stack_push(&mut self, sp: u8, val: u8){
-        self.values[(0xFF + (sp as usize))] = val;
+        self.RAM[(0xFF + (sp as usize))] = val;
     }
     //Pops an item off of the stack, and returns it as a u8.
     //Called by cpu.stack_pop to actually modify memory.
     pub fn mem_stack_pop(&mut self, sp: u8) -> u8{
-        let temp: u8 = self.values[(0xFF + (sp as usize))];
-        self.values[(0xFF + (sp as usize))] = 0;
+        let temp: u8 = self.RAM[(0xFF + (sp as usize))];
+        self.RAM[(0xFF + (sp as usize))] = 0;
         return temp;
     }
 }

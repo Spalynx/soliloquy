@@ -323,9 +323,9 @@ pub mod cpu_test {
         cpu.a = 126;
         cpu.ADC(ImmediateAM{address: 5});
 
-        let d = 126;
-        let e = 5;
-        let f = d+e;
+        //let d = 126;
+        //let e = 5;
+        //let f = d+e;
         //println!("In carry: {}",((d^f)&(e^f)&(128))==128);
         assert_eq!(cpu.a, 131);
         assert_eq!(cpu.get_status("V"), true);
@@ -698,10 +698,13 @@ pub mod cpu_test {
     }
 
     #[test]
-    pub fn testOP_BRK() { assert!(false); } 
+    pub fn testOP_BRK() {
+        assert!(false); 
+    } 
     #[test]
-    pub fn testOP_RTI() { assert!(false); }
-
+    pub fn testOP_RTI() {
+        assert!(false); 
+    }
     #[test]
     pub fn testOP_PHA() {
         let mut cpu = super::CPU::new();
@@ -776,5 +779,71 @@ pub mod cpu_test {
         assert_eq!(cpu.get_status("C"), false, "CPY 'C'");
         assert_eq!(cpu.get_status("N"), true , "CPY 'N'");
         assert_eq!(cpu.get_status("Z"), false, "CPY 'Z'");
+    }
+    #[test]
+    pub fn testOP_JSR() {
+        let mut cpu = super::CPU::new();
+        //Since we don't have an actual FDE loop yet, going to simulate
+        cpu.pc = 0x4020;
+        cpu.JSR(AbsoluteAM{address: 0x4029});
+        assert_eq!(cpu.pc, 0x4029, "JSR: Checking if JSR loaded PC.");
+        cpu.RTS();
+        assert_eq!(cpu.pc, 0x4020+3, "JSR: Checking if RTI pulled from stack.");
+        // +3 because JSR accounts for the +2 bytes, and RTS adds +1 for JMP
+    }
+
+    #[test]
+    pub fn testOP_BCC() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BCS() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BEQ() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BMI() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BNE() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BPL() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_JMP() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BVC() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
+    }
+    #[test]
+    pub fn testOP_BVS() {
+        let mut cpu = super::CPU::new();
+
+        assert!(false);
     }
 }

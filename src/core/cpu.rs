@@ -611,12 +611,12 @@ impl CPU {
         // The B bit in the stack contains a 0 if it was caused by a normal IRQ.
 
         //Push PC to stack.
-        let mut PC = self.pc;
+        let PC = self.pc;
         self.stack_push(word_to_h_byte!(PC) as u8);
         self.stack_push(word_to_l_byte!(PC) as u8);
 
         //Set BRK flag on status.
-        let mut P = self.status | 0b0010000;
+        let P = self.status | 0b0010000;
         //push P
         self.stack_push(P);
 
@@ -728,10 +728,23 @@ impl CPU {
         self.set_status(7, sub < 0);   //'N' set based on result bit 7
 
     }
-} //IMPL CPU
 
-/*
     //#! Branching/Jumping
+    /// JSR
+    /// Jump to Subroutine
+    /// Takes a PC address (assembler replaces subroutine tag with the address)
+    ///  as an argument. Stores the current PC on the stack (for RTS), and
+    ///  overwrites the current PC value with the newly obtained value.
+    /// Uses Absolute addressing, which means that the new PC is u16.
+    pub fn JSR<AM: AddressingMode>(&mut self, am: AM){
+        let PC_new  = am.address(); 
+        let PCH: u8 = word_to_h_byte!(self.pc+2) as u8;
+        let PCL: u8 = word_to_l_byte!(self.pc+2) as u8;
+
+        self.stack_push(PCH);
+        self.stack_push(PCL);
+        self.pc = PC_new;
+    }
     pub fn BCC(&self) {}
     pub fn BCS(&self) {}
     pub fn BEQ(&self) {}
@@ -739,10 +752,10 @@ impl CPU {
     pub fn BNE(&self) {}
     pub fn BPL(&self) {}
     pub fn JMP(&self) {}
-    pub fn JSR(&self) {}
     pub fn BVC(&self) {}
     pub fn BVS(&self) {}
-*/
+} //IMPL CPU
+
 
 
 //=ADDRESSING-MODES=============================================================
@@ -771,6 +784,7 @@ impl CPU {
 pub trait AddressingMode {
     fn load (&self, cpu: &mut CPU) -> u8;
     fn save (&self, cpu: &mut CPU, storeval: u8);
+    fn address (&self) -> u16; 
 }
 
 /// The commented numbers specify the addressing mode's int value in
@@ -796,48 +810,60 @@ impl AddressingMode for AccumulatorAM{
     {	cpu.a	}
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.a = storeval; }
+
+    fn address (&self) -> u16 { 0 as u16 } 
 }
 impl AddressingMode for ImmediateAM {
+    #[allow(unused_variables)]
     fn load (&self, cpu: &mut CPU) -> u8
     {	self.address  }
+    #[allow(unused_variables)]
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	panic!("No way to store in ImmediateAM!"); }
+
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for AbsoluteAM {
     fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.get( self.address ) }
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address, storeval ); }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for AbsoluteXAM {
     fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.get( self.address + cpu.x as u16 ) }
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address + cpu.x as u16, storeval ); }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for AbsoluteYAM {
     fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.get( self.address + cpu.y as u16) }
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set( self.address + cpu.y as u16, storeval ); }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for ZeroPageAM {
     fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.get_zp( self.address ) }
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set_zp( self.address, storeval ); }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for ZeroPageXAM  {
     fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.get_zp( self.address+cpu.x ) }
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set_zp( self.address + cpu.x , storeval); }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for ZeroPageYAM  {
     fn load (&self, cpu: &mut CPU) -> u8
     {	cpu.memory.get_zp( self.address + cpu.y ) }
     fn save (&self, cpu: &mut CPU, storeval: u8)
     {	cpu.memory.set_zp( self.address + cpu.y , storeval); }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for IndexedIndirectAM {
     fn load (&self, cpu: &mut CPU) -> u8 {
@@ -852,6 +878,7 @@ impl AddressingMode for IndexedIndirectAM {
 
         cpu.memory.set( bytes_to_word!(high as u16,low as u16), storeval );
     }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 impl AddressingMode for IndirectIndexedAM {
     fn load (&self, cpu: &mut CPU) -> u8 {
@@ -867,6 +894,7 @@ impl AddressingMode for IndirectIndexedAM {
         cpu.memory.set( bytes_to_word!(high as u16,low as u16) + cpu.y as u16,
                         storeval );
     }
+    fn address (&self) -> u16 { self.address as u16 } 
 }
 
 
