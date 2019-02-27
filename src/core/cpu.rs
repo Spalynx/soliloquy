@@ -745,15 +745,62 @@ impl CPU {
         self.stack_push(PCL);
         self.pc = PC_new;
     }
-    pub fn BCC(&self) {}
-    pub fn BCS(&self) {}
-    pub fn BEQ(&self) {}
-    pub fn BMI(&self) {}
-    pub fn BNE(&self) {}
-    pub fn BPL(&self) {}
+
     pub fn JMP(&self) {}
-    pub fn BVC(&self) {}
-    pub fn BVS(&self) {}
+
+    /// A base function for branching.
+    /// Applies the concept of relative addressing.
+    ///   A new u8 is obtained as the offset and added to the PC.
+    ///   This is signed arithmetic, and therefore can reduce the PC. 
+    pub fn branch_base(&mut self, offset: u8){
+        if offset > 128 {
+            self.pc -= offset as u16;
+        }
+        else {
+            self.pc += offset as u16;
+        }
+    }
+
+    /// BCC
+    /// Branch on Carry Clear
+    pub fn BCC(&self) {
+
+    }
+    /// BCS
+    /// Branch on Carry Set
+    pub fn BCS(&self) {
+
+    }
+    /// BEQ
+    /// Branch on Result Zero
+    pub fn BEQ(&self) {
+
+    }
+    /// BMI
+    /// Branch on Result Minus
+    pub fn BMI(&self) {
+        
+    }
+    /// BNE
+    /// Branch on Result Not Zero
+    pub fn BNE(&self) {
+        
+    }
+    /// BPL
+    /// Branch on Result Plus
+    pub fn BPL(&self) {
+        
+    }
+    /// BVC
+    /// Branch on Overflow Clear
+    pub fn BVC(&self) {
+        
+    }
+    /// BVS
+    /// Branch on Overflow Set
+    pub fn BVS(&self) {
+        
+    }
 } //IMPL CPU
 
 
