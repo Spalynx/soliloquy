@@ -282,31 +282,63 @@ CLOSED: [2019-02-15 Fri 08:59]
 *** DONE testOP_CPY
 CLOSED: [2019-02-15 Fri 08:59]
 - State "DONE"       from "TODO"       [2019-02-15 Fri 08:59]
-** TODO [10%] v0.1.7 : "Branching/Jumping"
-*** TODO BCC
-*** TODO BCS
-*** TODO BEQ
-*** TODO BMI
-*** TODO BNE
-*** TODO BPL
+** TODO [90%] v0.1.7 : "Branching/Jumping"
+*** DONE BCC
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE BCS
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE BEQ
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE BMI
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE BNE
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE BPL
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
 *** TODO JMP
 *** DONE JSR
 CLOSED: [2019-02-27 Wed 14:14]
 - State "DONE"       from "TODO"       [2019-02-27 Wed 14:14]
-*** TODO BVC
-*** TODO BVS
-*** TODO testOP_BCC
-*** TODO testOP_BCS
-*** TODO testOP_BEQ
-*** TODO testOP_BMI
-*** TODO testOP_BNE
-*** TODO testOP_BPL
+*** DONE BVC
+CLOSED: [2019-03-02 Sat 12:36]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:36]
+*** DONE BVS
+CLOSED: [2019-03-02 Sat 12:36]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:36]
+*** DONE testOP_BCC
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE testOP_BCS
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE testOP_BEQ
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE testOP_BMI
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE testOP_BNE
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE testOP_BPL
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
 *** TODO testOP_JMP
 *** DONE testOP_JSR
 CLOSED: [2019-02-27 Wed 14:14]
 - State "DONE"       from "TODO"       [2019-02-27 Wed 14:14]
-*** TODO testOP_BVC
-*** TODO testOP_BVS
+*** DONE testOP_BVC
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
+*** DONE testOP_BVS
+CLOSED: [2019-03-02 Sat 12:35]
+- State "DONE"       from "TODO"       [2019-03-02 Sat 12:35]
 ** TODO [0%] v0.1.8 : "Opcode Parsing/Misc."
 *** TODO Opcode Parsing (Switch statement with OPCODE interp)
 *** TODO CPU timing setup

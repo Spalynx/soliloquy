@@ -763,43 +763,75 @@ impl CPU {
 
     /// BCC
     /// Branch on Carry Clear
-    pub fn BCC(&self) {
+    pub fn BCC<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
 
+        if self.status & 1 == 0 {
+            self.branch_base(offset);
+        }
     }
     /// BCS
     /// Branch on Carry Set
-    pub fn BCS(&self) {
+    pub fn BCS<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
 
+        if self.status & 1 == 1 {
+            self.branch_base(offset);
+        }
     }
     /// BEQ
     /// Branch on Result Zero
-    pub fn BEQ(&self) {
+    pub fn BEQ<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
 
+        if self.status & 2 == 2 {
+            self.branch_base(offset);
+        }
     }
     /// BMI
     /// Branch on Result Minus
-    pub fn BMI(&self) {
-        
+    pub fn BMI<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
+
+        if self.status & 128 == 128 {
+            self.branch_base(offset);
+        }
     }
     /// BNE
     /// Branch on Result Not Zero
-    pub fn BNE(&self) {
-        
+    pub fn BNE<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
+
+        if self.status & 2 == 0 {
+            self.branch_base(offset);
+        }
     }
     /// BPL
     /// Branch on Result Plus
-    pub fn BPL(&self) {
-        
+    pub fn BPL<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
+
+        if self.status & 128 == 0 {
+            self.branch_base(offset);
+        }
     }
     /// BVC
     /// Branch on Overflow Clear
-    pub fn BVC(&self) {
-        
+    pub fn BVC<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
+
+        if self.status & 64 == 0 {
+            self.branch_base(offset);
+        }
     }
     /// BVS
     /// Branch on Overflow Set
-    pub fn BVS(&self) {
-        
+    pub fn BVS<AM: AddressingMode>(&mut self, am: AM){
+        let offset = am.load(self);
+
+        if self.status & 64 == 64 {
+            self.branch_base(offset);
+        }
     }
 } //IMPL CPU
 

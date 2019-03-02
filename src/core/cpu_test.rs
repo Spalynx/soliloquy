@@ -793,57 +793,80 @@ pub mod cpu_test {
     }
 
     #[test]
+    pub fn testOP_JMP() {
+        assert!(false);
+    }
+    #[test]
     pub fn testOP_BCC() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
+        cpu.status = 0b11111110;
+        cpu.BCC(ImmediateAM{address: 20});
+
+        assert_eq!(cpu.pc, 20);
     }
     #[test]
     pub fn testOP_BCS() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
+        cpu.status = 0b00000001;
+        cpu.BCS(ImmediateAM{address: 20});
+
+        assert_eq!(cpu.pc, 20);
     }
     #[test]
     pub fn testOP_BEQ() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
-    }
-    #[test]
-    pub fn testOP_BMI() {
-        let mut cpu = super::CPU::new();
+        cpu.status = 0b00000010;
+        cpu.BEQ(ImmediateAM{address: 20});
 
-        assert!(false);
+        assert_eq!(cpu.pc, 20);
     }
     #[test]
     pub fn testOP_BNE() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
+        cpu.status = 0b11111101;
+        cpu.BNE(ImmediateAM{address: 20});
+
+        assert_eq!(cpu.pc, 20);
+    }
+    #[test]
+    pub fn testOP_BMI() {
+        let mut cpu = super::CPU::new();
+
+        cpu.status = 0b10000000;
+        cpu.BMI(ImmediateAM{address: 20});
+
+        assert_eq!(cpu.pc, 20);
+
     }
     #[test]
     pub fn testOP_BPL() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
-    }
-    #[test]
-    pub fn testOP_JMP() {
-        let mut cpu = super::CPU::new();
+        cpu.status = 0b01111111;
+        cpu.BPL(ImmediateAM{address: 20});
 
-        assert!(false);
+        assert_eq!(cpu.pc, 20);
     }
     #[test]
     pub fn testOP_BVC() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
+        cpu.status = 0b10111111;
+        cpu.BVC(ImmediateAM{address: 20});
+
+        assert_eq!(cpu.pc, 20);
     }
     #[test]
     pub fn testOP_BVS() {
         let mut cpu = super::CPU::new();
 
-        assert!(false);
+        cpu.status = 0b01000000;
+        cpu.BVS(ImmediateAM{address: 20});
+
+        assert_eq!(cpu.pc, 20);
     }
 }
