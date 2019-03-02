@@ -589,15 +589,17 @@ impl CPU {
 
     /// NOP
     /// AFAIK, IT DOES NOTHING... PRODUCTIVITY!
-    /// Arguably, it looks like this opcode is meant to be a way to manually step.
-    /// This Opcode has given some anxiety, because of unofficial opcodes that are
-    ///   effectively a NOP, but people have implied have differing timings.
+    /// Arguably, it looks like this opcode is meant to be a way to manually
+    ///  step. This Opcode has given some anxiety, because of unofficial
+    ///  opcodes that are effectively a NOP that people have implied have
+    ///  differing timings.
     pub fn NOP(&self) {
     }
 
     /// BRK
     /// Break. Throws a NMI, and increments the program counter by one.
-    ///  BRK is a 2 byte opcode. The first is #$00 and the second is a padding byte.
+    ///  BRK is a 2 byte opcode. The first is #$00 and the second is a padding
+    ///  byte.
     ///  Since the PC increment/decrement is handled in the step function,
     ///  we skip that part.
     pub fn BRK(&mut self) {
@@ -627,8 +629,8 @@ impl CPU {
     /// Return from Interrupt
     /// Restores the microprocessor to the state previous to the interrupt.
     /// To do this, it reads P and PC from the stack into their places. 
-    /// NOTE: Ignores P bits 4 (B) and 5 (s). Checking the B flag (post BRK) must
-    /// done manually!
+    /// NOTE: Ignores P bits 4 (B) and 5 (s). Checking the B flag (post BRK)
+    /// must be done manually!
     pub fn RTI(&mut self) {
         let P:   u8 = self.stack_pop();
         let PCL: u8 = self.stack_pop();
@@ -746,7 +748,18 @@ impl CPU {
         self.pc = PC_new;
     }
 
-    pub fn JMP(&self) {}
+    /// JMP
+    /// Jump to New Location
+    /// Loads program counter value from a given memory value, and it's
+    /// subsequent location.
+    /// AKA: (address) -> PCL, (address+1) -> PCH
+    pub fn JMP<AM: AddressingMode>(&mut self, am: AM){
+        let PC_L = am.load(self) as u16;
+        let ADDR = am.address() + 1;
+        let PC_H = AbsoluteAM{address: ADDR}.load(self) as u16;
+
+        self.pc = bytes_to_word!(PC_H, PC_L);
+    }
 
     /// A base function for branching.
     /// Applies the concept of relative addressing.
@@ -763,6 +776,7 @@ impl CPU {
 
     /// BCC
     /// Branch on Carry Clear
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BCC<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -772,6 +786,7 @@ impl CPU {
     }
     /// BCS
     /// Branch on Carry Set
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BCS<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -781,6 +796,7 @@ impl CPU {
     }
     /// BEQ
     /// Branch on Result Zero
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BEQ<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -790,6 +806,7 @@ impl CPU {
     }
     /// BMI
     /// Branch on Result Minus
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BMI<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -799,6 +816,7 @@ impl CPU {
     }
     /// BNE
     /// Branch on Result Not Zero
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BNE<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -808,6 +826,7 @@ impl CPU {
     }
     /// BPL
     /// Branch on Result Plus
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BPL<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -817,6 +836,7 @@ impl CPU {
     }
     /// BVC
     /// Branch on Overflow Clear
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BVC<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 
@@ -826,6 +846,7 @@ impl CPU {
     }
     /// BVS
     /// Branch on Overflow Set
+    /// Adds the offset value given to PC if condition is met. 
     pub fn BVS<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
 

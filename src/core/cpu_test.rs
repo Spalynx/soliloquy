@@ -794,7 +794,15 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_JMP() {
-        assert!(false);
+        let mut cpu = super::CPU::new();
+
+        cpu.memory.set(0x0030, 0b00000001);
+        cpu.memory.set(0x0031, 0b10000000);
+        cpu.pc = 0;
+
+        cpu.JMP(AbsoluteAM{address: 0x0030});
+        assert_eq!(cpu.pc, 0b1000000000000001);
+
     }
     #[test]
     pub fn testOP_BCC() {
