@@ -11,21 +11,6 @@ pub mod cpu_test {
     // [before_each]/[assemblyintialize]... Maybe one day!
     use super::*;
 
-    //~~~INSTRUCTION~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #[test]
-    fn test_instruction_init(){
-        let test_instr = super::Instructions::new();
-
-        //Testing the instruction table for init.
-        assert_eq!(test_instr.names.len()     ,256);
-        assert_eq!(test_instr.sizes.len()     ,256);
-        assert_eq!(test_instr.modes.len()     ,256);
-        assert_eq!(test_instr.speeds.len()    ,256);
-        assert_eq!(test_instr.paging.len()    ,256);
-
-        //This can be expanded later when testing opcode parsing.
-    }
-
     //~~~CPU~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #[test]
     fn test_cpu_init(){
@@ -37,7 +22,7 @@ pub mod cpu_test {
         assert_eq!(test_cpu.sp,       0xFF);
         assert_eq!(test_cpu.x,        0);
         assert_eq!(test_cpu.y,        0);
-        assert_eq!(test_cpu.status,   0);
+        assert_eq!(test_cpu.status,   34);
         assert_eq!(test_cpu.interrupt,0);
         assert_eq!(test_cpu.stall,    0);
     }

@@ -1,0 +1,1 @@
+// Idea: Use either structs with mapper traits to use in cartridge.rs, or use closures for loading. Not sure which yet.

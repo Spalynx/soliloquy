@@ -2,15 +2,28 @@ extern crate memmap;
 
 use self::memmap::Mmap;
 use std::fs::File;
+use std::io;
+use std::io::prelude::*;
 
-pub struct ROM {
-    filename: String, 
+pub struct CART {
+    pub filename: &'static str, 
+    pub raw_cart: Vec<u8>,
 }
 
-impl ROM {
-    pub fn new(file_n: String) -> ROM {
-    	ROM{
+impl CART {
+   
+    pub fn new(file_n: &'static str) -> CART {
+    	CART {
             filename:   file_n,
+            raw_cart: Vec::new(),
         }
+    }
+    pub fn read_cart(&mut self) -> io::Result<()> { 
+        let mut f = File::open(self.filename.to_string())?;
+
+        for byte in f.bytes(){
+           self.raw_cart.push(byte.unwrap()); 
+        }
+        Ok(())
     }
 }

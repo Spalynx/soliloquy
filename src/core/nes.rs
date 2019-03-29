@@ -6,11 +6,11 @@
  * Author: Spalynx.
  */
 //use super::*;
-use core::cartridge::ROM;
+use core::cartridge;
 use core::cpu::CPU;
 
 pub struct NES {
-    rom:    ROM,
+    //rom:    ROM,
     cpu:    CPU,
 }
 
@@ -20,19 +20,30 @@ impl NES {
         // There is utility in loading without instantiating (Load
         // multiple NES, and boot individually?).
         NES {
-            rom:    ROM::new(),
+            //rom:    ROM::new("".to_string()),
             cpu:    CPU::new(),
         }
     }
 
-    //Loads values in each hardware device, including rom-file. 
-    pub fn boot(&mut self, game: &ROM) {
-        
+    //Loads values for each hardware device, including rom-file. 
+    pub fn boot(&mut self, filepath: &str) {
+        //Cartridge maps ROM contents into RAM/16-bit addr space
+        //self.rom = ROM::new(filepath.to_string());
+        //CPU running code
+
+        //PPU init
+
+        //Read CHR ROM write data to PPU
+
+        //Code starts to read its ROM data and writes to APU registers
+
+        //Code waits for your input to make selection
+
     }
 
-    //This begins the fetch-decode-execute loop.
-    // After booting, this should be run until termination.
-    pub fn fde_loop (&mut self) {
+    //Runs a step for CPU, APU, PPU. In theory these should run async,
+    // so, this function, and similar ones will hold timing logic.
+    pub fn step(&mut self) {
 
     }
 

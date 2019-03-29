@@ -86,7 +86,7 @@ impl CPU {
             x:              0,		        // x register
             y:              0,		        // y register
 
-            status:         0,		        //cpu flags
+            status:         34,		        //cpu flags
 
             interrupt:      0,		        // interrupt type to perform
             stall:          0,		        // number of cycles to stall
@@ -119,6 +119,12 @@ impl CPU {
         //;;            self.parse_opcode(OP, ARG);
         //;;          },
         //;;}
+    }
+
+    fn reset(&mut self){
+        self.sp = 0xFD;
+        self.set_status(2, true);
+        self.memory.set(0x4015, 0);
     }
 
     /// Receives a string as a param, and throws one of the 3 (?) cpu
