@@ -1,0 +1,32 @@
+* Soliloquy
+Nintendo Entertainment System emulated with rust with a primary focus on
+learning.
+
+Versioning and planning: [[doc/ROADMAP.org][Project TODO]] 
+
+** Project Goals
+ - Emulate basic NES games (Donkey Kong, Ice Climbers, etc.)
+ - Allow the use of default controller, and some preripherals.
+ - Provide a knowledge base for a possible future emulation project.
+  
+** Philosophy 
+The CPU file is over-engineered and over tested for the sake of having a strong core that hopefully won't have to be modified. As I progress outwards from the core, I'm going to attempt a more rapid-development type of approach, rather than the previous, more test-driven methods.
+
+
+** Roadmap
+Even writing a simple NES emulator should take a good while. 
+The implementation order should be:
+**** DONE CPU
+**** TODO CART/mappers
+**** TODO APU
+**** TODO PPU
+**** TODO IO/GUI
+
+** References
+  - fogleman/nes : A fantastic reference for getting started.
+  - pcwalton/sprocketnes : Great for helping me understand how to implement a project like this in rust.
+
+** License
+This is just an educational project: I've read a lot of similar implementations, and borrowed many ideas. Hopefully, herein lies ideas that are worth sharing.
+
+[[http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-3.png][WTFPL2]]

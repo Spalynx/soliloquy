@@ -2,8 +2,7 @@
 // Date 9/13/17
 // This should only be used for testing of the virtual hardware.
 
-mod core;
-use core::cartridge::*;
+extern crate core;
 
 fn main() {
     let mut c = CART::new("example/example.rom");
@@ -12,5 +11,5 @@ fn main() {
         Err(e)   => panic!("ROM read ERR"),
     }
 
-    println!("{:?}", c.raw_cart);
+    //println!("{:?}", c.raw_cart);
 }

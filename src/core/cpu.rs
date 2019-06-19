@@ -42,27 +42,30 @@
 /// println!("{}", c.add());
 /// ```
 ///
-/// This struct emulates the NES cpu.
+/// This struct emulates the NES cpu.  
 /// CPU holds within it: a set of registers, a connection to memory,
-/// it's instruction set, and it commands to parse instructinos.
+/// it's instruction set, and it commands to parse instructions.
 pub struct CPU {
+    /// Entire internal memory map. Acts as a slave module to CPU.
     pub memory:         MEM,
-
-    pub pc:             u16,        //Program Counter - 65536 memory locations.
-    pub cycles:         u64,        //Clock cycle counter.
-                                    //      Other hardware relies on this. [5]
-
-    pub sp:             u8,         //Stack Pointer - Accessed using interrupts,
-                                    //     pulls, pushes, and transfers.
-
-    pub a:              u8,         // Accumulator.
-    pub x:              u8,         // X register.
-    pub y:              u8,         // Y register.
-
-    pub status:         u8,         // CPU Flags See [1] for reference
-
-    pub interrupt:      u8,         // Interrupt type to perform.
-    pub stall:          u8,         // Number of cycles to stall.
+    /// Program Counter - 65536 memory locations.
+    pub pc:             u16,
+    /// Clock cycle counter. Other hardware relies on this. [5]
+    pub cycles:         u64,
+    /// Stack Pointer - Accessed using interrupts, pulls, pushes, and transfers.
+    pub sp:             u8,         
+    /// Accumulator.
+    pub a:              u8,
+    /// X register.
+    pub x:              u8,
+    /// Y register.
+    pub y:              u8,         
+    /// CPU Flags See [1] for reference
+    pub status:         u8,         
+    /// Interrupt type to perform.
+    pub interrupt:      u8,         
+    /// Number of cycles to stall.
+    pub stall:          u8, 
 }
 
 
@@ -71,7 +74,7 @@ pub struct CPU {
 
 #[allow(dead_code)]
 impl CPU {
-    /// Initializes an empty CPU struct
+    /// Initializes an empty CPU struct.
     /// All values initialized as empty.
     pub fn new() -> CPU {
         CPU{
@@ -128,15 +131,15 @@ impl CPU {
     }
 
     /// Receives a string as a param, and throws one of the 3 (?) cpu
-    /// interrupts.
-    /// NOTE: This is me pushing off interrupts until I actually
+    /// interrupts.  
+    /// **Note:** This is me pushing off interrupts until I actually
     /// understand what they do.
     fn throw_interrupt(&mut self, interrupt: &'static str){
         println!("{}", interrupt);
     }
 
 
-    /// Sets flags based upon a given byte.
+    /// Sets flags based upon a given byte.  
     /// Bit crunching here to reduce overhead, as flags are going to change often.
     pub fn set_status(&mut self, status_num: u8, val: bool){
         //Panic on non-valid status.
@@ -144,12 +147,15 @@ impl CPU {
             panic!("Status position ${} is not possible!", status_num);
         }
 
-        self.status = 	if val {self.status |  (1 << status_num)} //Setting status to true...
-        		else   {self.status & !(1 << status_num)} //Setting status to false....
+        self.status =
+            if val {self.status |  (1 << status_num)} //Setting status to true...
+        	else   {self.status & !(1 << status_num)} //Setting status to false....
     }
 
 
-    /// Sets flags based upon a given byte.
+    /// Sets flags based upon a given byte.  
+    /// **Deprecated:** This has been replaced by set_status, and been (AFAIK)
+    ///  entirely phased out. Remove this and test, eventually.
     pub fn set_status_old(&mut self, flag: &'static str, val: bool){
 
         // Yes, I know that this is a really slow way to access
@@ -176,6 +182,10 @@ impl CPU {
             _ => panic!("NOT A FLAG"),
         };
     }
+    ///Returns the status register flag, given a status flag letter.  
+    ///Useful for readability, but not exactly the fastest way to obtain a
+    /// status flag.  
+    ///As a result, you might see me manually grabbing it in some cases.
     pub fn get_status(&mut self, flag: &'static str) -> bool{
         //Matches given flag number 
         return match flag.as_ref() {
@@ -190,6 +200,10 @@ impl CPU {
             _ => panic!("NOT A FLAG"),
         }
     }
+    ///Prints the flags of the status register with a neat header.  
+    ///This is just mostly a debug function, and shouldn't really be used
+    /// for low level modules.  
+    ///**Note:** Consider making priviate.
     pub fn print_status(&self) {
         println!("N V - - D I Z C");
         let mut y = 128;
@@ -205,9 +219,8 @@ impl CPU {
     }
 
 
-    /// Sets the Z/N flags based upon a given value.
-    ///     I think that this will be used often, but not sure how
-    ///     much.
+    ///A helper function that sets the Z/N flags based upon a given value.
+    ///This is done quite a bit throughout implementation.
     fn set_zn(&mut self, val: u8){
         //Setting flags based upon accumulator value.
         if val == 0 {
@@ -225,45 +238,49 @@ impl CPU {
     }
 
 
-    //The stack is on page 1 of memory. ($0100-$01FF)
-    //
+    ///Pushes a value onto the stack and "increments" the stack pointer.
+    ///NOTE: "Increments" is technically a decrement of 0xFF.
+    ///NOTE: The stack is on page 1 of memory. ($0100-$01FF)
     fn stack_push(&mut self, val: u8){
         self.memory.mem_stack_push(self.sp, val);
         self.sp = self.sp - 1;
     }
-    // Pops an item from the stack and returns it.
+    ///Pops an item from the stack, returns it, and "decrements" the SP.  
+    ///**Note:** "Increments" is technically a decrement cpu.sp.
+    ///**Note:** The stack is on page 1 of memory. ($0100-$01FF)
     fn stack_pop(&mut self) -> u8 {
         self.sp = self.sp + 1;
 
         return self.memory.mem_stack_pop(self.sp);
     }
 
-    ///CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ///---------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    /// Refer to [3] for all cpu explanations.
+    //CPU~Instruction~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //---------------~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Refer to [3] for all cpu explanations.
 
     //#! Flag OPCODES.
     //   Why not set_status_old()? Simply: Not fast enough.
     //   Wondering if I should make /fake/ OPs for other flags.
 
-    /// CLC - Clear Carry. Sets carry to false.
+    /// **CLC** - Clear Carry.       Sets carry to false.
     pub fn CLC(&mut self) {     self.status = self.status ^ (1);}
-    /// CLD - Clear Decimal. Sets decimal to false.
+    /// **CLD** - Clear Decimal. Sets decimal to false.
     pub fn CLD(&mut self) {     self.status = self.status ^ (1 << 3);   }
-    /// CLI - Clear Interrupt. Sets interrupt to false.
+    /// **CLI** - Clear Interrupt.   Sets interrupt to false.
     pub fn CLI(&mut self) {     self.status = self.status ^ (1 << 2);   }
-    /// CLV - Clear O*V*ERFLOW. Sets overflow to false.
+    /// **CLV** - Clear O*V*ERFLOW.  Sets overflow to false.
     pub fn CLV(&mut self) {     self.status = self.status ^ (1 << 6);   }
 
-    /// SEC  - SEt Carry. Sets carry to true.
+    /// **SEC**  - SEt Carry.        Sets carry to true.
     pub fn SEC(&mut self) {     self.status = self.status | (1 << 0);   }
-    /// SED  - SEt Decimal. Sets decimal to true.
+    /// **SED**  - SEt Decimal.      Sets decimal to true.
     pub fn SED(&mut self) {     self.status = self.status | (1 << 3);   }
-    /// SEI  - SEt Interrupt. Sets interrupt to true.
+    /// **SEI**  - SEt Interrupt.    Sets interrupt to true.
     pub fn SEI(&mut self) {     self.status = self.status | (1 << 2);   }
 
     //#! Register Loads.
-    /// LDA (LoaD Accumulator with memory)
+
+    /// **LDA** (LoaD Accumulator with memory)  
     /// One of the most used opcodes, loads the accumulator with a given value.
     pub fn LDA <AM: AddressingMode> (&mut self, am: AM){
         self.a = am.load(self);
@@ -271,7 +288,7 @@ impl CPU {
         self.set_zn(a);
     }
 
-    ///LDX (LoaD X with memory) 
+    ///**LDX** (LoaD X with memory)   
     pub fn LDX <AM: AddressingMode> (&mut self, am: AM){
         self.x = am.load(self);
 
@@ -279,7 +296,7 @@ impl CPU {
         self.set_zn(x);
     }
 
-    ///LDY (LoaD Y with memory) 
+    ///**LDY** (LoaD Y with memory)   
     pub fn LDY <AM: AddressingMode> (&mut self, am: AM){
         self.y = am.load(self);
 
@@ -288,8 +305,9 @@ impl CPU {
     }
 
     //#! Primary Arithmetic Operations
-    /// ADC
-    /// ADd with Carry. ADC results are based on the decimal flag. In
+
+    /// **ADC** (ADd with Carry)   
+    /// ADC results are based on the decimal flag. In
     /// decimal mode, addition is carried out as if the values are in Binary
     /// Coded Decimal.
     pub fn ADC <AM: AddressingMode>(&mut self, am: AM){
@@ -310,8 +328,7 @@ impl CPU {
         self.a = d as u8;
     }
 
-    /// SBC
-    /// Subtract with borrow.
+    /// **SBC** (Subtract with borrow)   
     /// This function implements all of ADC functionality by simply negating the
     ///  value of the operand.
     /// NOTE: Without carry being added, the sent value is off-by-one. Supposedly
@@ -322,9 +339,8 @@ impl CPU {
         self.ADC(ImmediateAM{address: b^0xFF});
     }
 
-    /// AND
-    /// Bitwise AND with accumulator, takes memory address as parameter,
-    /// and comp/replaces cpu.a.
+    /// **AND** (Bitwise AND with accumulator)  
+    /// Takes memory address as parameter, and comp/replaces cpu.a.
     pub fn AND <AM: AddressingMode>(&mut self, am: AM){
         let a: u8 = self.a;
         let b: u8 = am.load(self);
@@ -332,8 +348,8 @@ impl CPU {
         self.LDA(ImmediateAM{address: (a & b)});
     }
 
-    /// ORA
-    /// Bitwise OR with accumulator, param of memory val to bitwise OR cpu.a.
+    /// **ORA** (Bitwise OR with accumulator)  
+    /// Param of memory val to bitwise OR cpu.a.
     pub fn ORA <AM: AddressingMode>(&mut self, am: AM){
         let a: u8 = self.a;
         let b: u8 = am.load(self);
@@ -341,8 +357,7 @@ impl CPU {
         self.LDA(ImmediateAM{address: (a | b)})
     }
 
-    /// EOR
-    /// Bitwise XOR with accumulator.
+    /// **EOR** (Bitwise XOR with accumulator)  
     pub fn EOR <AM: AddressingMode>(&mut self, am: AM){
         let a: u8 = self.a;
         let b: u8 = am.load(self);
@@ -351,8 +366,9 @@ impl CPU {
     }
 
     //#! Bit Manipulation
-    /// ASL
-    /// Arithmatic shift left. Shifts all bits left one position.
+
+    /// **ASL** (Arithmatic shift left)  
+    /// Shifts all bits left one position.
     /// 0 is shifted into bit 0 and original bit 7 is shifted to Carry.
     /// Modifies either accumulator or memory, this can be controlled via addressing modes.
     pub fn ASL <AM: AddressingMode>(&mut self, am: AM){
@@ -367,8 +383,7 @@ impl CPU {
         am.save(self, b);
     }
 
-    /// LSR
-    /// Logical Shift Right
+    /// **LSR** (Logical Shift Right)  
     pub fn LSR <AM: AddressingMode>(&mut self, am: AM){
         let mut b: u8 = am.load(self);
 
@@ -381,8 +396,7 @@ impl CPU {
         am.save(self, b);
     }
 
-    /// ROL
-    /// Rotate Left
+    /// **ROL** (Rotate Left)  
     pub fn ROL <AM: AddressingMode>(&mut self, am: AM){
         let mut b: u8 = am.load(self);
 
@@ -403,8 +417,7 @@ impl CPU {
 
     }
 
-    /// ROR
-    /// Rotate Right
+    /// **ROR** (Rotate Right)  
     /// Available on Microprocessors after June, 1976.
     pub fn ROR <AM: AddressingMode>(&mut self, am: AM){
         let mut b: u8 = am.load(self);
@@ -425,8 +438,7 @@ impl CPU {
         am.save(self, b);
     }
 
-    /// DEC
-    /// "Decrement Memory By One"
+    /// **DEC** (Decrement Memory By One)  
     /// Subtracts 1 from a memory location, changing the "Z" and "N" flags based
     ///  upon the resulting value.
     /// Theoretically, this is used by two's complement subtraction.
@@ -437,8 +449,7 @@ impl CPU {
         self.set_zn(dec_M);
         am.save(self, dec_M);
     }
-    /// DEX
-    /// "Decrement Index Register X by One"
+    /// **DEX** (Decrement Index Register X by One)  
     /// Decrements register X by one, and sets "Z" if the result is 0, and
     ///  sets "N" if the result is negative.
     pub fn DEX(&mut self) {
@@ -447,8 +458,7 @@ impl CPU {
         self.set_zn(dec_X);
         self.x = dec_X;
     }
-    /// DEY
-    /// "Decrement Index Register Y by One"
+    /// **DEY** (Decrement Index Register Y by One)  
     /// Decrements register Y by one, and sets "Z" if the result is 0, and
     ///  sets "N" if the result is negative.
     pub fn DEY(&mut self) {
@@ -457,8 +467,7 @@ impl CPU {
         self.set_zn(dec_Y);
         self.y = dec_Y;
     }
-    /// INC
-    /// "Increment Memory By One"
+    /// **INC** (Increment Memory By One)  
     pub fn INC<AM: AddressingMode>(&mut self, am: AM){
         let inc_M = (255) & (am.load(self) as u16 + 1) as u8;
 
@@ -466,53 +475,46 @@ impl CPU {
         am.save(self, inc_M);
     }
 
-    /// INX
-    /// "Increment Index Register X by One"
+    /// **INX** (Increment Index Register X by One)  
     pub fn INX(&mut self) {
         let inc_X = (255) & (self.x as u16 + 1) as u8;
 
         self.set_zn(inc_X);
         self.x = inc_X;
     }
-    /// INY
-    /// "Increment Index Register Y by One"
+    /// **INY** (Increment Index Register Y by One)  
     pub fn INY(&mut self) {
         let inc_Y = (255) & (self.y as u16 + 1) as u8;
 
         self.set_zn(inc_Y);
         self.y = inc_Y;
     }
-    /// STA
-    /// "Store Accumulator in Memory"
+    /// **STA** (Store Accumulator in Memory)  
     /// Variable 'A' created because of borrowing issues, probably my bad.
     pub fn STA<AM: AddressingMode>(&mut self, am: AM){
         let A = self.a;
         am.save(self, A);
     }
-    /// STX
-    /// "Store Index Register X in Memory"
+    /// **STX** (Store Index Register X in Memory)  
     pub fn STX<AM: AddressingMode>(&mut self, am: AM){
         let X = self.x;
         am.save(self, X);
     }
 
-    /// STY
-    /// "Store Index Register Y in Memory"
+    /// **STY** (Store Index Register Y in Memory)  
     pub fn STY<AM: AddressingMode>(&mut self, am: AM){
         let Y = self.y;
         am.save(self, Y);
     }
 
-    /// TAX
-    /// "Transfer Accumulator to Index X"
+    /// **TAX** (Transfer Accumulator to Index X)  
     pub fn TAX(&mut self) {
         let A = self.a;
         self.x = A;
         self.set_zn(A);
     }
 
-    /// TAY
-    /// "Transfer Accumulator to Index Y"
+    /// **TAY** (Transfer Accumulator to Index Y)  
     pub fn TAY(&mut self) {
         let Y = self.y;
         self.a = Y;
@@ -520,8 +522,7 @@ impl CPU {
 
     }
 
-    /// TXA
-    /// "Transfer Index X to Accumulator"
+    /// **TXA** (Transfer Index X to Accumulator)  
     pub fn TXA(&mut self) {
         let X = self.x;
         self.a = X;
@@ -529,8 +530,7 @@ impl CPU {
 
     }
 
-    /// TYA
-    /// "Transfer Index Y to Accumulator"
+    /// **TYA** (Transfer Index Y to Accumulator)  
     pub fn TYA(&mut self) {
         let Y = self.y;
         self.a = Y;
@@ -538,15 +538,13 @@ impl CPU {
 
     }
 
-    /// TXS
-    /// "Transfer Index X to Stack Pointer"
+    /// **TXS** (Transfer Index X to Stack Pointer)  
     pub fn TXS(&mut self) {
         self.sp = self.x;
 
     }
 
-    /// TSX
-    /// "Transfer Stack Pointer to Index"
+    /// **TSX** (Transfer Stack Pointer to Index)  
     pub fn TSX(&mut self) {
         self.x = self.sp;
 
@@ -554,11 +552,6 @@ impl CPU {
 
     //#! General Operations
 
-    /// BIT
-    /// Test Bits in Memory with Accumulator
-    /// Performans an AND between a memory location and the accumulator.
-    /// ONLY CHANGES THE 'N, V, Z' FLAGS!
-    ///   This is useful for testing one bit, and branching if 'Z' is set!
 	
     /* TEMP! From KIM-1 Programming manual.
     This instruction performs an AND between a memory location
@@ -572,6 +565,11 @@ impl CPU {
      memory if the result is Zero, Z is reset otherwise.  It does not
      affect the accumulator.
     */
+
+    /// **BIT** (Test Bits in Memory with Accumulator)  
+    /// Performs an AND between a memory location and the accumulator.  
+    /// ONLY CHANGES THE 'N, V, Z' FLAGS!  
+    ///   This is useful for testing one bit, and branching if 'Z' is set!  
     pub fn BIT<AM: AddressingMode>(&mut self, am: AM){
         let M = am.load(self);
 
@@ -590,8 +588,8 @@ impl CPU {
     }
 
 
-    /// NOP
-    /// AFAIK, IT DOES NOTHING... PRODUCTIVITY!
+    /// **NOP**  
+    /// AFAIK, IT DOES NOTHING... PRODUCTIVITY!  
     /// Arguably, it looks like this opcode is meant to be a way to manually
     ///  step. This Opcode has given some anxiety, because of unofficial
     ///  opcodes that are effectively a NOP that people have implied have
@@ -599,9 +597,9 @@ impl CPU {
     pub fn NOP(&self) {
     }
 
-    /// BRK
-    /// Break. Throws a NMI, and increments the program counter by one.
-    ///  BRK is a 2 byte opcode. The first is #$00 and the second is a padding
+    /// **BRK** (Break)  
+    ///  Throws a NMI, and increments the program counter by one.  
+    ///  BRK is a 2 byte opcode. The first is #$00 and the second is a padding  
     ///  byte.
     ///  Since the PC increment/decrement is handled in the step function,
     ///  we skip that part.
@@ -628,10 +626,9 @@ impl CPU {
         //PC = Vector
         self.pc = 0xFFFE
     }
-    /// RTI
-    /// Return from Interrupt
+    /// **RTI** (Return from Interrupt)  
     /// Restores the microprocessor to the state previous to the interrupt.
-    /// To do this, it reads P and PC from the stack into their places. 
+    /// To do this, it reads P and PC from the stack into their places.   
     /// NOTE: Ignores P bits 4 (B) and 5 (s). Checking the B flag (post BRK)
     /// must be done manually!
     pub fn RTI(&mut self) {
@@ -645,39 +642,34 @@ impl CPU {
 
     //#! Stack Manipulation
 
-    /// PHA
-    /// Push Accumulator on Stack
+    /// **PHA** (Push Accumulator on Stack)  
     /// Pushes the current accumulator value on the stack.
     pub fn PHA(&mut self) {
         let A: u8 = self.a;
         self.stack_push(A);
     }
-    /// PLA
-    /// Pull Accumulator from Stack
-    /// Pops the top value off of the stack and places in accumulator.
+    /// **PLA** (Pull Accumulator from Stack)  
+    /// Pops the top value off of the stack and places in accumulator.  
     /// NOTE: This implies that popping might not clear the previous value!
     pub fn PLA(&mut self) {
         let A: u8 = self.stack_pop();
         self.a = A;
     }
-    /// PHP
-    /// Push Processor Status on Stack
+    /// **PHP** (Push Processor Status on Stack)  
     /// Pushes the status register (P) _unchanged_ onto the stack.
     pub fn PHP(&mut self) {
         let P: u8 = self.status;
         self.stack_push(P); 
     }
-    /// PLP
-    /// Pull Processor Status from Stack
+    /// **PLP** (Pull Processor Status from Stack)  
     /// Pops the top stack value into the status register (P).
     pub fn PLP(&mut self) {
         let P: u8 = self.stack_pop();
         self.status = P;
     }
-    /// RTS
-    /// Return From Subroutine
+    /// **RTS** (Return From Subroutine)  
     /// Loads PCL then PCH from stack, into PC and increments by 1 to point 
-    /// to the instruction following the JSR.
+    /// to the instruction following the JSR.  
     /// Note: Since two pops occur, SP gets decremented twice (technically incremented).
     pub fn RTS(&mut self) {
         let PCL: u16 = self.stack_pop() as u16;
@@ -688,8 +680,7 @@ impl CPU {
 
     //#! Comparators (Probably used in jumping)
 
-    /// CMP
-    /// Compare Accumulator 
+    /// **CMP** (Compare Accumulator)  
     /// The purpose of the compare instruction is to allow the user
     /// to compare a value in memory to the accumulator without changing
     /// the value of the accumulator.
@@ -703,9 +694,8 @@ impl CPU {
         self.set_status(7, sub > 127);  //'N' set based on result bit 7
     }
 
-    /// CPX 
-    /// Compare X Register
-    /// Seems to be the same thing as CMP but with X register.
+    /// **CPX** (Compare X Register)  
+    /// Seems to be the same thing as CMP but with X register.  
     /// Operation and flag results are identical to equivalent mode accumulator CMP
     /// ops. 
     pub fn CPX<AM: AddressingMode>(&mut self, am: AM){
@@ -718,9 +708,8 @@ impl CPU {
         self.set_status(7, sub < 0);  //'N' set based on result bit 7
     }
 
-    /// CPY 
-    /// Compare Y Register
-    /// Seems to be the same thing as CMP but with Y register.
+    /// **CPY** (Compare Y Register)  
+    /// Seems to be the same thing as CMP but with Y register.  
     /// Operation and flag results are identical to equivalent mode accumulator CMP
     /// ops. 
     pub fn CPY<AM: AddressingMode>(&mut self, am: AM){
@@ -735,11 +724,11 @@ impl CPU {
     }
 
     //#! Branching/Jumping
-    /// JSR
-    /// Jump to Subroutine
+
+    /// **JSR** (Jump to Subroutine)  
     /// Takes a PC address (assembler replaces subroutine tag with the address)
     ///  as an argument. Stores the current PC on the stack (for RTS), and
-    ///  overwrites the current PC value with the newly obtained value.
+    ///  overwrites the current PC value with the newly obtained value.  
     /// Uses Absolute addressing, which means that the new PC is u16.
     pub fn JSR<AM: AddressingMode>(&mut self, am: AM){
         let PC_new  = am.address(); 
@@ -751,10 +740,9 @@ impl CPU {
         self.pc = PC_new;
     }
 
-    /// JMP
-    /// Jump to New Location
+    /// **JMP** (Jump to New Location)  
     /// Loads program counter value from a given memory value, and it's
-    /// subsequent location.
+    /// subsequent location.  
     /// AKA: (address) -> PCL, (address+1) -> PCH
     pub fn JMP<AM: AddressingMode>(&mut self, am: AM){
         let PC_L = am.load(self) as u16;
@@ -764,10 +752,10 @@ impl CPU {
         self.pc = bytes_to_word!(PC_H, PC_L);
     }
 
-    /// A base function for branching.
-    /// Applies the concept of relative addressing.
-    ///   A new u8 is obtained as the offset and added to the PC.
-    ///   This is signed arithmetic, and therefore can reduce the PC. 
+    /// A base function for branching.    
+    /// Applies the concept of relative addressing.  
+    ///  - A new u8 is obtained as the offset and added to the PC.
+    ///  - This is signed arithmetic, and therefore can reduce the PC. 
     pub fn branch_base(&mut self, offset: u8){
         if offset > 128 {
             self.pc -= offset as u16;
@@ -777,8 +765,7 @@ impl CPU {
         }
     }
 
-    /// BCC
-    /// Branch on Carry Clear
+    /// **BCC** (Branch on Carry Clear)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BCC<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -787,8 +774,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BCS
-    /// Branch on Carry Set
+    /// **BCS** (Branch on Carry Set)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BCS<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -797,8 +783,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BEQ
-    /// Branch on Result Zero
+    /// **BEQ** (Branch on Result Zero)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BEQ<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -807,8 +792,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BMI
-    /// Branch on Result Minus
+    /// **BMI** (Branch on Result Minus)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BMI<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -817,8 +801,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BNE
-    /// Branch on Result Not Zero
+    /// **BNE** (Branch on Result Not Zero)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BNE<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -827,8 +810,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BPL
-    /// Branch on Result Plus
+    /// **BPL** (Branch on Result Plus)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BPL<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -837,8 +819,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BVC
-    /// Branch on Overflow Clear
+    /// **BVC** (Branch on Overflow Clear)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BVC<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -847,8 +828,7 @@ impl CPU {
             self.branch_base(offset);
         }
     }
-    /// BVS
-    /// Branch on Overflow Set
+    /// **BVS** (Branch on Overflow Set)  
     /// Adds the offset value given to PC if condition is met. 
     pub fn BVS<AM: AddressingMode>(&mut self, am: AM){
         let offset = am.load(self);
@@ -858,6 +838,14 @@ impl CPU {
         }
     }
 
+    /// This module is a silly attempt to simplify the opcode processing
+    ///  issue, that comes with any emulator.  
+    /// I chose this method of a simple branch based upon opcode value 
+    ///  because of the relative difficulty of defining a funciton table
+    ///  in this language.  
+    ///
+    /// **Note:** It should be theoretically possible to define a funciton table
+    ///  via some functional aspects, instead of OOP aspects of rust.
     fn parse_opcode(&mut self, OP: u8, arg: u16){
         let arg_u8 = arg as u8;
         match OP {
@@ -1154,12 +1142,13 @@ pub trait AddressingMode {
     fn address (&self) -> u16; 
 }
 
-/// The commented numbers specify the addressing mode's int value in
-/// the Instruction.mode table.
+// The commented numbers specify the addressing mode's int value in
+// the Instruction.mode table.
+// Indirect(10), Relative(9), and Accumulator either do not need
+// structs or, in accumulator's case are not given a number because
+// of it only being called when an operand is not given.
 
-/// Indirect(10), Relative(9), and Accumulator either do not need
-/// structs or, in accumulator's case are not given a number because
-/// of it only being called when an operand is not given.
+///AccumulatorAM is the "Super class" for the other Addressing Modes.
 pub struct AccumulatorAM;    
 pub struct ImmediateAM      {pub address: u8}      /*2*/ 
 pub struct AbsoluteAM       {pub address: u16}     /*6*/ 
