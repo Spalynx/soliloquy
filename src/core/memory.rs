@@ -6,24 +6,46 @@
  *---------------------------------------------------------------------
  */
 
+pub use crate::core::*;
+#[allow(non_snake_case)]
+#[allow(dead_code)]
 //Truthfully, I don't think that I'll be able to fully emulate cartridge space.
 //I think that Cartridge.rs will just simply use standard std::fs to access PC
 // locations.
 pub struct MEM {
     RAM:	[u8; 0x800],        //2kb internal RAM.
-    CART:   [u8; 0xBFDF],    //Cartridge Space
+    CART:   Box<MAP>,    //Cartridge Space
+    PPU:    u8,         //TODO
+    APU:    u8,         //TODO
+    INPUT:  u8,         //TODO
+
 }
 
-
-#[allow(dead_code)]
 impl MEM {
-//Initializes an empty memory struct.
-    pub fn new() -> MEM {
+    /// Simple empty initialization used for unit testing.
+    /// I have no clue how hard this will be to modify when most 
+    ///  struct values are not u8.
+    pub fn new_empty() -> MEM {
         return MEM {
             RAM:	    [0; 0x800],
-            CART:	    [0; 0xBFDF],
+            CART:	    Box::new(EMPTY_MAP),
+            PPU:        0,
+            APU:        0,
+            INPUT:      0,
         }
     }
+    //Initializes the full memory map of the NES.
+    // TODO: PPU, APU, and INPUT registers are unimplemented!
+    pub fn new(mapper: Box<MAP>, ppu: u8, apu: u8, input: u8) -> MEM {
+        return MEM {
+            RAM:	    [0; 0x800],
+            CART:	    mapper,
+            PPU:        ppu,
+            APU:        apu,
+            INPUT:      input,
+        }
+    }
+    
 
     //Obtains values from full memory map.
     pub fn get(&self, address: u16) -> u8 {
@@ -32,7 +54,7 @@ impl MEM {
             self.RAM[address as usize]
         }
         else if address >= 0x4020 {
-            self.CART[address as usize]
+            self.CART.get(address) 
         }
         else {
             panic!("Other values in the memory map not implemented yet!");
@@ -53,7 +75,7 @@ impl MEM {
         }
         else if address >= 0x4020 {
             //~6kb Cartridge space.
-            self.CART[address as usize] = val;
+            self.CART.set(address, val);
         }
         else {
             panic!("Other values in the memory map not implemented yet!");

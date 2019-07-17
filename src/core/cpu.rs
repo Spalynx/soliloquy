@@ -4,9 +4,11 @@
 
 //Because OPCODES are cooler in CAPS!
     #![allow(non_snake_case)]
+    #[allow(dead_code)]
 
 //Imports
-    use core::memory::MEM;
+    use crate::core::memory::MEM;
+    pub use ::log::*;
 
 //Test module definition.
     #[cfg(test)]
@@ -66,6 +68,7 @@ pub struct CPU {
     pub interrupt:      u8,         
     /// Number of cycles to stall.
     pub stall:          u8, 
+
 }
 
 
@@ -76,11 +79,38 @@ pub struct CPU {
 impl CPU {
     /// Initializes an empty CPU struct.
     /// All values initialized as empty.
-    pub fn new() -> CPU {
+    /// This function was created to allow for ease of testing in the 
+    ///   cpu_test.rs unit test file.
+    pub fn new_empty() -> CPU {
         CPU{
-            memory:         MEM::new(),
+            memory:         MEM::new_empty(),
 
-            pc:             0,		        //Program Counter
+            pc:             0,		            //Program Counter
+            cycles:         0,		            //Number of cycles
+
+            sp:             0xFF,	            //Stack Pointer, \S 8.13 in KIM-1
+
+            a:              0,		            //Accumulator
+            x:              0,		            // x register
+            y:              0,		            // y register
+
+            status:         34,		            //cpu flags
+
+            interrupt:      0,		            // interrupt type to perform
+            stall:          0,		            // number of cycles to stall
+        }
+    }
+    /// Initializes an empty CPU struct.
+    /// Sets a memory map with pre-initialized MEM (PPU, APU, MAP, INPUT)
+    ///  values.
+    /// This is used in the main boot sequence.
+
+    pub fn new(memory: MEM) -> CPU {
+        debug!("PRE-COMPLETE -> CPU Initialization."); 
+        CPU{
+            memory:         memory,
+
+            pc:             0xC000,		    //Program Counter
             cycles:         0,		        //Number of cycles
 
             sp:             0xFF,	        //Stack Pointer, \S 8.13 in KIM-1
@@ -104,25 +134,41 @@ impl CPU {
     ///Meta-Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ///-----~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
+    /// This module decodes an opcode number found at the Program Counter's
+    ///  current address number.
+    /// NOTE 1: I had to implement this as a match statement for the given
+    ///  opcode, because as far as I can tell, Rust doesnt really support
+    ///  anything like a struct method function table.
+    /// NOTE 2: I ultimately split the 255 arm long match statement into 
+    ///  three separate functions for (1) readability, and (2) the ability
+    ///  to parse an opcode, and it's parameters from PC, without having to
+    ///  have an OPCODE_SIZE[u8;255] lookup table.
+    ///
+    /// Truly, I wish that I could have made this
+    ///  more readable, and elegant by using a function table.
+    /// I understand that rust doesn't allow this for many memory/concurrency
+    ///  safety reasons, but much to my sadness.
+    pub fn step(&mut self){
+        let opnum = self.memory.get(self.pc);
 
-    /// Runs a cpu cycle with each call
-    fn step(){
-        //;; Read opcode from rom -> OP
-        //;; match OP_SIZES[OP] {
-        //;;    0 => panic!("OPCODE NOT IMPL YET!"),
-        //;;    1 => self.parse_opcode(OP, 0),
-        //;;    2 => {
-        //;;            read arg from rom -> ARG
-        //;;            self.parse_opcode(OP, ARG);
-        //::         },
-        //;;    3 => {
-        //;;            read arg1 from rom -> ARG1
-        //;;            read arg2 from rom -> ARG2
-        //;;            let ARG: u16 = bytes_to_word!(ARG2, ARG1);
-        //;;            self.parse_opcode(OP, ARG);
-        //;;          },
-        //;;}
+        info!("ACTION::BEF -> OP: #[{:X}], CPU: (PC:[{}], CYC:[{}], SP[{}], S[{}], A[{}], X[{}], Y[{}])",
+                opnum, self.pc, self.cycles, self.sp, self.status, self.a, self.x, self.y);
+
+        if self.step_nil_op(opnum) {        //IF NO_PARAMETER_OPCODE is run:
+            self.pc = self.pc + 1;          //Increment PC to next OP.
+        }
+        else if self.step_byte_op(opnum) {  //IF BYTE_PARAMETER_OPCODE is run:
+            self.pc = self.pc + 2;          //Increment PC to next OP.
+        }
+        else if self.step_word_op(opnum){   //IF WORD_PARAMETER_OPCODE is run:
+            self.pc = self.pc + 3;          //Increment PC to next OP.
+        }
+        else {
+            panic!("OP: [{:x}] NOT FOUND!", opnum);
+        }
     }
+
+
 
     fn reset(&mut self){
         self.sp = 0xFD;
@@ -838,277 +884,311 @@ impl CPU {
         }
     }
 
-    /// This module is a silly attempt to simplify the opcode processing
-    ///  issue, that comes with any emulator.  
-    /// I chose this method of a simple branch based upon opcode value 
-    ///  because of the relative difficulty of defining a funciton table
-    ///  in this language.  
-    ///
-    /// **Note:** It should be theoretically possible to define a funciton table
-    ///  via some functional aspects, instead of OOP aspects of rust.
-    fn parse_opcode(&mut self, OP: u8, arg: u16){
-        let arg_u8 = arg as u8;
-        match OP {
+
+    /// A sub-method of  the main CPU step method.
+    /// This method, given an opcode number value, runs an OPcode if
+    ///   the OP doesn't need a memory value, and therefore doesn't have
+    ///   one that should be read.
+    /// Returns _true_ if an opcode is run. False otherwise.
+    fn step_nil_op(&mut self, opnum: u8) -> bool {
+        match opnum {
             0x00	=> self.BRK( ),
-            0x01	=> self.ORA(IndexedIndirectAM{address: arg_u8}),
             0x02	=> self.NOP( ),
             0x03	=> self.NOP( ),
             0x04	=> self.NOP( ),
-            0x05	=> self.ORA( ZeroPageAM{address: arg_u8}),
-            0x06	=> self.ASL( ZeroPageAM{address: arg_u8}),
             0x07	=> self.NOP( ),
             0x08	=> self.PHP( ),
-            0x09	=> self.ORA( ImmediateAM{address: arg_u8}),
-            0x0A	=> self.ASL( AccumulatorAM),
-            0x0B	=> self.NOP( ),
+            0x0A	=> self.ASL( AccumulatorAM ),
             0x0C	=> self.NOP( ),
-            0x0D	=> self.ORA( AbsoluteAM{address: arg}),
-            0x0E	=> self.ASL( AbsoluteAM{address: arg}),
+            0x0B	=> self.NOP( ),
             0x0F	=> self.NOP( ),
-            0x10	=> self.BPL( ImmediateAM{address: arg_u8}),
-            0x11	=> self.ORA( IndirectIndexedAM{address: arg_u8}),
             0x12	=> self.NOP( ),
             0x13	=> self.NOP( ),
             0x14	=> self.NOP( ),
-            0x15	=> self.ORA( ZeroPageXAM{address: arg_u8}),
-            0x16	=> self.ASL( ZeroPageXAM{address: arg_u8}),
             0x17	=> self.NOP( ),
             0x18	=> self.CLC( ),
-            0x19	=> self.ORA( AbsoluteYAM{address: arg}),
             0x1A	=> self.NOP( ),
             0x1B	=> self.NOP( ),
             0x1C	=> self.NOP( ),
-            0x1D	=> self.ORA( AbsoluteXAM{address: arg}),
-            0x1E	=> self.ASL( AbsoluteXAM{address: arg}),
             0x1F	=> self.NOP( ),
-            0x20	=> self.JSR( AbsoluteAM{address: arg}),
-            0x21	=> self.AND( IndexedIndirectAM{address: arg_u8}),
             0x22	=> self.NOP( ),
             0x23	=> self.NOP( ),
-            0x24	=> self.BIT( ZeroPageAM{address: arg_u8}),
-            0x25	=> self.AND( ZeroPageAM{address: arg_u8}),
-            0x26	=> self.ROL( ZeroPageAM{address: arg_u8}),
             0x27	=> self.NOP( ),
             0x28	=> self.PLP( ),
-            0x29	=> self.AND( ImmediateAM{address: arg_u8}),
-            0x2A	=> self.ROL( AccumulatorAM),
+            0x2A	=> self.ROL( AccumulatorAM ),
             0x2B	=> self.NOP( ),
-            0x2C	=> self.BIT( AbsoluteAM{address: arg}),
-            0x2D	=> self.AND( AbsoluteAM{address: arg}),
-            0x2E	=> self.ROL( AbsoluteAM{address: arg}),
             0x2F	=> self.NOP( ),
-            0x30	=> self.BMI( ImmediateAM{address: arg_u8}),
-            0x31	=> self.AND( IndirectIndexedAM{address: arg_u8}),
             0x32	=> self.NOP( ),
             0x33	=> self.NOP( ),
             0x34	=> self.NOP( ),
-            0x35	=> self.AND( ZeroPageXAM{address: arg_u8}),
-            0x36	=> self.ROL( ZeroPageXAM{address: arg_u8}),
             0x37	=> self.NOP( ),
             0x38	=> self.SEC( ),
-            0x39	=> self.AND( AbsoluteYAM{address: arg}),
             0x3A	=> self.NOP( ),
             0x3B	=> self.NOP( ),
             0x3C	=> self.NOP( ),
-            0x3D	=> self.AND( AbsoluteXAM{address: arg}),
-            0x3E	=> self.ROL( AbsoluteXAM{address: arg}),
             0x3F	=> self.NOP( ),
             0x40	=> self.RTI( ),
-            0x41	=> self.EOR( IndexedIndirectAM{address: arg_u8}),
             0x42	=> self.NOP( ),
             0x43	=> self.NOP( ),
             0x44	=> self.NOP( ),
-            0x45	=> self.EOR( ZeroPageAM{address: arg_u8}),
-            0x46	=> self.LSR( ZeroPageAM{address: arg_u8}),
             0x47	=> self.NOP( ),
             0x48	=> self.PHA( ),
-            0x49	=> self.EOR( ImmediateAM{address: arg_u8}),
-            0x4A	=> self.LSR( AccumulatorAM),
+            0x4A	=> self.LSR( AccumulatorAM ),
             0x4B	=> self.NOP( ),
-            0x4C	=> self.JMP( AbsoluteAM{address: arg}),
-            0x4D	=> self.EOR( AbsoluteAM{address: arg}),
-            0x4E	=> self.LSR( AbsoluteAM{address: arg}),
             0x4F	=> self.NOP( ),
-            0x50	=> self.BVC( ImmediateAM{address: arg_u8}),
-            0x51	=> self.EOR( IndirectIndexedAM{address: arg_u8}),
             0x52	=> self.NOP( ),
             0x53	=> self.NOP( ),
             0x54	=> self.NOP( ),
-            0x55	=> self.EOR( ZeroPageXAM{address: arg_u8}),
-            0x56	=> self.LSR( ZeroPageXAM{address: arg_u8}),
             0x57	=> self.NOP( ),
             0x58	=> self.CLI( ),
-            0x59	=> self.EOR( AbsoluteYAM{address: arg}),
             0x5A	=> self.NOP( ),
             0x5B	=> self.NOP( ),
             0x5C	=> self.NOP( ),
-            0x5D	=> self.EOR( AbsoluteXAM{address: arg}),
-            0x5E	=> self.LSR( AbsoluteXAM{address: arg}),
             0x5F	=> self.NOP( ),
             0x60	=> self.RTS( ),
-            0x61	=> self.ADC( IndexedIndirectAM{address: arg_u8}),
             0x62	=> self.NOP( ),
             0x63	=> self.NOP( ),
             0x64	=> self.NOP( ),
-            0x65	=> self.ADC( ZeroPageAM{address: arg_u8}),
-            0x66	=> self.ROR( ZeroPageAM{address: arg_u8}),
             0x67	=> self.NOP( ),
             0x68	=> self.PLA( ),
-            0x69	=> self.ADC( ImmediateAM{address: arg_u8}),
-            0x6A	=> self.ROR( AccumulatorAM),
+            0x6A	=> self.ROR( AccumulatorAM ),
             0x6B	=> self.NOP( ),
-            0x6C	=> self.JMP( AbsoluteAM{address: arg}), //Indirect technically
-            0x6D	=> self.ADC( AbsoluteAM{address: arg}),
-            0x6E	=> self.ROR( AbsoluteAM{address: arg}),
             0x6F	=> self.NOP( ),
-            0x70	=> self.BVS( ImmediateAM{address: arg_u8}),
-            0x71	=> self.ADC( IndirectIndexedAM{address: arg_u8}),
             0x72	=> self.NOP( ),
             0x73	=> self.NOP( ),
             0x74	=> self.NOP( ),
-            0x75	=> self.ADC( ZeroPageXAM{address: arg_u8}),
-            0x76	=> self.ROR( ZeroPageXAM{address: arg_u8}),
             0x77	=> self.NOP( ),
             0x78	=> self.SEI( ),
-            0x79	=> self.ADC( AbsoluteYAM{address: arg}),
             0x7A	=> self.NOP( ),
             0x7B	=> self.NOP( ),
             0x7C	=> self.NOP( ),
-            0x7D	=> self.ADC( AbsoluteXAM{address: arg}),
-            0x7E	=> self.ROR( AbsoluteXAM{address: arg}),
             0x7F	=> self.NOP( ),
             0x80	=> self.NOP( ),
-            0x81	=> self.STA( IndexedIndirectAM{address: arg_u8}),
             0x82	=> self.NOP( ),
             0x83	=> self.NOP( ),
-            0x84	=> self.STY( ZeroPageAM{address: arg_u8}),
-            0x85	=> self.STA( ZeroPageAM{address: arg_u8}),
-            0x86	=> self.STX( ZeroPageAM{address: arg_u8}),
             0x87	=> self.NOP( ),
             0x88	=> self.DEY( ),
             0x89	=> self.NOP( ),
             0x8A	=> self.TXA( ),
             0x8B	=> self.NOP( ),
-            0x8C	=> self.STY( AbsoluteAM{address: arg}),
-            0x8D	=> self.STA( AbsoluteAM{address: arg}),
-            0x8E	=> self.STX( AbsoluteAM{address: arg}),
             0x8F	=> self.NOP( ),
-            0x90	=> self.BCC( ImmediateAM{address: arg_u8}),
-            0x91	=> self.STA( IndirectIndexedAM{address: arg_u8}),
             0x92	=> self.NOP( ),
             0x93	=> self.NOP( ),
-            0x94	=> self.STY( ZeroPageXAM{address: arg_u8}),
-            0x95	=> self.STA( ZeroPageXAM{address: arg_u8}),
-            0x96	=> self.STX( ZeroPageYAM{address: arg_u8}),
             0x97	=> self.NOP( ),
             0x98	=> self.TYA( ),
-            0x99	=> self.STA( AbsoluteYAM{address: arg}),
             0x9A	=> self.TXS( ),
             0x9B	=> self.NOP( ),
             0x9C	=> self.NOP( ),
-            0x9D	=> self.STA( AbsoluteXAM{address: arg}),
             0x9E	=> self.NOP( ),
             0x9F	=> self.NOP( ),
-            0xA0	=> self.LDY( ImmediateAM{address: arg_u8}),
-            0xA1	=> self.LDA( IndexedIndirectAM{address: arg_u8}),
-            0xA2	=> self.LDX( ImmediateAM{address: arg_u8}),
             0xA3	=> self.NOP( ),
-            0xA4	=> self.LDY( ZeroPageAM{address: arg_u8}),
-            0xA5	=> self.LDA( ZeroPageAM{address: arg_u8}),
-            0xA6	=> self.LDX( ZeroPageAM{address: arg_u8}),
             0xA7	=> self.NOP( ),
             0xA8	=> self.TAY( ),
-            0xA9	=> self.LDA( ImmediateAM{address: arg_u8}),
             0xAA	=> self.TAX( ),
             0xAB	=> self.NOP( ),
-            0xAC	=> self.LDY( AbsoluteAM{address: arg}),
-            0xAD	=> self.LDA( AbsoluteAM{address: arg}),
-            0xAE	=> self.LDX( AbsoluteAM{address: arg}),
             0xAF	=> self.NOP( ),
-            0xB0	=> self.BCS( ImmediateAM{address: arg_u8}),
-            0xB1	=> self.LDA( IndirectIndexedAM{address: arg_u8}),
             0xB2	=> self.NOP( ),
             0xB3	=> self.NOP( ),
-            0xB4	=> self.LDY( ZeroPageXAM{address: arg_u8}),
-            0xB5	=> self.LDA( ZeroPageXAM{address: arg_u8}),
-            0xB6	=> self.LDX( ZeroPageYAM{address: arg_u8}),
             0xB7	=> self.NOP( ),
             0xB8	=> self.CLV( ),
-            0xB9	=> self.LDA( AbsoluteYAM{address: arg}),
             0xBA	=> self.TSX( ),
             0xBB	=> self.NOP( ),
-            0xBC	=> self.LDY( AbsoluteXAM{address: arg}),
-            0xBD	=> self.LDA( AbsoluteXAM{address: arg}),
-            0xBE	=> self.LDX( AbsoluteYAM{address: arg}),
             0xBF	=> self.NOP( ),
-            0xC0	=> self.CPY( ImmediateAM{address: arg_u8}),
-            0xC1	=> self.CMP( IndexedIndirectAM{address: arg_u8}),
             0xC2	=> self.NOP( ),
             0xC3	=> self.NOP( ),
-            0xC4	=> self.CPY( ZeroPageAM{address: arg_u8}),
-            0xC5	=> self.CMP( ZeroPageAM{address: arg_u8}),
-            0xC6	=> self.DEC( ZeroPageAM{address: arg_u8}),
             0xC7	=> self.NOP( ),
             0xC8	=> self.INY( ),
-            0xC9	=> self.CMP( ImmediateAM{address: arg_u8}),
             0xCA	=> self.DEX( ),
             0xCB	=> self.NOP( ),
-            0xCC	=> self.CPY( AbsoluteAM{address: arg}),
-            0xCD	=> self.CMP( AbsoluteAM{address: arg}),
-            0xCE	=> self.DEC( AbsoluteAM{address: arg}),
             0xCF	=> self.NOP( ),
-            0xD0	=> self.BNE( ImmediateAM{address: arg_u8}),
-            0xD1	=> self.CMP( IndirectIndexedAM{address: arg_u8}),
             0xD2	=> self.NOP( ),
             0xD3	=> self.NOP( ),
             0xD4	=> self.NOP( ),
-            0xD5	=> self.CMP( ZeroPageXAM{address: arg_u8}),
-            0xD6	=> self.DEC( ZeroPageXAM{address: arg_u8}),
             0xD7	=> self.NOP( ),
             0xD8	=> self.CLD( ),
-            0xD9	=> self.CMP( AbsoluteYAM{address: arg}),
             0xDA	=> self.NOP( ),
             0xDB	=> self.NOP( ),
             0xDC	=> self.NOP( ),
-            0xDD	=> self.CMP( AbsoluteXAM{address: arg}),
-            0xDE	=> self.DEC( AbsoluteXAM{address: arg}),
             0xDF	=> self.NOP( ),
-            0xE0	=> self.CPX( ImmediateAM{address: arg_u8}),
-            0xE1	=> self.SBC( IndexedIndirectAM{address: arg_u8}),
             0xE2	=> self.NOP( ),
             0xE3	=> self.NOP( ),
-            0xE4	=> self.CPX( ZeroPageAM{address: arg_u8}),
-            0xE5	=> self.SBC( ZeroPageAM{address: arg_u8}),
-            0xE6	=> self.INC( ZeroPageAM{address: arg_u8}),
             0xE7	=> self.NOP( ),
             0xE8	=> self.INX( ),
-            0xE9	=> self.SBC( ImmediateAM{address: arg_u8}),
             0xEA	=> self.NOP( ),
             0xEB	=> self.NOP( ),
-            0xEC	=> self.CPX( AbsoluteAM{address: arg}),
-            0xED	=> self.SBC( AbsoluteAM{address: arg}),
-            0xEE	=> self.INC( AbsoluteAM{address: arg}),
             0xEF	=> self.NOP( ),
-            0xF0	=> self.BEQ( ImmediateAM{address: arg_u8}),
-            0xF1	=> self.SBC( IndirectIndexedAM{address: arg_u8}),
             0xF2	=> self.NOP( ),
             0xF3	=> self.NOP( ),
             0xF4	=> self.NOP( ),
-            0xF5	=> self.SBC( ZeroPageXAM{address: arg_u8}),
-            0xF6	=> self.INC( ZeroPageXAM{address: arg_u8}),
             0xF7	=> self.NOP( ),
             0xF8	=> self.SED( ),
-            0xF9	=> self.SBC( AbsoluteYAM{address: arg}),
             0xFA	=> self.NOP( ),
             0xFB	=> self.NOP( ),
             0xFC	=> self.NOP( ),
-            0xFD	=> self.SBC( AbsoluteXAM{address: arg}),
-            0xFE	=> self.INC( AbsoluteXAM{address: arg}),
             0xFF	=> self.NOP( ),
-            _       =>  panic!("OPCODE not implemented yet."),
+            _       => return false,
         }
 
-        let speed = 0 + OP_SPEEDS[OP as usize];
+        debug!("COMPLETE -> OP #[{:X}].", opnum);
+        return true;
+    }
+
+    /// A sub-method of  the main CPU step method.
+    /// This method, given an opcode number value, runs an OPcode if
+    ///   the OP requires an 8-bit memory value, and therefore requires the
+    ///   following byte.
+    /// Returns _true_ if an opcode is run. False otherwise.
+    fn step_byte_op(&mut self, opnum: u8) -> bool {
+        //Obtain the address byte from value in PC + 1.
+        let arg_u8 = self.memory.get(self.pc + 1);
+
+        //Byte (8-bit) OPcodes!
+        match opnum {
+            0x01	=> self.ORA( IndexedIndirectAM{address: arg_u8}),
+            0x05	=> self.ORA( ZeroPageAM{address: arg_u8}),
+            0x06	=> self.ASL( ZeroPageAM{address: arg_u8}),
+            0x09	=> self.ORA( ImmediateAM{address: arg_u8}),
+            0x10	=> self.BPL( ImmediateAM{address: arg_u8}),
+            0x11	=> self.ORA( IndirectIndexedAM{address: arg_u8}),
+            0x15	=> self.ORA( ZeroPageXAM{address: arg_u8}),
+            0x16	=> self.ASL( ZeroPageXAM{address: arg_u8}),
+            0x21	=> self.AND( IndexedIndirectAM{address: arg_u8}),
+            0x24	=> self.BIT( ZeroPageAM{address: arg_u8}),
+            0x25	=> self.AND( ZeroPageAM{address: arg_u8}),
+            0x26	=> self.ROL( ZeroPageAM{address: arg_u8}),
+            0x29	=> self.AND( ImmediateAM{address: arg_u8}),
+            0x30	=> self.BMI( ImmediateAM{address: arg_u8}),
+            0x31	=> self.AND( IndirectIndexedAM{address: arg_u8}),
+            0x35	=> self.AND( ZeroPageXAM{address: arg_u8}),
+            0x36	=> self.ROL( ZeroPageXAM{address: arg_u8}),
+            0x41	=> self.EOR( IndexedIndirectAM{address: arg_u8}),
+            0x45	=> self.EOR( ZeroPageAM{address: arg_u8}),
+            0x46	=> self.LSR( ZeroPageAM{address: arg_u8}),
+            0x49	=> self.EOR( ImmediateAM{address: arg_u8}),
+            0x50	=> self.BVC( ImmediateAM{address: arg_u8}),
+            0x51	=> self.EOR( IndirectIndexedAM{address: arg_u8}),
+            0x55	=> self.EOR( ZeroPageXAM{address: arg_u8}),
+            0x56	=> self.LSR( ZeroPageXAM{address: arg_u8}),
+            0x61	=> self.ADC( IndexedIndirectAM{address: arg_u8}),
+            0x65	=> self.ADC( ZeroPageAM{address: arg_u8}),
+            0x66	=> self.ROR( ZeroPageAM{address: arg_u8}),
+            0x69	=> self.ADC( ImmediateAM{address: arg_u8}),
+            0x70	=> self.BVS( ImmediateAM{address: arg_u8}),
+            0x71	=> self.ADC( IndirectIndexedAM{address: arg_u8}),
+            0x75	=> self.ADC( ZeroPageXAM{address: arg_u8}),
+            0x76	=> self.ROR( ZeroPageXAM{address: arg_u8}),
+            0x81	=> self.STA( IndexedIndirectAM{address: arg_u8}),
+            0x84	=> self.STY( ZeroPageAM{address: arg_u8}),
+            0x85	=> self.STA( ZeroPageAM{address: arg_u8}),
+            0x86	=> self.STX( ZeroPageAM{address: arg_u8}),
+            0x90	=> self.BCC( ImmediateAM{address: arg_u8}),
+            0x91	=> self.STA( IndirectIndexedAM{address: arg_u8}),
+            0x94	=> self.STY( ZeroPageXAM{address: arg_u8}),
+            0x95	=> self.STA( ZeroPageXAM{address: arg_u8}),
+            0x96	=> self.STX( ZeroPageYAM{address: arg_u8}),
+            0xA0	=> self.LDY( ImmediateAM{address: arg_u8}),
+            0xA1	=> self.LDA( IndexedIndirectAM{address: arg_u8}),
+            0xA2	=> self.LDX( ImmediateAM{address: arg_u8}),
+            0xA4	=> self.LDY( ZeroPageAM{address: arg_u8}),
+            0xA5	=> self.LDA( ZeroPageAM{address: arg_u8}),
+            0xA6	=> self.LDX( ZeroPageAM{address: arg_u8}),
+            0xA9	=> self.LDA( ImmediateAM{address: arg_u8}),
+            0xB0	=> self.BCS( ImmediateAM{address: arg_u8}),
+            0xB1	=> self.LDA( IndirectIndexedAM{address: arg_u8}),
+            0xB4	=> self.LDY( ZeroPageXAM{address: arg_u8}),
+            0xB5	=> self.LDA( ZeroPageXAM{address: arg_u8}),
+            0xB6	=> self.LDX( ZeroPageYAM{address: arg_u8}),
+            0xC0	=> self.CPY( ImmediateAM{address: arg_u8}),
+            0xC1	=> self.CMP( IndexedIndirectAM{address: arg_u8}),
+            0xC4	=> self.CPY( ZeroPageAM{address: arg_u8}),
+            0xC5	=> self.CMP( ZeroPageAM{address: arg_u8}),
+            0xC6	=> self.DEC( ZeroPageAM{address: arg_u8}),
+            0xC9	=> self.CMP( ImmediateAM{address: arg_u8}),
+            0xD0	=> self.BNE( ImmediateAM{address: arg_u8}),
+            0xD1	=> self.CMP( IndirectIndexedAM{address: arg_u8}),
+            0xD5	=> self.CMP( ZeroPageXAM{address: arg_u8}),
+            0xD6	=> self.DEC( ZeroPageXAM{address: arg_u8}),
+            0xE0	=> self.CPX( ImmediateAM{address: arg_u8}),
+            0xE1	=> self.SBC( IndexedIndirectAM{address: arg_u8}),
+            0xE4	=> self.CPX( ZeroPageAM{address: arg_u8}),
+            0xE5	=> self.SBC( ZeroPageAM{address: arg_u8}),
+            0xE6	=> self.INC( ZeroPageAM{address: arg_u8}),
+            0xE9	=> self.SBC( ImmediateAM{address: arg_u8}),
+            0xF0	=> self.BEQ( ImmediateAM{address: arg_u8}),
+            0xF1	=> self.SBC( IndirectIndexedAM{address: arg_u8}),
+            0xF5	=> self.SBC( ZeroPageXAM{address: arg_u8}),
+            0xF6	=> self.INC( ZeroPageXAM{address: arg_u8}),
+            _       => return false,
+        }
+        debug!("COMPLETE -> OP #[{:X}] [{:X}].", opnum, arg_u8);
+        return true;
+    }
+    
+    /// A sub-method of  the main CPU step method.
+    /// This method, given an opcode number value, runs an OPcode if
+    ///   the OP requires a 16-bit memory value, and therefore requires the
+    ///   following _two_ bytes.
+    /// Returns _true_ if an opcode is run. False otherwise.
+    fn step_word_op(&mut self, opnum: u8) -> bool{
+        //Build address word from mem{PC+1} (LO), and mem{PC+2} value (HI).
+        let arg_u16= bytes_to_word!( self.memory.get(self.pc + 2)   as u16, //HI
+                                     self.memory.get(self.pc + 1)   as u16);//LO
+
+        //Word (16-bit) OPcodes!
+        match opnum {
+            0x0D	=> self.ORA( AbsoluteAM{address: arg_u16}),
+            0x0E	=> self.ASL( AbsoluteAM{address: arg_u16}),
+            0x19	=> self.ORA( AbsoluteYAM{address: arg_u16}),
+            0x1D	=> self.ORA( AbsoluteXAM{address: arg_u16}),
+            0x1E	=> self.ASL( AbsoluteXAM{address: arg_u16}),
+            0x20	=> self.JSR( AbsoluteAM{address: arg_u16}),
+            0x2C	=> self.BIT( AbsoluteAM{address: arg_u16}),
+            0x2D	=> self.AND( AbsoluteAM{address: arg_u16}),
+            0x2E	=> self.ROL( AbsoluteAM{address: arg_u16}),
+            0x39	=> self.AND( AbsoluteYAM{address: arg_u16}),
+            0x3D	=> self.AND( AbsoluteXAM{address: arg_u16}),
+            0x3E	=> self.ROL( AbsoluteXAM{address: arg_u16}),
+            0x4C	=> self.JMP( AbsoluteAM{address: arg_u16}),
+            0x4D	=> self.EOR( AbsoluteAM{address: arg_u16}),
+            0x4E	=> self.LSR( AbsoluteAM{address: arg_u16}),
+            0x59	=> self.EOR( AbsoluteYAM{address: arg_u16}),
+            0x5D	=> self.EOR( AbsoluteXAM{address: arg_u16}),
+            0x5E	=> self.LSR( AbsoluteXAM{address: arg_u16}),
+            0x6C	=> self.JMP( AbsoluteAM{address: arg_u16}), 
+                        // <- Indirect technically
+            0x6D	=> self.ADC( AbsoluteAM{address: arg_u16}),
+            0x6E	=> self.ROR( AbsoluteAM{address: arg_u16}),
+            0x79	=> self.ADC( AbsoluteYAM{address: arg_u16}),
+            0x7D	=> self.ADC( AbsoluteXAM{address: arg_u16}),
+            0x7E	=> self.ROR( AbsoluteXAM{address: arg_u16}),
+            0x8C	=> self.STY( AbsoluteAM{address: arg_u16}),
+            0x8D	=> self.STA( AbsoluteAM{address: arg_u16}),
+            0x8E	=> self.STX( AbsoluteAM{address: arg_u16}),
+            0x99	=> self.STA( AbsoluteYAM{address: arg_u16}),
+            0x9D	=> self.STA( AbsoluteXAM{address: arg_u16}),
+            0xAC	=> self.LDY( AbsoluteAM{address: arg_u16}),
+            0xAD	=> self.LDA( AbsoluteAM{address: arg_u16}),
+            0xAE	=> self.LDX( AbsoluteAM{address: arg_u16}),
+            0xB9	=> self.LDA( AbsoluteYAM{address: arg_u16}),
+            0xBC	=> self.LDY( AbsoluteXAM{address: arg_u16}),
+            0xBD	=> self.LDA( AbsoluteXAM{address: arg_u16}),
+            0xBE	=> self.LDX( AbsoluteYAM{address: arg_u16}),
+            0xCC	=> self.CPY( AbsoluteAM{address: arg_u16}),
+            0xCD	=> self.CMP( AbsoluteAM{address: arg_u16}),
+            0xCE	=> self.DEC( AbsoluteAM{address: arg_u16}),
+            0xD9	=> self.CMP( AbsoluteYAM{address: arg_u16}),
+            0xDD	=> self.CMP( AbsoluteXAM{address: arg_u16}),
+            0xDE	=> self.DEC( AbsoluteXAM{address: arg_u16}),
+            0xEC	=> self.CPX( AbsoluteAM{address: arg_u16}),
+            0xED	=> self.SBC( AbsoluteAM{address: arg_u16}),
+            0xEE	=> self.INC( AbsoluteAM{address: arg_u16}),
+            0xF9	=> self.SBC( AbsoluteYAM{address: arg_u16}),
+            0xFD	=> self.SBC( AbsoluteXAM{address: arg_u16}),
+            0xFE	=> self.INC( AbsoluteXAM{address: arg_u16}),
+            _       => return false,
+        }
+        debug!("COMPLETE -> OP #[{:X}] [{:X}].", opnum, arg_u16);
+        return true;
     }
 } //IMPL CPU
 
@@ -1261,7 +1341,8 @@ pub struct Instructions {
     pub paging:    [u8;256],
 }
 
-static OP_SPEEDS: [u8;256] =
+    #[allow(dead_code)]
+pub static OP_SPEEDS: [u8;256] =
     [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0,
     4, 0, 7, 4, 4, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5,
     0, 8, 4, 4, 6, 6, 0, 4, 0, 7, 4, 4, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0,
@@ -1274,7 +1355,8 @@ static OP_SPEEDS: [u8;256] =
     6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 2, 5, 0, 8, 4, 4, 6, 6, 0, 4,
     0, 7, 4, 4, 7, 7]; 
 
-static OP_PAGING: [u8; 256] = 
+    #[allow(dead_code)]
+pub static OP_PAGING: [u8; 256] = 
     [7, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0,
     5, 0, 7, 5, 5, 7, 7, 6, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6,
     0, 8, 4, 4, 6, 6, 0, 5, 0, 7, 5, 5, 7, 7, 0, 6, 0, 8, 3, 3, 5, 5, 0, 2, 0,
@@ -1287,7 +1369,8 @@ static OP_PAGING: [u8; 256] =
     6, 2, 8, 3, 3, 5, 5, 0, 2, 0, 2, 4, 4, 6, 6, 3, 6, 0, 8, 4, 4, 6, 6, 0, 5,
     0, 7, 5, 5, 7, 7];
 
-static OP_SIZES:[u8; 256] = 
+    #[allow(dead_code)]
+pub static OP_SIZES:[u8; 256] = 
     [1, 2, 0, 0, 0, 2, 2, 0, 1, 2, 1, 0, 0, 3, 3, 0, 2, 2, 0, 0, 0, 2, 2, 0, 1,
     3, 0, 0, 0, 3, 3, 0, 3, 2, 0, 0, 2, 2, 2, 0, 1, 2, 1, 0, 3, 3, 3, 0, 2, 2,
     0, 0, 0, 2, 2, 0, 1, 3, 0, 0, 0, 3, 3, 0, 1, 2, 0, 0, 0, 2, 2, 0, 1, 2, 1,

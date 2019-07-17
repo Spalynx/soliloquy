@@ -1,15 +1,27 @@
-// Author: Mark Eikel
-// Date 9/13/17
+// Author: Spalynx 
+// INIT Date: 9/13/17
 // This should only be used for testing of the virtual hardware.
 
-extern crate core;
+extern crate soliloquy;
+pub mod core;
+
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 
 fn main() {
-    let mut c = CART::new("example/example.rom");
-    match c.read_cart(){
-        Ok(e)    => println!("ROM read correctly."),
-        Err(e)   => panic!("ROM read ERR"),
-    }
+    env_logger::from_env(env_logger::Env::default().default_filter_or("debug"))
+        .init();
 
-    //println!("{:?}", c.raw_cart);
+    debug!("COMPLETE -> Logger init.");
+    let mut nes_main = 
+        core::nes::NES::new("example/nestest.nes");
+    debug!("COMPLETE -> NES boot/CPU boot");
+    nes_main.step();
+    nes_main.step();
+    nes_main.step();
+    nes_main.step();
+    nes_main.step();
+    nes_main.step();
+    nes_main.step();
 }
