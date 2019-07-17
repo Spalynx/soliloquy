@@ -2,7 +2,7 @@
  *  Author: Spalynx
  *  Init: 6/17/18
  */
-use core::cpu::*;
+use crate::core::cpu::*;
 //use core::memory::*;
 
 #[cfg(test)]
@@ -14,7 +14,7 @@ pub mod cpu_test {
     //~~~CPU~META~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #[test]
     fn test_cpu_init(){
-        let test_cpu = super::CPU::new();
+        let test_cpu = super::CPU::new_empty();
         
         //Testing each struct field initialization.
         assert_eq!(test_cpu.cycles,   0);
@@ -29,7 +29,7 @@ pub mod cpu_test {
 
     #[test]
     fn test_status_each(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Array of status codes.
 
@@ -64,7 +64,7 @@ pub mod cpu_test {
     fn test_status_settingtwice(){
         //Making sure that nothing is changed when setting something twice.
         // When I would set a false flag to false, it would be set to true.
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //False
         cpu.set_status(2, false);
@@ -79,8 +79,8 @@ pub mod cpu_test {
 
     #[test]
     fn test_new_memory(){
-        let mut cpu = super::CPU::new();
-        let mem = super::MEM::new();
+        let mut cpu = super::CPU::new_empty();
+        let mem = super::MEM::new_empty();
 
         cpu.new_memory(mem);
 
@@ -101,7 +101,7 @@ pub mod cpu_test {
         // I'm too lazy to give it's own module, and I don't expect
         // much trouble from these.
 
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         // AccumulatorAM
         cpu.a = 10;
         assert_eq!(AccumulatorAM.load(&mut cpu), 10, "Accumulator load");
@@ -191,7 +191,7 @@ pub mod cpu_test {
         //Yes, I understand that I should split this up,
         // but cargo test doesn't really avoid bpcode atm.
 
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //~! CLEARS
 
@@ -227,7 +227,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_LDA(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.memory.set(0x755, 234); // Random position non zero page.
         cpu.memory.set(0xAF, 123);  // Random position in zero page.
@@ -249,7 +249,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_LDX(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         
         //Test actual load of x.
         cpu.memory.set_zp(0xFF, 12);
@@ -265,7 +265,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_LDY(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Test actual load of x.
         cpu.memory.set_zp(0x0, 13);
@@ -281,7 +281,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ADC_carry(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.a = 255;
         cpu.ADC(ImmediateAM{address: 255});
@@ -292,7 +292,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ADC_zero(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.a = 0;
         cpu.ADC(ImmediateAM{address: 0});
@@ -303,7 +303,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ADC_overflow(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.a = 126;
         cpu.ADC(ImmediateAM{address: 5});
@@ -318,7 +318,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ADC_memory_with_lda(){
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         
         cpu.memory.set(0x755, 237); 
@@ -333,7 +333,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ADC_signed (){
-        let mut test_cpu = super::CPU::new();
+        let mut test_cpu = super::CPU::new_empty();
 
         test_cpu.LDA(ImmediateAM{address: 0b01111111u8}); //+127
         test_cpu.ADC(ImmediateAM{address: 0b00000010u8}); //+2
@@ -355,7 +355,7 @@ pub mod cpu_test {
         /// This is going to be turfed to an issue to be solved post v1.
 
         assert!(true);
-        //let mut test_cpu = super::CPU::new();
+        //let mut test_cpu = super::CPU::new_empty();
 
         ////Set to decimal mode:
         //test_cpu.SED();
@@ -369,7 +369,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_SBC() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.SEC(); //C is set in subtraction.
         cpu.memory.set(0x755, 237); 
@@ -380,7 +380,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_SBC_signed() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.SEC(); //C is set in subtraction.
         cpu.LDA(ImmediateAM{address: 0b00000001u8}); //+1
@@ -398,7 +398,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_AND() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.LDA(ImmediateAM{address: 0b11000001u8});
         cpu.AND(ImmediateAM{address: 0b10111111u8}); //Resetting the 6th bit with AND.
@@ -409,7 +409,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_ORA() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.LDA(ImmediateAM{address: 0b01010101u8});
         cpu.ORA(ImmediateAM{address: 0b10001101u8}); //Random OR operation, really.
@@ -419,7 +419,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_EOR() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.LDA(ImmediateAM{address: 0b11111111u8});
         cpu.EOR(ImmediateAM{address: 0b11111111u8}); //Exclusive OR, should return nothing.
@@ -432,7 +432,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ASL() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.LDA(ImmediateAM{address: 0b11111111u8});
         cpu.ASL(AccumulatorAM); 
@@ -444,7 +444,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_LSR() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.LDA(ImmediateAM{address: 0b11111111u8});
         cpu.LSR(AccumulatorAM); 
@@ -456,7 +456,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ROL() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.SEC();
         cpu.LDA(ImmediateAM{address: 0b01111110u8});
@@ -469,7 +469,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_ROR() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.SEC();
         cpu.LDA(ImmediateAM{address: 0b01111110u8});
@@ -482,7 +482,7 @@ pub mod cpu_test {
 
     #[test]
     fn testOP_DEC() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Testing Z flag in relation to DEC.
         cpu.memory.set(0x755, 1);
@@ -504,7 +504,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_DEX() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Testing Z flag in relation to DEX, and proper decrement.
         cpu.x = 1;
@@ -521,7 +521,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_DEY() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Testing Z flag in relation to DEY, and proper decrement.
         cpu.y = 1;
@@ -538,7 +538,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_INC() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Setting memory value for increment.
         cpu.memory.set(0x755, 129);
@@ -551,7 +551,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_INX() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Setting X to 255 for INX: Tests overflow add, 'N', and 'Z'.
         cpu.x = 255;
@@ -568,7 +568,7 @@ pub mod cpu_test {
     fn testOP_INY() {
         //NOTE: A carbon copy of testOP_INX.
         //TODO: BP tests might not be useful. Possibly prune dupes?
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Setting Y to 255 for INY: Tests overflow add, 'N', and 'Z'.
         cpu.y = 255;
@@ -584,7 +584,7 @@ pub mod cpu_test {
     #[test]
     fn testOP_STA() {
         //Inane, but we're just gonna test a basic store.
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.a = 255;
         cpu.STA(AbsoluteAM{address: 0x741});
@@ -593,7 +593,7 @@ pub mod cpu_test {
     #[test]
     fn testOP_STX() {
         //Inane, but we're just gonna test a basic store.
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.x = 255;
         cpu.STX(AbsoluteAM{address: 0x741});
@@ -603,7 +603,7 @@ pub mod cpu_test {
     #[test]
     fn testOP_STY() {
         //Inane, but we're just gonna test a basic store.
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.y = 255;
         cpu.STY(AbsoluteAM{address: 0x741});
@@ -611,7 +611,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_TXS() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.x = 255;
         cpu.TXS();
@@ -619,7 +619,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_TSX() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.sp = 255;
         cpu.TSX();
@@ -627,7 +627,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_TXA() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.x = 255;
         cpu.TXA();
@@ -636,7 +636,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_TAY() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.a = 0;
         cpu.TAY();
@@ -645,7 +645,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_TAX() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.a = 0;
         cpu.TAX();
@@ -654,7 +654,7 @@ pub mod cpu_test {
     }
     #[test]
     fn testOP_TYA() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.y = 0;
         cpu.TYA();
@@ -665,7 +665,7 @@ pub mod cpu_test {
     #[test]
     pub fn testOP_BIT() {
         //A little hard to test, best way is to try to trigger each flag.
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         //Fill first memory location. Sets 'N, V'.
         cpu.memory.set(0xAA, 0b11000000); 
@@ -692,7 +692,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_PHA() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.a = 250;
         cpu.PHA();
         assert_eq!(cpu.stack_pop(), 250,  "A != stack top val!");
@@ -700,7 +700,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_PLA() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.stack_push(0xFA);
         cpu.PLA();
         assert_eq!(cpu.a, 0xFA,  "A != Popped value!");
@@ -708,7 +708,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_PHP() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.status = 250;
         cpu.PHP();
         assert_eq!(cpu.stack_pop(), 250,  "A != stack top val!");
@@ -716,7 +716,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_PLP() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.stack_push(0xFA);
         cpu.PLP();
         assert_eq!(cpu.status, 0xFA,  "A != Popped value!");
@@ -724,7 +724,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_RTS() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.stack_push(0b10000000);
         cpu.stack_push(0b00000001);
         cpu.RTS();
@@ -733,7 +733,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_CMP() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.memory.set(0xFF, 0xFF);
         cpu.a = 1;
         cpu.CMP(AbsoluteAM{address: 0xFF});
@@ -745,7 +745,7 @@ pub mod cpu_test {
     //Another round of copies of the original.
     #[test]
     pub fn testOP_CPY() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.memory.set(0xFF, 0x80);
         cpu.x = 0x7F;
         cpu.CPY(AbsoluteAM{address: 0xFF});
@@ -756,7 +756,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_CPX() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         cpu.memory.set(0xFF, 0x80);
         cpu.x = 0x7F;
         cpu.CPX(AbsoluteAM{address: 0xFF});
@@ -767,7 +767,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_JSR() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
         //Since we don't have an actual FDE loop yet, going to simulate
         cpu.pc = 0x4020;
         cpu.JSR(AbsoluteAM{address: 0x4029});
@@ -779,7 +779,7 @@ pub mod cpu_test {
 
     #[test]
     pub fn testOP_JMP() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.memory.set(0x0030, 0b00000001);
         cpu.memory.set(0x0031, 0b10000000);
@@ -791,7 +791,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BCC() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b11111110;
         cpu.BCC(ImmediateAM{address: 20});
@@ -800,7 +800,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BCS() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b00000001;
         cpu.BCS(ImmediateAM{address: 20});
@@ -809,7 +809,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BEQ() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b00000010;
         cpu.BEQ(ImmediateAM{address: 20});
@@ -818,7 +818,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BNE() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b11111101;
         cpu.BNE(ImmediateAM{address: 20});
@@ -827,7 +827,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BMI() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b10000000;
         cpu.BMI(ImmediateAM{address: 20});
@@ -837,7 +837,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BPL() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b01111111;
         cpu.BPL(ImmediateAM{address: 20});
@@ -846,7 +846,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BVC() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b10111111;
         cpu.BVC(ImmediateAM{address: 20});
@@ -855,7 +855,7 @@ pub mod cpu_test {
     }
     #[test]
     pub fn testOP_BVS() {
-        let mut cpu = super::CPU::new();
+        let mut cpu = super::CPU::new_empty();
 
         cpu.status = 0b01000000;
         cpu.BVS(ImmediateAM{address: 20});

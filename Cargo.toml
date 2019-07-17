@@ -8,6 +8,9 @@ keywords = ["soliloquy", "nes", "Nintendo", "Entertainment", "System", "Emulator
 license = "WTFPL2"
 
 publish = false
+edition = "2018"
 
 [dependencies]
+log = { version = "0.4.6", features = ["max_level_debug", "release_max_level_warn"] }
 memmap = "0.7.0"
+env_logger = "0.6.1"
