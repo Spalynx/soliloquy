@@ -17,11 +17,8 @@ fn main() {
     let mut nes_main = 
         core::nes::NES::new("example/nestest.nes");
     debug!("COMPLETE -> NES boot/CPU boot");
-    nes_main.step();
-    nes_main.step();
-    nes_main.step();
-    nes_main.step();
-    nes_main.step();
-    nes_main.step();
-    nes_main.step();
+    for i in 1..=100 { 
+        debug!("INSTRUCTION: #{}", i );
+        nes_main.step();
+    }
 }

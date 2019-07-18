@@ -14,7 +14,7 @@ pub use crate::core::*;
 // locations.
 pub struct MEM {
     RAM:	[u8; 0x800],        //2kb internal RAM.
-    CART:   Box<MAP>,    //Cartridge Space
+    pub CART:   Box<MAP>,    //Cartridge Space
     PPU:    u8,         //TODO
     APU:    u8,         //TODO
     INPUT:  u8,         //TODO

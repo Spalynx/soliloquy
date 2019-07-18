@@ -94,7 +94,7 @@ impl CPU {
             x:              0,		            // x register
             y:              0,		            // y register
 
-            status:         34,		            //cpu flags
+            status:         0x24,		            //cpu flags
 
             interrupt:      0,		            // interrupt type to perform
             stall:          0,		            // number of cycles to stall
@@ -119,7 +119,7 @@ impl CPU {
             x:              0,		        // x register
             y:              0,		        // y register
 
-            status:         34,		        //cpu flags
+            status:         0x24,		        //cpu flags
 
             interrupt:      0,		        // interrupt type to perform
             stall:          0,		        // number of cycles to stall
@@ -151,21 +151,14 @@ impl CPU {
     pub fn step(&mut self){
         let opnum = self.memory.get(self.pc);
 
-        info!("ACTION::BEF -> OP: #[{:X}], CPU: (PC:[{}], CYC:[{}], SP[{}], S[{}], A[{}], X[{}], Y[{}])",
-                opnum, self.pc, self.cycles, self.sp, self.status, self.a, self.x, self.y);
+        info!("ATTEMPT  -> OP: #[{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        opnum, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
 
-        if self.step_nil_op(opnum) {        //IF NO_PARAMETER_OPCODE is run:
-            self.pc = self.pc + 1;          //Increment PC to next OP.
-        }
-        else if self.step_byte_op(opnum) {  //IF BYTE_PARAMETER_OPCODE is run:
-            self.pc = self.pc + 2;          //Increment PC to next OP.
-        }
-        else if self.step_word_op(opnum){   //IF WORD_PARAMETER_OPCODE is run:
-            self.pc = self.pc + 3;          //Increment PC to next OP.
-        }
-        else {
+        if  !(self.step_nil_op(opnum) || 
+            self.step_byte_op(opnum) || self.step_word_op(opnum)) {
             panic!("OP: [{:x}] NOT FOUND!", opnum);
         }
+
     }
 
 
@@ -330,7 +323,7 @@ impl CPU {
     /// One of the most used opcodes, loads the accumulator with a given value.
     pub fn LDA <AM: AddressingMode> (&mut self, am: AM){
         self.a = am.load(self);
-        let a = self.a; //Can't mutably borrow, but can't deref u8? ok.
+        let a = self.a;          //Can't mutably borrow, but can't deref u8? ok.
         self.set_zn(a);
     }
 
@@ -654,20 +647,17 @@ impl CPU {
 
         // PC + 2 \|/ (FFFE) -> PCL (FFFF) -> PCH
         // Microprocessor transfers control to the interrupt vector
-        // The B flag is stored on the stack, at stack pointer plus 1, containing
+        // The B flag is stored on the stack, at stack pointer + 1, containing
         // a one in the break bit position. Indicating the interrupt was caused
         // by a BRK instruction.
         // The B bit in the stack contains a 0 if it was caused by a normal IRQ.
 
         //Push PC to stack.
-        let PC = self.pc;
-        self.stack_push(word_to_h_byte!(PC) as u8);
-        self.stack_push(word_to_l_byte!(PC) as u8);
+        self.stack_push(word_to_h_byte!(self.pc.clone()) as u8);
+        self.stack_push(word_to_l_byte!(self.pc.clone()) as u8);
 
-        //Set BRK flag on status.
-        let P = self.status | 0b0010000;
-        //push P
-        self.stack_push(P);
+        //Set BRK flag on status, and push P.
+        self.stack_push(self.status.clone() | 0b0010000);
 
         //PC = Vector
         self.pc = 0xFFFE
@@ -787,10 +777,16 @@ impl CPU {
     }
 
     /// **JMP** (Jump to New Location)  
+    /// Changes program counter to a given address.
+    pub fn JMP<AM: AddressingMode>(&mut self, am: AM){
+        self.pc = am.address() as u16;
+    }
+
+    /// **JMP** (Jump to New Location)  INDIRECT MODE
     /// Loads program counter value from a given memory value, and it's
     /// subsequent location.  
     /// AKA: (address) -> PCL, (address+1) -> PCH
-    pub fn JMP<AM: AddressingMode>(&mut self, am: AM){
+    pub fn JMPA<AM: AddressingMode>(&mut self, am: AM){
         let PC_L = am.load(self) as u16;
         let ADDR = am.address() + 1;
         let PC_H = AbsoluteAM{address: ADDR}.load(self) as u16;
@@ -891,6 +887,8 @@ impl CPU {
     ///   one that should be read.
     /// Returns _true_ if an opcode is run. False otherwise.
     fn step_nil_op(&mut self, opnum: u8) -> bool {
+        self.pc = self.pc + 1;
+
         match opnum {
             0x00	=> self.BRK( ),
             0x02	=> self.NOP( ),
@@ -1026,10 +1024,11 @@ impl CPU {
             0xFB	=> self.NOP( ),
             0xFC	=> self.NOP( ),
             0xFF	=> self.NOP( ),
-            _       => return false,
+            _       => {self.pc = self.pc - 1; return false},
         }
+        info!("COMPLETE -> OP: #[{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        opnum, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
 
-        debug!("COMPLETE -> OP #[{:X}].", opnum);
         return true;
     }
 
@@ -1041,6 +1040,8 @@ impl CPU {
     fn step_byte_op(&mut self, opnum: u8) -> bool {
         //Obtain the address byte from value in PC + 1.
         let arg_u8 = self.memory.get(self.pc + 1);
+
+        self.pc = self.pc + 2;
 
         //Byte (8-bit) OPcodes!
         match opnum {
@@ -1118,9 +1119,10 @@ impl CPU {
             0xF1	=> self.SBC( IndirectIndexedAM{address: arg_u8}),
             0xF5	=> self.SBC( ZeroPageXAM{address: arg_u8}),
             0xF6	=> self.INC( ZeroPageXAM{address: arg_u8}),
-            _       => return false,
+            _       => {self.pc = self.pc - 2; return false},
         }
-        debug!("COMPLETE -> OP #[{:X}] [{:X}].", opnum, arg_u8);
+        info!("COMPLETE -> OP: #[{:X}] [{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        opnum, arg_u8, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
         return true;
     }
     
@@ -1133,6 +1135,8 @@ impl CPU {
         //Build address word from mem{PC+1} (LO), and mem{PC+2} value (HI).
         let arg_u16= bytes_to_word!( self.memory.get(self.pc + 2)   as u16, //HI
                                      self.memory.get(self.pc + 1)   as u16);//LO
+
+        self.pc = self.pc + 3;
 
         //Word (16-bit) OPcodes!
         match opnum {
@@ -1148,14 +1152,15 @@ impl CPU {
             0x39	=> self.AND( AbsoluteYAM{address: arg_u16}),
             0x3D	=> self.AND( AbsoluteXAM{address: arg_u16}),
             0x3E	=> self.ROL( AbsoluteXAM{address: arg_u16}),
-            0x4C	=> self.JMP( AbsoluteAM{address: arg_u16}),
+            0x4C	=> self.JMP( AbsoluteAM{address: arg_u16}), 
+                    //Techn. AbsAM, but behaves like Immedate{u16}.
             0x4D	=> self.EOR( AbsoluteAM{address: arg_u16}),
             0x4E	=> self.LSR( AbsoluteAM{address: arg_u16}),
             0x59	=> self.EOR( AbsoluteYAM{address: arg_u16}),
             0x5D	=> self.EOR( AbsoluteXAM{address: arg_u16}),
             0x5E	=> self.LSR( AbsoluteXAM{address: arg_u16}),
-            0x6C	=> self.JMP( AbsoluteAM{address: arg_u16}), 
-                        // <- Indirect technically
+            0x6C	=> self.JMPA( AbsoluteAM{address: arg_u16}), 
+                    //Techn. Indirect, had to assign new fn. 
             0x6D	=> self.ADC( AbsoluteAM{address: arg_u16}),
             0x6E	=> self.ROR( AbsoluteAM{address: arg_u16}),
             0x79	=> self.ADC( AbsoluteYAM{address: arg_u16}),
@@ -1185,9 +1190,10 @@ impl CPU {
             0xF9	=> self.SBC( AbsoluteYAM{address: arg_u16}),
             0xFD	=> self.SBC( AbsoluteXAM{address: arg_u16}),
             0xFE	=> self.INC( AbsoluteXAM{address: arg_u16}),
-            _       => return false,
+            _       => {self.pc = self.pc - 3; return false},
         }
-        debug!("COMPLETE -> OP #[{:X}] [{:X}].", opnum, arg_u16);
+        info!("COMPLETE -> OP: #[{:X}] [{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        opnum, arg_u16, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
         return true;
     }
 } //IMPL CPU
