@@ -88,7 +88,7 @@ impl CPU {
             pc:             0,		            //Program Counter
             cycles:         0,		            //Number of cycles
 
-            sp:             0xFF,	            //Stack Pointer, \S 8.13 in KIM-1
+            sp:             0xFD,	            //Stack Pointer, \S 8.13 in KIM-1
 
             a:              0,		            //Accumulator
             x:              0,		            // x register
@@ -113,7 +113,7 @@ impl CPU {
             pc:             0xC000,		    //Program Counter
             cycles:         0,		        //Number of cycles
 
-            sp:             0xFF,	        //Stack Pointer, \S 8.13 in KIM-1
+            sp:             0xFD,	        //Stack Pointer, \S 8.13 in KIM-1
 
             a:              0,		        //Accumulator
             x:              0,		        // x register
@@ -151,7 +151,7 @@ impl CPU {
     pub fn step(&mut self){
         let opnum = self.memory.get(self.pc);
 
-        info!("ATTEMPT  -> OP: #[{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        info!("ATTEMPT  -> OP: #[{:X}] \t\t CPU:[PC:{:4X} || A:{:2X}, X:{:2X}, Y:{:2X}, P:{:2X}, SP:{:2X}, CYC:{}, SL:?]",
         opnum, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
 
         if  !(self.step_nil_op(opnum) || 
@@ -175,6 +175,11 @@ impl CPU {
     /// understand what they do.
     fn throw_interrupt(&mut self, interrupt: &'static str){
         println!("{}", interrupt);
+
+        // Information on the 'B' flag (for the near future).
+        //Two interrupts (/IRQ and /NMI) and two instructions (PHP and BRK) push the flags to the stack. In the byte pushed, bit 5 is always set to 1, and bit 4 is 1 if from an instruction (PHP or BRK) or 0 if from an interrupt line being pulled low (/IRQ or /NMI). This is the only time and place where the B flag actually exists: not in the status register itself, but in bit 4 of the copy that is written to the stack. 
+        //From the nesdev flags page.
+
     }
 
 
@@ -656,23 +661,26 @@ impl CPU {
         self.stack_push(word_to_h_byte!(self.pc.clone()) as u8);
         self.stack_push(word_to_l_byte!(self.pc.clone()) as u8);
 
-        //Set BRK flag on status, and push P.
-        self.stack_push(self.status.clone() | 0b0010000);
+        //Push P, sets bits 4 and 5.
+        self.PHP();
 
-        //PC = Vector
-        self.pc = 0xFFFE
+        //Sets Interrupt flag.
+        self.SEI();
+
+        //Jumps to Vector
+        self.JMP(AbsoluteAM{address: 0xFFFE});
     }
     /// **RTI** (Return from Interrupt)  
     /// Restores the microprocessor to the state previous to the interrupt.
     /// To do this, it reads P and PC from the stack into their places.   
     /// NOTE: Ignores P bits 4 (B) and 5 (s). Checking the B flag (post BRK)
     /// must be done manually!
+    /// NOTE: PLP used for flag pull, for debugging ease.
     pub fn RTI(&mut self) {
-        let P:   u8 = self.stack_pop();
+        self.PLP();
+
         let PCL: u8 = self.stack_pop();
         let PCH: u8 = self.stack_pop();
-
-        self.status = P & 0b11001111;
         self.pc     = bytes_to_word!(PCH as u16, PCL as u16);
     }
 
@@ -693,15 +701,16 @@ impl CPU {
     }
     /// **PHP** (Push Processor Status on Stack)  
     /// Pushes the status register (P) _unchanged_ onto the stack.
+    /// Note: I have no clue where I got unchanged from. "B" is set.
     pub fn PHP(&mut self) {
-        let P: u8 = self.status;
+        let P: u8 = self.status |  (3 << 5); //Setting 'B' to true...
         self.stack_push(P); 
     }
     /// **PLP** (Pull Processor Status from Stack)  
     /// Pops the top stack value into the status register (P).
     pub fn PLP(&mut self) {
         let P: u8 = self.stack_pop();
-        self.status = P;
+        self.status = P & 0b11101111; //PLP/RTI ignore 's'/'b' flags!
     }
     /// **RTS** (Return From Subroutine)  
     /// Loads PCL then PCH from stack, into PC and increments by 1 to point 
@@ -711,7 +720,8 @@ impl CPU {
         let PCL: u16 = self.stack_pop() as u16;
         let PCH: u16 = self.stack_pop() as u16;
 
-        self.pc = bytes_to_word!(PCH, PCL) + 1;
+        debug!("RTS -> PC_o: {:X}, PCH: {:X}, PCL: {:X}, PC_n: {:X}", self.pc, PCH, PCL, bytes_to_word!(PCH, PCL));
+        self.pc = bytes_to_word!(PCH, PCL);
     }
 
     //#! Comparators (Probably used in jumping)
@@ -768,11 +778,11 @@ impl CPU {
     /// Uses Absolute addressing, which means that the new PC is u16.
     pub fn JSR<AM: AddressingMode>(&mut self, am: AM){
         let PC_new  = am.address(); 
-        let PCH: u8 = word_to_h_byte!(self.pc+2) as u8;
-        let PCL: u8 = word_to_l_byte!(self.pc+2) as u8;
+        let PC = (self.pc).to_be_bytes();
+        debug!("JSR -> PC_o: {:X}, PCH: {:2X}, PCL: {:2X}, PC_n: {:X}!", self.pc, PC[0], PC[1], PC_new);
 
-        self.stack_push(PCH);
-        self.stack_push(PCL);
+        self.stack_push(PC[0]);
+        self.stack_push(PC[1]);
         self.pc = PC_new;
     }
 
@@ -1026,7 +1036,7 @@ impl CPU {
             0xFF	=> self.NOP( ),
             _       => {self.pc = self.pc - 1; return false},
         }
-        info!("COMPLETE -> OP: #[{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        info!("COMPLETE -> OP: #[{:X}] \t\t CPU:[PC:{:4X} || A:{:2X}, X:{:2X}, Y:{:2X}, P:{:2X}, SP:{:2X}, CYC:{}, SL:?]",
         opnum, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
 
         return true;
@@ -1121,7 +1131,7 @@ impl CPU {
             0xF6	=> self.INC( ZeroPageXAM{address: arg_u8}),
             _       => {self.pc = self.pc - 2; return false},
         }
-        info!("COMPLETE -> OP: #[{:X}] [{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        info!("COMPLETE -> OP: #[{:X}] [{:X}] \t\t CPU:[PC:{:4X} || A:{:2X}, X:{:2X}, Y:{:2X}, P:{:2X}, SP:{:2X}, CYC:{}, SL:?]",
         opnum, arg_u8, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
         return true;
     }
@@ -1192,7 +1202,7 @@ impl CPU {
             0xFE	=> self.INC( AbsoluteXAM{address: arg_u16}),
             _       => {self.pc = self.pc - 3; return false},
         }
-        info!("COMPLETE -> OP: #[{:X}] [{:X}] \t\t CPU:[PC:{:X} || A:{:X}, X:{:X}, Y:{:X}, P:{:X}, SP:{:X}, CYC:{}, SL:?]",
+        info!("COMPLETE -> OP: #[{:X}] [{:X}] \t\t CPU:[PC:{:4X} || A:{:2X}, X:{:2X}, Y:{:2X}, P:{:2X}, SP:{:2X}, CYC:{}, SL:?]",
         opnum, arg_u16, self.pc, self.a, self.x, self.y, self.status, self.sp, self.cycles);
         return true;
     }

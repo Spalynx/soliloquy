@@ -16,11 +16,11 @@ The CPU file is over-engineered and over tested for the sake of having a strong 
 ** Roadmap
 Even writing a simple NES emulator should take a good while. 
 The implementation order should be:
-**** DONE CPU
-**** TODO CART/mappers
-**** TODO APU
-**** TODO PPU
-**** TODO IO/GUI
+  - DONE CPU
+  - TODO CART/mappers
+  - TODO PPU
+  - TODO APU
+  - TODO IO/GUI
 
 ** References
   - fogleman/nes : A fantastic reference for getting started.
@@ -29,4 +29,4 @@ The implementation order should be:
 ** License
 This is just an educational project: I've read a lot of similar implementations, and borrowed many ideas. Hopefully, herein lies ideas that are worth sharing.
 
-[[http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-3.png][WTFPL2]]
+[[http://www.wtfpl.net][file:http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-3.png]]
